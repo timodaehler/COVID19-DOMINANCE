@@ -1,26 +1,75 @@
-# README ----
+# README ====
 # Author: Timo Daehler, daehler@usc.edu
 # Date of last update: 14 July 2020
 # Inputs: -
 # Outputs: -
-# Other relevant notes: -
-#####################################################################
+# Other relevant notes: If you do not wish to run the code, please see the final output (graphs and datasets) provided in the Github repository. Make sure to check the relevant README files for the contents of the folder.
+
+# ==================================================.
 
 
 
+# package installation   ----
+# Installing the relevant packages.
+# install.packages("sf")
+# install.packages("readr")
+# install.packages("tmap") 
+# install.packages("leaflet") 
+# install.packages("mapview") 
+# install.packages("ggplot2")
+# install.packages("tidyverse")
+# install.packages("rlang")
+# install.packages("reshape")
+# install.packages("rgdal")
+# install.packages("lubridate")
+# install.packages("plotly")
+# install.packages("patchwork")
+# install.packages("ggforce")
+# install.packages("gridExtra")
+# install.packages("htmltools")
+# install.packages("data.table")
+# install.packages("webshot")
+# webshot::install_phantomjs()
+# install.packages("runner")
+# install.packages("zoo")
+# install.packages("devtools")
+# devtools::install_version("latticeExtra", version="0.6-28")
+# install.packages("Hmisc")
+# install.packages("DataCombine")
+# install.packages("fastDummies")
+# install.packages("heatmaply")
+# install.packages("glmnet")
+# install.packages("caret")
+# install.packages("summarytools")
+# install.packages("remote")
+# remotes::install_github('rapporter/pander')
+# install.packages("mlbench")
+# install.packages("psych")
+# install.packages("lmtest")
+# install.packages("quantmod")
+# install.packages("corrplot")
+# install.packages("fBasics")
+# install.packages("stargazer")
+# install.packages("tseries")
+# install.packages("vars")
+# install.packages("gghighlight")
 
-# packages ----
-# Setting our initial libraries. In subsequent rounds of analysis, we will be integrating new libraries (we do not do so here to avoid conflicts between packages).
-library(data.table)
-library(quandl)
-library(readxl)
-library(zoo)
-library(xts)
-library(ggplot2)
-library(reshape2)
-library(gridExtra)
-library(grid)
-library(tseries)
+# ==================================================.
+
+
+
+# loading libraries ----
+# In subsequent rounds of analysis, we will be integrating new libraries (we do not do so here to avoid conflicts between packages).
+# library(data.table)
+# library(quandl)
+# library(readxl)
+# library(zoo)
+# library(xts)
+# library(ggplot2)
+# library(reshape2)
+# library(gridExtra)
+# library(grid)
+# library(tseries)
 
 library(sf)
 library(readr)
@@ -65,12 +114,14 @@ library(gghighlight)
 
 #I don't want scientific notation for my values, so I specify this below. 
 options(scipen = 999)
-#####################################################################
+
+# ==================================================.
 
 
 
 
-## CLEANING - Note that initial confirmed cases and deaths are recorded as cumulative sums in the Hopkins dataset. We will generate new (daily and weekly) case and death data.
+# importing COVID data ---- 
+# Note that initial confirmed cases and deaths are recorded as cumulative sums in the Hopkins dataset. We will generate new (daily and weekly) case and death data.
 ## 
 # Import and quickly cleaning our data. We will call the import our initial confirmed data (Wide). 
 Initial_Confirmed_Wide <- read_csv("Data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv")
@@ -79,6 +130,7 @@ Initial_Confirmed_Wide <- read_csv("Data/csse_covid_19_time_series/time_series_c
 tempcolnumber <- ncol(Initial_Confirmed_Wide)
 
 # Creating our Temporary and World data files.
+
 # Our data is in wide format. Here, I translate it to long format.
 Confirmed_Long <- pivot_longer(Initial_Confirmed_Wide, cols = c(5:all_of(tempcolnumber)), names_to = "Dates", values_to = "Confirmed_Cases")
 
@@ -113,12 +165,18 @@ myvars <- c("COUNTRY", "Province/State", "Lat", "Long", "Dates", "Confirmed_Case
 
 # I rename this file as our temporary data.
 Temporary_Data_Country <- Merged_Data[myvars]
+Temporary_Data_Country$Date <- as.Date(Temporary_Data_Country$Date) # XXX I added this. Maybe it is not necessary
 
 # We might also want a dataset with the total number of global confirmed cases and deaths per day.
+# I first have to deatch plyr for it group and summarise correctly. 
+# detach(package:plyr)    
+library(dplyr)
 World_Data <- Temporary_Data_Country %>% group_by(Date) %>%
   summarise(country='World', Global_Confirmed_Cases = sum(Confirmed_Cases, na.rm=T),
-            Global_Deceased = sum(Deceased, na.rm=T))
+            Global_Deceased = sum(Deceased, na.rm=T))  %>% ungroup()
 World_Data$Death_Rate <- ((World_Data$Global_Deceased/World_Data$Global_Confirmed_Cases) * 100)
+
+
 
 
 # Collapsing and calculating relevant variables in the temporary data.
@@ -143,7 +201,7 @@ Temporary_Data_Country$New_Confirmed_Country <- ifelse(Temporary_Data_Country$Da
 
 Temporary_Data_Country$New_Total_Deceased_Country <- ifelse(Temporary_Data_Country$Date == First_Day, NA, Temporary_Data_Country$Total_Deceased_Country - dplyr::lag(Temporary_Data_Country$Total_Deceased_Country, number=1))
 
-# Here I see some NAs in the data
+# XXX Here I see some NAs in the data. I think it is fine
 
 # There are a few values for which we have negative new deaths and new cases. Intuitively, this shouldn't make sense. This is actually a problem which steps from the COVID data. For example, Iceland has some weird values in the initial dataframe. Although deaths should represent cumulative sums, if we observe the data from 3/15 - 4/05, we note that the number of recorded deaths drops from 5 to 0, then increases back to six as the month progresses. This is a well-documented problem which stems from the original Github data: https://github.com/CSSEGISandData/COVID-19/issues/2379; https://github.com/CSSEGISandData/COVID-19/issues/2165. We can either exclude data points which show a decrease in cumulative deaths (which I haven't done here); or wait for the data to be updated. Because we only drop a few observations from the analysis, I choose to exclude them, and proceed as normal. Note that when we take global sums, this will affect our cumulative totals (as we have excluded observations for certain nations on certain days).
 
@@ -189,7 +247,6 @@ Temporary_Data_Country$New_Mortality_Rate_Per_Capita = (Temporary_Data_Country$N
 Temporary_Data_Country$Total_Cases_Country_Per_Capita = (Temporary_Data_Country$Total_Cases_Country / Temporary_Data_Country$Population)
 
 # Lastly, I want to create a rolling average of the total and new mortality rates per capita, new confirmed cases, and new deaths. This is a bit complicated, so bear with me.
-
 
 # First, I order the data by country and date.
 Temporary_Data_Country <- Temporary_Data_Country[order(Temporary_Data_Country$COUNTRY, Temporary_Data_Country$Date),]
@@ -299,6 +356,7 @@ Temporary_Data_Country <- merge(Temporary_Data_Country, Country_Coordinates, by 
 
 # I load the following two libraries in order to label our variables.
 library(lattice)
+detach(package:Hmisc)
 library(Hmisc)
 
 label(Temporary_Data_Country$Total_Cases_Country) <- "Cumulative Sum of Confirmed Cases by Country (John Hopkins)"
@@ -323,7 +381,8 @@ label(Temporary_Data_Country$new_rolling_average_mortality) <- "Seven Day Rollin
 # See https://www.bsg.ox.ac.uk/sites/default/files/Calculation%20and%20presentation%20of%20the%20Stringency%20Index.pdf for information on how the stringency index was calculated.
 
 Government_Responses <- read.csv("https://github.com/OxCGRT/covid-policy-tracker/raw/master/data/OxCGRT_latest.csv")
-# If the link on the web is changed, you can alternatively import a version of the CSV from 14 July 2020 from the document "Government_Responses.csv" in the data folder on the github
+colnames(Government_Responses)
+# If the link on the web is changed, you can alternatively import a version of the CSV from 14 July 2020 from the document "Government_Responses.csv" in the data folder on the github through the command below
 # Government_Responses <- read_csv("Data/Government_Responses.csv")
 
 # First, I convert the date to a proper format.
@@ -350,6 +409,8 @@ Government_Responses$COUNTRY <- ifelse(Government_Responses$COUNTRY == "Timor", 
 Government_Responses$COUNTRY <- ifelse(Government_Responses$COUNTRY == "United States", "US", Government_Responses$COUNTRY)
 
 Government_Responses <- Government_Responses[order(Government_Responses$CountryName, Government_Responses$Date),]
+# XXX had to make it a tibble to make it the same
+Government_Responses <- as_tibble(Government_Responses)
 
 colnames(Government_Responses)
 
@@ -371,6 +432,8 @@ colnames(Government_Responses)
 # Government_Responses$H3_Contact.tracing <- Government_Responses$`H3_Contact tracing`
 # Government_Responses$H4_Emergency.investment.in.healthcare <- Government_Responses$`H4_Emergency investment in healthcare`
 # Government_Responses$H5_Investment.in.vaccines <- Government_Responses$`H5_Investment in vaccines`
+
+# XXX here something starts looking different
 
 # I now subset the data. PLEASE NOTE the observations change in this merge. Oxford began collecting data before Hopkins started tracking cases and deaths. For simplicity, I use the merged data from before to visualize the confirmed cases and deaths (as these dates are filtered correctly).
 Government_Responses <- subset(Government_Responses, is.element(Government_Responses$COUNTRY, Temporary_Data_Country$COUNTRY))
@@ -885,7 +948,6 @@ Final_Data_Country <- Final_Data_Country[order(Final_Data_Country$COUNTRY, Final
 
 
 # Now, I add socioeconomic controls from the World Development Indicators.
-
 Final_Data_Country <- Final_Data_Country[order(Final_Data_Country$COUNTRY, Final_Data_Country$Date),]
 
 # First, I add the proportion of the national population above 65 from: https://data.worldbank.org/indicator/SP.POP.65UP.TO.ZS. 
@@ -1038,10 +1100,9 @@ Final_Data_Country <- Final_Data_Country[order(Final_Data_Country$COUNTRY, Final
 Final_Data_Country <- Final_Data_Country[order(Final_Data_Country$COUNTRY, Final_Data_Country$Date),]
 
 # Here, I integrate the Apple Mobility data. 
-mobility <- read.csv("Data/applemobilitytrends.csv")
-
 mobility <- read.csv("https://covid19-static.cdn-apple.com/covid19-mobility-data/2012HotfixDev11/v3/en-us/applemobilitytrends-2020-07-12.csv")
 # You can also download it from online by changing the date in the following command
+# mobility <- read.csv("Data/applemobilitytrends.csv")
 # mobility <- read.csv("https://covid19-static.cdn-apple.com/covid19-mobility-data/2012HotfixDev11/v3/en-us/applemobilitytrends-2020-07-12.csv")
 
 # First, we convert from wide to long format.
@@ -1049,11 +1110,11 @@ mobility <- pivot_longer(mobility, cols = starts_with("X"), names_to = "Dates")
 
 # Next, we reformat the dates.
 mobility$Dates<-sub("X", "", mobility$Dates)
-mobility$Dates <- ymd(mobility$Dates, quiet = FALSE, tz = NULL, locale = Sys.getlocale("LC_TIME"),
+mobility$Date <- ymd(mobility$Dates, quiet = FALSE, tz = NULL, locale = Sys.getlocale("LC_TIME"),
                      truncated = 0)
 
-# Renaming the "key" variable 
-mobility$Date <- mobility$Dates
+# Renaming the "key" variable XXXX. no longer necessary I think
+# mobility$Date <- mobility$Dates
 
 # I only keep the variables we care about. I also filter for only countries (we can re-add cities at a later period).
 
@@ -1451,9 +1512,42 @@ label(Final_Data_Country$irst) <- "Iron and steel production (thousands of ton)"
 label(Final_Data_Country$pec) <- "Primary energy consumption (thousands of coal-ton equivalents)"
 label(Final_Data_Country$cinc) <- "Composite Index of National Capability score"
 
-# I restrict the analysis to Eurozone countries, from a list pulled from here: https://europa.eu/european-union/about-eu/countries_en.
+# Because the country names in Final_Data_Country are not according to the same standard as ISO country names (for example "Philippines" instead of "Philippines (the)"), I need to export the file below to do some manual Excel adjustment work to make sure that the names of the countries in the "SAMPLE_LISTS" sheet are conform with the country names in Final_Country_Data
+laender <- as.data.frame(unique(Final_Data_Country$COUNTRY))
+write_xlsx(laender,"Data/laender.xlsx")
 
-Final_Data_Country <- subset(Final_Data_Country, (COUNTRY == "Austria" | COUNTRY == "Belgium" | COUNTRY == "Cyprus" | COUNTRY == "Estonia" | COUNTRY == "Finland" | COUNTRY == "France" | COUNTRY == "Germany" | COUNTRY == "Greece" | COUNTRY == "Ireland" | COUNTRY == "Italy" | COUNTRY == "Latvia" | COUNTRY == "Lithuania" | COUNTRY == "Luxembourg" | COUNTRY == "Malta" | COUNTRY == "Netherlands" | COUNTRY == "Portugal" | COUNTRY == "Slovakia" | COUNTRY == "Slovenia" | COUNTRY == "Spain"))
+# I restrict the analysis to Emerging Market countries, from a list pulled from here: https://www.ishares.com/us/products/239572/ishares-jp-morgan-usd-emerging-markets-bond-etf for EMBI (plus India and Thailand for EMBI+2) and here https://www.ishares.com/us/products/239528/ishares-emerging-markets-local-currency-bond-etf for LEMB
+EMBI <- read_excel("Data/SAMPLE_LISTS.xlsx", sheet = "EMBI")
+EMBI2 <- read_excel("Data/SAMPLE_LISTS.xlsx", sheet = "EMBI2")
+LEMB <- read_excel("Data/SAMPLE_LISTS.xlsx", sheet = "LEMB")
+
+# Creating a safety copy of Final_Data_Country so that I don't have to rerun the entire previous code in case I subset the wrong way. 
+# safetyFinal_Data_Country <- Final_Data_Country
+
+Final_Data_Country <- subset(Final_Data_Country, COUNTRY %in% EMBI$Country)
+# test <- subset(Final_Data_Country, COUNTRY %in% EMBI$Country)
+# subset(Final_Data_Country, (COUNTRY == "Austria" | COUNTRY == "Belgium" | COUNTRY == "Cyprus" | COUNTRY == "Estonia" | COUNTRY == "Finland" | COUNTRY == "France" | COUNTRY == "Germany" | COUNTRY == "Greece" | COUNTRY == "Ireland" | COUNTRY == "Italy" | COUNTRY == "Latvia" | COUNTRY == "Lithuania" | COUNTRY == "Luxembourg" | COUNTRY == "Malta" | COUNTRY == "Netherlands" | COUNTRY == "Portugal" | COUNTRY == "Slovakia" | COUNTRY == "Slovenia" | COUNTRY == "Spain"))
+
+
+
+
+# 
+# 
+# 
+# test <- subset(Final_Data_Country, COUNTRY %in% EMBI$Country)
+# anothertest <- subset(Final_Data_Country, COUNTRY %in% EMBI2$Country)
+# anothertest2 <- subset(Final_Data_Country, COUNTRY %in% LEMB$Country)
+# 
+# test <- subset(Final_Data_Country$COUNTRY %in% mycountriesoffocus$EMBI_Countries)
+# test <- subset(mycountriesoffocus, EMBI_Countries %in% Final_Data_Country$COUNTRY)
+# test2 <- subset(Final_Data_Country, COUNTRY %in% mycountriesoffocus$EMBI_Countries )
+# unique(test2$COUNTRY)
+# laender
+# test2 <- subset(Final_Data_Country, )
+
+
+
+# Final_Data_Country <- subset(Final_Data_Country, (COUNTRY == "Austria" | COUNTRY == "Belgium" | COUNTRY == "Cyprus" | COUNTRY == "Estonia" | COUNTRY == "Finland" | COUNTRY == "France" | COUNTRY == "Germany" | COUNTRY == "Greece" | COUNTRY == "Ireland" | COUNTRY == "Italy" | COUNTRY == "Latvia" | COUNTRY == "Lithuania" | COUNTRY == "Luxembourg" | COUNTRY == "Malta" | COUNTRY == "Netherlands" | COUNTRY == "Portugal" | COUNTRY == "Slovakia" | COUNTRY == "Slovenia" | COUNTRY == "Spain"))
 
 # Adding data on government indicators.
 # I now add data on government indicators from: https://info.worldbank.org/governance/wgi/Home/Documents. 
@@ -1467,10 +1561,14 @@ Final_Data_Country <- merge(Final_Data_Country, govt, by = c("COUNTRY"), all=TRU
 
 Final_Data_Country <- Final_Data_Country[order(Final_Data_Country$COUNTRY, Final_Data_Country$Date),]
 
-Oxford_V1 <- Final_Data_Country
+
+
+# Oxford_V1 <- Final_Data_Country
 
 library(writexl)
 library(readxl)
+
+
 
 
 # XXX here it gets shaky
@@ -1506,18 +1604,524 @@ Oxford_V1$Total_Deaths_Per_Million = (Oxford_V1$Total_Deceased_Country / Oxford_
 
 
 
+### VISUALIZATIONS
+# Importing libraries.
+library(lubridate)
+library(zoo)
+library(quantmod)
+library(fBasics)
+library(tseries)
+library(sandwich)
+library(lmtest)
+library(lattice)
+library(xtable)
+library(vars)
+library(plyr)
+library(gridExtra)
+library(corrplot)
+library(ggplot2)
+library(reshape2)
+library(data.table)
+library(rvest)
+library(foreign)
+library(dplyr)
+library(plm)
+library(stringr)
+library(stargazer)
+library(survival)
+library(ggfortify)
+library(plotly)
+library(sf)
+library(readr)
+library(mapview)
+library(ggplot2)
+library(tidyverse)
+library(reshape)
+library(rgdal)
+library(lubridate)
+library(plotly)
+library(patchwork)
+library(ggforce)
+library(gridExtra)
+library(htmltools)
+library(data.table)
+library(webshot)
+library(coronavirus)
+library(runner)
+library(zoo)
+library(DataCombine)
+library(fastDummies)
+library(car)
+library(heatmaply)
+library(htmlwidgets)
+# XXX here's a problem with summarytools
+library(summarytools)
+library(glmnet)
+library(caret)
+library(mlbench)
+library(psych)
+library(plm)
+library(lmtest)
+library(quantmod)
+library(leaflet)
+library(corrplot)
+library(fBasics)
+library(stargazer)
+library(tseries)
+library(vars)
+library(dplyr)
+library(haven)
+
+# Remove factor variables for government responses.
+Oxford_V1<-Oxford_V1 %>% dplyr::select(-contains("Flag"))
+Oxford_V1<-Oxford_V1 %>% dplyr::select(-contains("Lagged"))
+Oxford_V1$latitude <- NULL
+Oxford_V1$longitude <- NULL
+
+
+
+# XXX got fix this so that it shows EM and not EZ countries
+Days_Since_100_Deceased <- Oxford_V1 %>%
+  dplyr:: filter(Total_Deceased_Country >= 100)
+
+Days_Since_100_Deceased <- Days_Since_100_Deceased %>%
+  dplyr::group_by(COUNTRY) %>%
+  dplyr::mutate(Days = row_number(COUNTRY))
+
+Plot_10 <- plot_ly(Days_Since_100_Deceased, x=~Days, y=~Total_Deceased_Country) %>%
+  add_lines(linetype = ~COUNTRY) %>%
+  layout(title="Days Since 100 Deaths - Eurozone")
+Plot_10
+
+
+
+
+# Next, I construct a graph illustrating the seven-day rolling average of new deaths, new cases, and the mortality rate per capita. This is a version of the fourth Bloomberg plot from the above link. You will need to slide to the right (to March 2020) to see variation in these plots (or simply check the output folder). 
+
+## Please note that Hopkins revised their estimates of deaths in Spain downwards on May 27th. We do not include dates for which the cumulative sum of deaths decreases (as this is not intuitive), and hence there are some gaps in the visualizations.
+
+Oxford_V1 <- Oxford_V1[order(Oxford_V1$COUNTRY, Oxford_V1$Date),]
+
+Plot_13 <- plot_ly(Oxford_V1, x=~Date, y=~rolling_average_confirmed) %>% add_lines(linetype = ~COUNTRY) %>% layout(title="Rolling Average of Confirmed Cases")
+Plot_13
+
+Plot_14 <- plot_ly(Oxford_V1, x=~Date, y=~rolling_average_deceased) %>%
+  add_lines(linetype = ~COUNTRY) %>%
+  layout(title="Rolling Average of Deaths")
+Plot_14
+
+Plot_15 <- plot_ly(Oxford_V1, x=~Date, y=~total_rolling_average_mortality) %>% add_lines(linetype = ~COUNTRY) %>% layout(title="Total Rolling Average of Mortality Rate per Capita")
+Plot_15
+
+Plot_16 <- plot_ly(Oxford_V1, x=~Date, y=~new_rolling_average_mortality) %>% add_lines(linetype = ~COUNTRY) %>% layout(title="New Rolling Average of Mortality Rate per Capita")
+Plot_16
+
+
+
+
+# Here, I plot the global confirmed cases over our time period.
+exponential <- function(x) exp(x)
+exponential_function <- ggplot(data = data.frame(x=c(0,10)), mapping=aes(x=x)) + stat_function(fun = exponential)
+exponential_function
+
+# Here I subset only for data from 22-1-2020 to end of June XXX
+#str(World_Data$Date)
+# World_Data$Date <- as.Date(World_Data$Date)
+# World_Data <- subset(World_Data, Date < "2020-06-30")
+
+Confirmed <- ggplot(data = World_Data, aes(x = Date, y = Global_Confirmed_Cases)) + geom_bar(stat = "identity", fill = "red") +
+  labs(title = "Global Confirmed Cases - COVID19",
+       subtitle = "January 22nd, 2020 - June 15th, 2020",
+       x = "Date", y = "Confirmed Cases")
+Plot_17 <- ggplotly(Confirmed)
+Plot_17
+
+# Now, I plot the global deaths over our time period.
+Deaths <- ggplot(data = World_Data, aes(x = Date, y = Global_Deceased)) +
+  geom_bar(stat = "identity", fill = "darkred") +
+  labs(title = "Global Deaths - COVID19",
+       subtitle = "January 22nd, 2020 - June 15th, 2020",
+       x = "Date", y = "Deaths")
+Plot_18 <- ggplotly(Deaths)
+Plot_18 
+
+
+
+# This whole plot does not work. 
+# Now, I plot the change in the global death rate across the time period.
+Death_Rate <- ggplot(World_Data, aes(x=Date)) +
+  geom_line(aes(y=Death_Rate, colour='Daily')) +
+  xlab('') + ylab('Death Rate (%)') + labs(title='Change in Death Rate (%)') +
+  theme(legend.position='bottom', legend.title=element_blank(),
+        legend.text=element_text(size=8),
+        legend.key.size=unit(0.5, 'cm'),
+        axis.text.x=element_text(angle=45, hjust=1))
+Plot_21 <- ggplotly(Death_Rate)
+Plot_21
+
+
+
+# Now, I extend this analysis to generate the number of confirmed cases and deaths by country.
+Plot_23 <- plot_ly(Oxford_V1, x=~Date, y=~Total_Cases_Country) %>%
+  add_lines(linetype = ~COUNTRY) %>%
+  layout(title="Confirmed Cases Across Countries")
+Plot_23
+
+Plot_24 <- plot_ly(Oxford_V1, x=~Date, y=~Total_Deceased_Country) %>%
+  add_lines(linetype = ~COUNTRY) %>%
+  layout(title="Deaths Across Countries")
+Plot_24
+
+Plot_25 <- plot_ly(Oxford_V1, x=~Date, y=~Total_Mortality_Rate_Per_Capita) %>%
+  add_lines(linetype = ~COUNTRY) %>%
+  layout(title="Total Mortality Rate Across Countries")
+Plot_25
+
+Plot_26 <- plot_ly(Oxford_V1, x=~Date, y=~New_Mortality_Rate_Per_Capita) %>%
+  add_lines(linetype = ~COUNTRY) %>%
+  layout(title="New Mortality Rate Across Countries")
+Plot_26
+
+
+
+# Weekly Growth Rate Visualizations
+
+
+# Here, I filter by first deaths per country.
+First_Death <- Oxford_V1 %>%
+  dplyr::group_by(COUNTRY) %>%
+  dplyr::filter(Total_Deceased_Country > 0)
+
+# Now, I calculate the week-by-week growth rate in the rolling average of the mortality rate. This is equivalent to the log[total_total_rolling_average_mortality_(t) – total_total_rolling_average_mortality_(t-7)]. First, I create a variable for weeks by country. This tells us in what week of the year each nation had their first death.
+First_Death$week_num = lubridate::week(ymd(First_Death$Date))
+
+# Next, I generate week-over-week mortality growth rates. Should be (current week - previous week)/previous week. I use two distinct formulas for this calculation.
+
+First_Death <- First_Death %>%
+  dplyr::group_by(COUNTRY) %>%
+  dplyr::mutate(total_mortality_growth = log((total_rolling_average_mortality/Lag(total_rolling_average_mortality,7))))
+
+First_Death <- First_Death %>%
+  dplyr::group_by(COUNTRY) %>%
+  dplyr::mutate(total_mortality_growth_b <- (total_rolling_average_mortality-Lag(total_rolling_average_mortality,7))/Lag(total_rolling_average_mortality,7))
+
+First_Death$total_mortality_growth_b  <- log(First_Death$`... <- NULL`,10)
+
+First_Death <- First_Death %>%
+  dplyr::group_by(COUNTRY) %>%
+  dplyr::mutate(new_mortality_growth <- log((new_rolling_average_mortality/Lag(new_rolling_average_mortality,7)))) 
+
+First_Death$new_mortality_growth  <- First_Death$`... <- NULL`
+
+First_Death <- First_Death %>%
+  dplyr::group_by(COUNTRY) %>%
+  dplyr::mutate(new_mortality_growth_b <- (new_rolling_average_mortality-Lag(new_rolling_average_mortality,7))/Lag(new_rolling_average_mortality,7))
+
+First_Death$new_mortality_growth_b  <- log(First_Death$`... <- NULL`,10)
+
+# Please see the First Death dataset in the data folder.
+
+# The following code allows us to visualize the rolling average of the mortality rate by country.
+Plot_27A <- plot_ly(First_Death, x=~Date, y=~total_rolling_average_mortality) %>%
+  add_lines(linetype = ~COUNTRY) %>%
+  layout(title="Total Rolling Average of Mortality Rate Over Time - COVID19")
+Plot_27A
+
+Plot_28 <- Plot_27A %>% layout(yaxis = list(type = "log"))
+Plot_28
+
+Plot_27B <- plot_ly(First_Death, x=~Date, y=~new_rolling_average_mortality) %>%
+  add_lines(linetype = ~COUNTRY) %>%
+  layout(title="New Rolling Average of Mortality Rate Over Time - COVID19")
+Plot_27B
+
+# Here, I add a facet wrap for each nation in our sample.
+Plot_28B <- ggplot(data = First_Death, aes(Date, log(total_rolling_average_mortality))) + geom_line(size=.7) + facet_wrap(~COUNTRY, switch="x", ncol = 7) + theme_bw() + theme(axis.title.y=element_blank(),
+                                                                                                                                                                               axis.text.y=element_blank(),
+                                                                                                                                                                               axis.text.x=element_blank(),
+                                                                                                                                                                               axis.ticks.x=element_blank(),
+                                                                                                                                                                               axis.title.x = element_blank(),
+                                                                                                                                                                               strip.background = element_rect(color="white", fill="white"))
+Plot_28B
+
+Plot_28C <- ggplot(data = First_Death, aes(x = Date, y = new_rolling_average_mortality, group = COUNTRY)) + geom_line() + theme_bw() + theme(legend.title = element_blank(), axis.text.y=element_blank(), axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("Rolling Average New Mortality")
+Plot_28C
+
+
+### Generating Figures 1.1, 1.2 and 1.3.
+
+library(gghighlight)
+
+Plot_28D <- ggplot(data = First_Death, aes(x = Date, y = new_rolling_average_mortality * 100, color = COUNTRY)) + geom_line() + theme_bw() + theme(axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("New Mortality Rate (%)")
+Plot_28D
+
+First_Death_High <- First_Death %>%
+  dplyr::filter(COUNTRY == "Belgium" | COUNTRY == "Spain" | COUNTRY == "Italy" | COUNTRY == "France" | COUNTRY == "Netherlands" | COUNTRY == "Ireland")
+
+Plot_28D.1 <- ggplot(data = First_Death_High, aes(x = Date, y = new_rolling_average_mortality * 100, color = COUNTRY)) + geom_line() + theme_bw() + theme(axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("New Mortality Rate (%)")
+Plot_28D.1
+
+First_Death_Medium <- First_Death %>%
+  dplyr::filter(COUNTRY == "Luxembourg" | COUNTRY == "Portugal" | COUNTRY == "Germany" | COUNTRY == "Austria" | COUNTRY == "Finland")
+
+Plot_28D.2 <- ggplot(data = First_Death_Medium, aes(x = Date, y = new_rolling_average_mortality * 100, color = COUNTRY)) + geom_line() + theme_bw() + theme(axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("New Mortality Rate (%)")
+Plot_28D.2
+
+First_Death_Low <- First_Death %>%
+  dplyr::filter(COUNTRY == "Slovenia" | COUNTRY == "Lithuania" | COUNTRY == "Greece" | COUNTRY == "Latvia" | COUNTRY == "Slovakia")
+
+Plot_28D.3 <- ggplot(data = First_Death_Low, aes(x = Date, y = new_rolling_average_mortality * 100, color = COUNTRY)) + geom_line() + theme_bw() + theme(axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("New Mortality Rate (%)")
+Plot_28D.3
+
+Plot_28E <- ggplot(data = First_Death, aes(x = Date, y = log(total_rolling_average_mortality), color = COUNTRY)) + geom_line() + theme_bw() + theme(legend.title = element_blank(), legend.position = "none", axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("Logged Cumulative Mortality Rate")
+Plot_28E
+
+## Cyprus, Malta, and Luxembourg excluded from below.
+
+Oxford_Filtered <- Oxford_V1 %>%
+  dplyr::filter(COUNTRY != "Malta") %>%
+  dplyr::filter(COUNTRY != "Luxembourg") %>%
+  dplyr::filter(COUNTRY != "Cyprus")
+
+countriez <- unique(Oxford_Filtered$COUNTRY)
+country_plots<-list()
+
+for(i in 1:length(countriez)) {
+  country_plots[[i]] <- ggplot(data=subset(Oxford_Filtered,COUNTRY==countriez[i]), aes_string(x="Date",y="new_rolling_average_mortality"))+geom_line(size=1)+theme_bw()+ylab("")+xlab(countriez[i])+theme(axis.text=element_blank())
+}
+
+Plot28F <- do.call("grid.arrange", c(country_plots))
+
+Oxford_Death <- Oxford_V1 %>%
+  dplyr::group_by(COUNTRY) %>%
+  dplyr::filter(Total_Deceased_Country > 0)
+
+Plot_28G <- ggplot(data = Oxford_Death, aes(x = Date, y = Total_Deaths_Per_Million, color = COUNTRY)) + geom_line() + theme_bw() + theme( axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("Total Deaths Per Million")
+Plot_28G
+
+Plot_28G.1 <- plot_ly(Oxford_Death, x=~Date, y=~Total_Deaths_Per_Million) %>%
+  add_lines(linetype = ~COUNTRY) %>%
+  layout(title="Total Total_Deaths_Per_Million")
+Plot_28G.1
+
+Oxford_Death_High <- Oxford_V1 %>%
+  dplyr::filter(COUNTRY == "Belgium" | COUNTRY == "Spain" | COUNTRY == "Italy" | COUNTRY == "France" | COUNTRY == "Netherlands" | COUNTRY == "Estonia")
+
+Plot_28H <- ggplot(data = Oxford_Death_High, aes(x = Date, y = Total_Deaths_Per_Million, color = COUNTRY)) + geom_line() + theme_bw() + theme( axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("Total Deaths Per Million")
+Plot_28H
+
+Oxford_Death_Medium <- Oxford_V1 %>%
+  dplyr::filter(COUNTRY == "Portugal" | COUNTRY == "Germany" | COUNTRY == "Finland" | COUNTRY == "Austria" | COUNTRY == "Estonia")
+
+Plot_28I <- ggplot(data = Oxford_Death_Medium, aes(x = Date, y = Total_Deaths_Per_Million, color = COUNTRY)) + geom_line() + theme_bw() + theme( axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("Total Deaths Per Million")
+Plot_28I
+
+Oxford_Death_Low <- Oxford_V1 %>%
+  dplyr::filter(COUNTRY == "Slovenia" | COUNTRY == "Lithuania" | COUNTRY == "Greece" | COUNTRY == "Latvia" | COUNTRY == "Slovakia")
+
+Plot_28J <- ggplot(data = Oxford_Death_Low, aes(x = Date, y = Total_Deaths_Per_Million, color = COUNTRY)) + geom_line() + theme_bw() + theme( axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("Total Deaths Per Million")
+Plot_28J
 
 
 
 
 
+# Next, I create initial visualizations of the mortality growth rates by country.
+Plot_29 <- plot_ly(First_Death, x=~Date, y=~total_mortality_growth) %>%
+  add_lines(linetype = ~COUNTRY) %>%
+  layout(title="Weekly Growth Rate in Total Rolling Average Mortality per Capita - COVID19")
+Plot_29
+
+Plot_30 <- plot_ly(First_Death, x=~Date, y=~total_mortality_growth_b) %>%
+  add_lines(linetype = ~COUNTRY) %>%
+  layout(title="Alternate Weekly Growth Rate in Total Rolling Average Mortality per Capita - COVID19")
+Plot_30
+
+Plot_31 <- plot_ly(First_Death, x=~Date, y=~new_mortality_growth) %>%
+  add_lines(linetype = ~COUNTRY) %>%
+  layout(title="Weekly Growth Rate in New Rolling Average Mortality per Capita - COVID19")
+Plot_31
 
 
 
 
 
+# First, we generate extensive summary statistics for each variable with describe in the Hmisc function.
+Hmisc::describe(Oxford_V1)
+# n, nmiss, unique, mean, 5, 10, 25, 50, 75, 90, 95th percentiles
+
+# Next, I generate shareable outputs, using the summarytools package. Set st_options(use.x11 = FALSE).
+saved_x11_option <- st_options("use.x11")
+st_options(use.x11 = TRUE)
+dfSummary(Oxford_V1, plain.ascii = FALSE, style = "grid", 
+          graph.magnif = 0.75, valid.col = FALSE, tmp.img.dir = "/tmp")
+view(dfSummary(Oxford_V1))
+# For the complete output, please open the summary in the html link.
 
 
+
+
+
+# Now, I generate a correlation heat map, using a subset of variables from the final dataset.
+corrmapvarlist <- c("total_rolling_average_mortality", "Total_Cases_Country", "Total_Deceased_Country", "New_Confirmed_Country", "New_Total_Deceased_Country", "Population", "rolling_average_confirmed", "rolling_average_deceased", "C1_School.closing", "C2_Workplace.closing", "C3_Cancel.public.events", "C4_Restrictions.on.gatherings", "C5_Close.public.transport", "C6_Stay.at.home.requirements", "C7_Restrictions.on.internal.movement", "C8_International.travel.controls", "E1_Income.support", "E2_Debt.contract.relief", "E3_Fiscal.measures", "H1_Public.information.campaigns", "H2_Testing.policy", "H3_Contact.tracing", "H4_Emergency.investment.in.healthcare", "H5_Investment.in.vaccines", "StringencyIndex", "prop65", "propurban", "driving", "walking")
+corrmapvars <- Oxford_V1[corrmapvarlist]
+
+# Here, I rename the variables to make them easier to read on the map.
+corrmapvars <- corrmapvars %>% dplyr::rename(mortality_ra = total_rolling_average_mortality)
+corrmapvars <- corrmapvars %>% dplyr::rename(confirmed_ra = rolling_average_confirmed)
+corrmapvars <- corrmapvars %>% dplyr::rename(deceased_ra = rolling_average_deceased)
+corrmapvars <- corrmapvars %>% dplyr::rename(cases = Total_Cases_Country)
+corrmapvars <- corrmapvars %>% dplyr::rename(deaths = Total_Deceased_Country)
+corrmapvars <- corrmapvars %>% dplyr::rename(new_cases = New_Confirmed_Country)
+corrmapvars <- corrmapvars %>% dplyr::rename(new_deaths = New_Total_Deceased_Country)
+corrmapvars <- corrmapvars %>% dplyr::rename(school_closing = C1_School.closing)
+corrmapvars <- corrmapvars %>% dplyr::rename(work_closing = C2_Workplace.closing)
+corrmapvars <- corrmapvars %>% dplyr::rename(public_event_closing = C3_Cancel.public.events)
+corrmapvars <- corrmapvars %>% dplyr::rename(gathering_restrictions = C4_Restrictions.on.gatherings)
+corrmapvars <- corrmapvars %>% dplyr::rename(transport_closing = C5_Close.public.transport)
+corrmapvars <- corrmapvars %>% dplyr::rename(lockdown = C6_Stay.at.home.requirements)
+corrmapvars <- corrmapvars %>% dplyr::rename(internal_restrictions = C7_Restrictions.on.internal.movement)
+corrmapvars <- corrmapvars %>% dplyr::rename(travel_restrictions = C8_International.travel.controls)
+corrmapvars <- corrmapvars %>% dplyr::rename(income = E1_Income.support)
+corrmapvars <- corrmapvars %>% dplyr::rename(debt = E2_Debt.contract.relief)
+corrmapvars <- corrmapvars %>% dplyr::rename(fiscal = E3_Fiscal.measures)
+corrmapvars <- corrmapvars %>% dplyr::rename(campaigns = H1_Public.information.campaigns)
+corrmapvars <- corrmapvars %>% dplyr::rename(testing = H2_Testing.policy)
+corrmapvars <- corrmapvars %>% dplyr::rename(tracing = H3_Contact.tracing)
+corrmapvars <- corrmapvars %>% dplyr::rename(health_care = H4_Emergency.investment.in.healthcare)
+corrmapvars <- corrmapvars %>% dplyr::rename(vaccine = H5_Investment.in.vaccines)
+corrmapvars <- corrmapvars %>% dplyr::rename(stringency_index = StringencyIndex)
+corrmapvalues <- round(cor(corrmapvars, use = "pairwise.complete.obs"), 2)
+
+# Here, I get the lower triangle of the correlation matrix
+get_lower_tri<-function(cormat){
+  cormat[upper.tri(cormat)] <- NA
+  return(cormat)
+}
+# Now, I get the upper triangle of the correlation matrix
+get_upper_tri <- function(cormat){
+  cormat[lower.tri(cormat)]<- NA
+  return(cormat)
+}
+reorder_cormat <- function(cormat){
+  ### Use correlation between variables as distance
+  dd <- as.dist((1-cormat)/2)
+  hc <- hclust(dd)
+  cormat <-cormat[hc$order, hc$order]
+}
+### Reorder the correlation matrix
+corrmapvalues <- reorder_cormat(corrmapvalues)
+### Get the Upper Triangle
+upper_tri <- get_upper_tri(corrmapvalues) 
+### Melt the Correlation Map
+melted_corrmap <- reshape2::melt(upper_tri, na.rm = TRUE)
+
+### Generate the Static Correlation Map
+ggheatmap <- ggplot(data = melted_corrmap, aes(x=Var2, y=Var1, fill=value)) + 
+  geom_tile(color = "white") +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white",
+                       midpoint = 0, limit = c(-1,1), space = "Lab", 
+                       name="Pearson\nCorrelation") +
+  theme(axis.text.x = element_text(angle = 45)) +
+  theme(axis.text.x = element_text(margin = margin(t = 5, r = 0, b = 0, l = 0))) +
+  theme(axis.text.x = element_text(hjust=1))
+print(ggheatmap)
+
+### Generate an Interactive Correlation Map (you are able to zoom to specific correlates).
+interactive_heatmap <- heatmaply_cor(
+  cor(corrmapvalues),
+  row_text_angle = 0,
+  column_text_angle = 45,
+  na.value = "grey50",
+  na.rm = TRUE,
+  xlab = "Features",
+  ylab = "Features",
+  k_col = 0,
+  k_row = 0,
+  fontsize_row = 5,
+  fontsize_col = 5,
+  plot_method = c("ggplot", "plotly"),
+  show_dendrogram = c(FALSE, FALSE),
+  key.title = "Pearson Correlations")
+interactive_heatmap
+
+
+
+
+### Correlation matrix of government interventions (Table 3B)
+cor.policy.dat <- Oxford_V1[,c("C1_School.closing", 
+                               "C2_Workplace.closing",
+                               "C3_Cancel.public.events",
+                               "C4_Restrictions.on.gatherings",
+                               "C5_Close.public.transport",            
+                               "C6_Stay.at.home.requirements",         
+                               "C7_Restrictions.on.internal.movement", 
+                               "C8_International.travel.controls",
+                               "H1_Public.information.campaigns",
+                               "StringencyIndex")]
+colnames(cor.policy.dat) <- c("School Closing", 
+                              "Workplace Closing",
+                              "Cancel Public Events",
+                              "Gathering Restrictions",
+                              "Close Public Transport",            
+                              "Stay at Home",         
+                              "Internal Movement Restrictions", 
+                              "International Travel Controls",
+                              "Public Information Campaigns",
+                              "Stringency Index")
+cormat<-round(cor(cor.policy.dat,use = "complete.obs"), 2)
+
+# Here, I get the lower triangle of the correlation matrix
+get_lower_tri<-function(cormat){
+  cormat[upper.tri(cormat)] <- NA
+  return(cormat)
+}
+# Now, I get the upper triangle of the correlation matrix
+get_upper_tri <- function(cormat){
+  cormat[lower.tri(cormat)]<- NA
+  return(cormat)
+}
+reorder_cormat <- function(cormat){
+  # Use correlation between variables as distance
+  dd <- as.dist((1-cormat)/2)
+  hc <- hclust(dd)
+  cormat <-cormat[hc$order, hc$order]
+}
+cormat <- reorder_cormat(cormat)
+melted_cormat <- reshape2::melt(get_upper_tri(cormat), na.rm = TRUE)
+
+### Generate the Static Correlation Map
+ggheatmap <- ggplot(data = melted_cormat, aes(x=Var2, y=Var1, fill=value)) + 
+  geom_tile(color = "black") +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white",
+                       midpoint = 0, limit = c(-1,1), space = "Lab", 
+                       name="Pearson\nCorrelation") +
+  theme_minimal()+
+  theme(axis.text.x = element_text(angle = 45)) +
+  theme(axis.text.x = element_text(margin = margin(t = 5, r = 0, b = 0, l = 0))) +
+  theme(axis.text.x = element_text(hjust=1))+coord_fixed()
+
+Plot_78 <- ggheatmap + 
+  geom_text(aes(Var2, Var1, label = value), color = "black", size = 1.75) +
+  theme(
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    axis.text=element_text(size=7),
+    panel.grid.major = element_blank(),
+    panel.border = element_blank(),
+    panel.background = element_blank(),
+    axis.ticks = element_blank(),
+    legend.justification = c(1, 0),
+    legend.position = c(0.6, 0.7),
+    legend.direction = "horizontal",
+    legend.title = element_text(size = 7),
+    legend.text=element_text(size=7),
+    plot.caption = element_text(size = 7, hjust=0))+
+  guides(fill = guide_colorbar(barwidth = 7, barheight = 1,
+                               title.position = "top", title.hjust = 0.5))
+
+# Print the heatmap
+print(Plot_78)
 
 
 
