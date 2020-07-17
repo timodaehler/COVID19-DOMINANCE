@@ -390,6 +390,11 @@ Government_Responses$Date <- ymd(Government_Responses$Date, quiet = FALSE, tz = 
                                  truncated = 0)
 order(Government_Responses$Date)
 
+# As the download dota is updated everyday, I have to subset the dataframe here so that it corresponds to the dates of the other dataframes.
+Government_Responses <- subset(Government_Responses, Date < as.Date("2020-07-17"))
+
+
+
 # Then, I correct country and variable names.
 
 Government_Responses$COUNTRY <- Government_Responses$CountryName
@@ -1520,20 +1525,16 @@ write_xlsx(laender,"Data/laender.xlsx")
 EMBI <- read_excel("Data/SAMPLE_LISTS.xlsx", sheet = "EMBI")
 EMBI2 <- read_excel("Data/SAMPLE_LISTS.xlsx", sheet = "EMBI2")
 LEMB <- read_excel("Data/SAMPLE_LISTS.xlsx", sheet = "LEMB")
+uniquecountries <- unique(rbind(EMBI, EMBI2, LEMB))
 
 # Creating a safety copy of Final_Data_Country so that I don't have to rerun the entire previous code in case I subset the wrong way. 
 # safetyFinal_Data_Country <- Final_Data_Country
-
-Final_Data_Country <- subset(Final_Data_Country, COUNTRY %in% EMBI$Country)
+# str(safetyFinal_Data_Country)
+Final_Data_Country <- subset(Final_Data_Country, COUNTRY %in% uniquecountries$Country)
 # test <- subset(Final_Data_Country, COUNTRY %in% EMBI$Country)
 # subset(Final_Data_Country, (COUNTRY == "Austria" | COUNTRY == "Belgium" | COUNTRY == "Cyprus" | COUNTRY == "Estonia" | COUNTRY == "Finland" | COUNTRY == "France" | COUNTRY == "Germany" | COUNTRY == "Greece" | COUNTRY == "Ireland" | COUNTRY == "Italy" | COUNTRY == "Latvia" | COUNTRY == "Lithuania" | COUNTRY == "Luxembourg" | COUNTRY == "Malta" | COUNTRY == "Netherlands" | COUNTRY == "Portugal" | COUNTRY == "Slovakia" | COUNTRY == "Slovenia" | COUNTRY == "Spain"))
 
 
-
-
-# 
-# 
-# 
 # test <- subset(Final_Data_Country, COUNTRY %in% EMBI$Country)
 # anothertest <- subset(Final_Data_Country, COUNTRY %in% EMBI2$Country)
 # anothertest2 <- subset(Final_Data_Country, COUNTRY %in% LEMB$Country)
@@ -1563,7 +1564,7 @@ Final_Data_Country <- Final_Data_Country[order(Final_Data_Country$COUNTRY, Final
 
 
 
-# Oxford_V1 <- Final_Data_Country
+Oxford_V1 <- Final_Data_Country
 
 library(writexl)
 library(readxl)
@@ -1572,14 +1573,14 @@ library(readxl)
 
 
 # XXX here it gets shaky
-write_xlsx(Oxford_V1,"Data/Oxford_V1.xlsx")
+# write_xlsx(Oxford_V1EM,"Data/Oxford_V1EM.xlsx")
 
 # I added nine additional columns for fiscal and monetary interventions (which had to be manually aggregated from different online datasets and hard coded). This new version of the dataset is imported below.
 
-remove(Oxford_V1)
+remove(Oxford_V1EM)
 
-Oxford_V1 <- read_excel("data/Oxford_V1.xlsx")
-
+# Oxford_V1 <- read_excel("Data/Oxford_V1EM.xlsx")
+# Oxford_V1 <- Oxford_V1EM
 
 # Now, I calculate deaths per million.
 library(data.table)
@@ -1595,11 +1596,11 @@ Oxford_V1 <- merge(Oxford_V1, Mill_Pop, by = c("COUNTRY"), all=TRUE)
 
 Oxford_V1 <- Oxford_V1[order(Oxford_V1$COUNTRY, Oxford_V1$Date),]
 
-Oxford_V1$New_Deaths_Per_Million = (Oxford_V1$New_Total_Deceased_Country / Oxford_V1$`Population (Millions)`)
+Oxford_V1$New_Deaths_Per_Million = (Oxford_V1$New_Total_Deceased_Country / Oxford_V1$PopMil)
 
 Oxford_V1 <- Oxford_V1[order(Oxford_V1$COUNTRY, Oxford_V1$Date),]
 
-Oxford_V1$Total_Deaths_Per_Million = (Oxford_V1$Total_Deceased_Country / Oxford_V1$`Population (Millions)`)
+Oxford_V1$Total_Deaths_Per_Million = (Oxford_V1$Total_Deceased_Country / Oxford_V1$PopMil)
 
 
 
@@ -1690,7 +1691,7 @@ Days_Since_100_Deceased <- Days_Since_100_Deceased %>%
 
 Plot_10 <- plot_ly(Days_Since_100_Deceased, x=~Days, y=~Total_Deceased_Country) %>%
   add_lines(linetype = ~COUNTRY) %>%
-  layout(title="Days Since 100 Deaths - Eurozone")
+  layout(title="Days Since 100 Deaths - Emerging Markets")
 Plot_10
 
 
@@ -1727,20 +1728,20 @@ exponential_function
 # Here I subset only for data from 22-1-2020 to end of June XXX
 #str(World_Data$Date)
 # World_Data$Date <- as.Date(World_Data$Date)
-# World_Data <- subset(World_Data, Date < "2020-06-30")
+# World_Data <- subset(World_Data, Date < as.Date("2020-06-30") )
 
-Confirmed <- ggplot(data = World_Data, aes(x = Date, y = Global_Confirmed_Cases)) + geom_bar(stat = "identity", fill = "red") +
+Confirmed <- ggplot(data = subset(World_Data, Date < as.Date("2020-06-30")) , aes(x = Date, y = Global_Confirmed_Cases)) + geom_bar(stat = "identity", fill = "red") +
   labs(title = "Global Confirmed Cases - COVID19",
-       subtitle = "January 22nd, 2020 - June 15th, 2020",
+       subtitle = "January 22nd, 2020 - June 30th, 2020",
        x = "Date", y = "Confirmed Cases")
 Plot_17 <- ggplotly(Confirmed)
 Plot_17
 
 # Now, I plot the global deaths over our time period.
-Deaths <- ggplot(data = World_Data, aes(x = Date, y = Global_Deceased)) +
+Deaths <- ggplot(data = subset(World_Data, Date < as.Date("2020-06-30")), aes(x = Date, y = Global_Deceased)) +
   geom_bar(stat = "identity", fill = "darkred") +
   labs(title = "Global Deaths - COVID19",
-       subtitle = "January 22nd, 2020 - June 15th, 2020",
+       subtitle = "January 22nd, 2020 - June 30th, 2020",
        x = "Date", y = "Deaths")
 Plot_18 <- ggplotly(Deaths)
 Plot_18 
@@ -1749,9 +1750,9 @@ Plot_18
 
 # This whole plot does not work. 
 # Now, I plot the change in the global death rate across the time period.
-Death_Rate <- ggplot(World_Data, aes(x=Date)) +
+Death_Rate <- ggplot(data = subset(World_Data, Date < as.Date("2020-06-30")), aes(x=Date)) +
   geom_line(aes(y=Death_Rate, colour='Daily')) +
-  xlab('') + ylab('Death Rate (%)') + labs(title='Change in Death Rate (%)') +
+  xlab('') + ylab('Death Rate (%)') + labs(title='Change in Death Rate (%)', subtitle = "January 22nd, 2020 - June 30th, 2020") +
   theme(legend.position='bottom', legend.title=element_blank(),
         legend.text=element_text(size=8),
         legend.key.size=unit(0.5, 'cm'),
@@ -1762,22 +1763,22 @@ Plot_21
 
 
 # Now, I extend this analysis to generate the number of confirmed cases and deaths by country.
-Plot_23 <- plot_ly(Oxford_V1, x=~Date, y=~Total_Cases_Country) %>%
+Plot_23 <- plot_ly(data = subset(Oxford_V1, Date < as.Date("2020-06-30")), x=~Date, y=~Total_Cases_Country) %>%
   add_lines(linetype = ~COUNTRY) %>%
   layout(title="Confirmed Cases Across Countries")
 Plot_23
 
-Plot_24 <- plot_ly(Oxford_V1, x=~Date, y=~Total_Deceased_Country) %>%
+Plot_24 <- plot_ly(data = subset(Oxford_V1, Date < as.Date("2020-06-30")), x=~Date, y=~Total_Deceased_Country) %>%
   add_lines(linetype = ~COUNTRY) %>%
   layout(title="Deaths Across Countries")
 Plot_24
 
-Plot_25 <- plot_ly(Oxford_V1, x=~Date, y=~Total_Mortality_Rate_Per_Capita) %>%
+Plot_25 <- plot_ly(data = subset(Oxford_V1, Date < as.Date("2020-06-30")), x=~Date, y=~Total_Mortality_Rate_Per_Capita) %>%
   add_lines(linetype = ~COUNTRY) %>%
   layout(title="Total Mortality Rate Across Countries")
 Plot_25
 
-Plot_26 <- plot_ly(Oxford_V1, x=~Date, y=~New_Mortality_Rate_Per_Capita) %>%
+Plot_26 <- plot_ly(data = subset(Oxford_V1, Date < as.Date("2020-06-30")), x=~Date, y=~New_Mortality_Rate_Per_Capita) %>%
   add_lines(linetype = ~COUNTRY) %>%
   layout(title="New Mortality Rate Across Countries")
 Plot_26
@@ -1819,7 +1820,7 @@ First_Death <- First_Death %>%
 
 First_Death$new_mortality_growth_b  <- log(First_Death$`... <- NULL`,10)
 
-# Please see the First Death dataset in the data folder.
+# Please see the First Death dataset in the data folder. xxx
 
 # The following code allows us to visualize the rolling average of the mortality rate by country.
 Plot_27A <- plot_ly(First_Death, x=~Date, y=~total_rolling_average_mortality) %>%
@@ -1855,6 +1856,7 @@ library(gghighlight)
 Plot_28D <- ggplot(data = First_Death, aes(x = Date, y = new_rolling_average_mortality * 100, color = COUNTRY)) + geom_line() + theme_bw() + theme(axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("New Mortality Rate (%)")
 Plot_28D
 
+# xxx
 First_Death_High <- First_Death %>%
   dplyr::filter(COUNTRY == "Belgium" | COUNTRY == "Spain" | COUNTRY == "Italy" | COUNTRY == "France" | COUNTRY == "Netherlands" | COUNTRY == "Ireland")
 
