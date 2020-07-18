@@ -1856,40 +1856,60 @@ library(gghighlight)
 Plot_28D <- ggplot(data = First_Death, aes(x = Date, y = new_rolling_average_mortality * 100, color = COUNTRY)) + geom_line() + theme_bw() + theme(axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("New Mortality Rate (%)")
 Plot_28D
 
-# xxx
-First_Death_High <- First_Death %>%
-  dplyr::filter(COUNTRY == "Belgium" | COUNTRY == "Spain" | COUNTRY == "Italy" | COUNTRY == "France" | COUNTRY == "Netherlands" | COUNTRY == "Ireland")
 
+# Here I am subsetting for the top and bottom 5 mortality countries per the end of April 
+First_Death_April30 <- subset(First_Death, Date == as.Date("2020-04-30"))
+
+First_Death_April30decreasing <- arrange(First_Death_April30, desc(new_rolling_average_mortality) )
+Top5_Mortality_Countries <- First_Death_April30decreasing[1:5, "COUNTRY"]
+
+First_Death_April30increasing <- arrange(First_Death_April30, new_rolling_average_mortality )
+Bottom5_Mortality_Countries <- First_Death_April30increasing[1:5, "COUNTRY"]
+
+
+
+First_Death_High <- First_Death %>%
+  dplyr::filter(COUNTRY %in% Top5_Mortality_Countries$COUNTRY)
+# First_Death_High <- First_Death %>%
+#  dplyr::filter(COUNTRY == "Belgium" | COUNTRY == "Spain" | COUNTRY == "Italy" | COUNTRY == "France" | COUNTRY == "Netherlands" | COUNTRY == "Ireland")
 Plot_28D.1 <- ggplot(data = First_Death_High, aes(x = Date, y = new_rolling_average_mortality * 100, color = COUNTRY)) + geom_line() + theme_bw() + theme(axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("New Mortality Rate (%)")
 Plot_28D.1
 
-First_Death_Medium <- First_Death %>%
-  dplyr::filter(COUNTRY == "Luxembourg" | COUNTRY == "Portugal" | COUNTRY == "Germany" | COUNTRY == "Austria" | COUNTRY == "Finland")
 
+
+First_Death_Medium <- First_Death %>%
+  dplyr::filter( !(     (COUNTRY %in% Top5_Mortality_Countries$COUNTRY)  | (COUNTRY %in% Bottom5_Mortality_Countries$COUNTRY)  )        )
+# First_Death_Medium <- First_Death %>%
+#   dplyr::filter(COUNTRY == "Luxembourg" | COUNTRY == "Portugal" | COUNTRY == "Germany" | COUNTRY == "Austria" | COUNTRY == "Finland")
 Plot_28D.2 <- ggplot(data = First_Death_Medium, aes(x = Date, y = new_rolling_average_mortality * 100, color = COUNTRY)) + geom_line() + theme_bw() + theme(axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("New Mortality Rate (%)")
 Plot_28D.2
 
-First_Death_Low <- First_Death %>%
-  dplyr::filter(COUNTRY == "Slovenia" | COUNTRY == "Lithuania" | COUNTRY == "Greece" | COUNTRY == "Latvia" | COUNTRY == "Slovakia")
 
+
+First_Death_Low <- First_Death %>%
+  dplyr::filter(COUNTRY %in% Bottom5_Mortality_Countries$COUNTRY)
+# First_Death_Low <- First_Death %>%
+#  dplyr::filter(COUNTRY == "Slovenia" | COUNTRY == "Lithuania" | COUNTRY == "Greece" | COUNTRY == "Latvia" | COUNTRY == "Slovakia")
 Plot_28D.3 <- ggplot(data = First_Death_Low, aes(x = Date, y = new_rolling_average_mortality * 100, color = COUNTRY)) + geom_line() + theme_bw() + theme(axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("New Mortality Rate (%)")
 Plot_28D.3
+
+
 
 Plot_28E <- ggplot(data = First_Death, aes(x = Date, y = log(total_rolling_average_mortality), color = COUNTRY)) + geom_line() + theme_bw() + theme(legend.title = element_blank(), legend.position = "none", axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("Logged Cumulative Mortality Rate")
 Plot_28E
 
 ## Cyprus, Malta, and Luxembourg excluded from below.
 
-Oxford_Filtered <- Oxford_V1 %>%
-  dplyr::filter(COUNTRY != "Malta") %>%
-  dplyr::filter(COUNTRY != "Luxembourg") %>%
-  dplyr::filter(COUNTRY != "Cyprus")
+# Oxford_Filtered <- Oxford_V1 %>%
+#   dplyr::filter(COUNTRY != "Malta") %>%
+#   dplyr::filter(COUNTRY != "Luxembourg") %>%
+#   dplyr::filter(COUNTRY != "Cyprus")
 
-countriez <- unique(Oxford_Filtered$COUNTRY)
+countriez <- unique(Oxford_V1$COUNTRY)
 country_plots<-list()
 
 for(i in 1:length(countriez)) {
-  country_plots[[i]] <- ggplot(data=subset(Oxford_Filtered,COUNTRY==countriez[i]), aes_string(x="Date",y="new_rolling_average_mortality"))+geom_line(size=1)+theme_bw()+ylab("")+xlab(countriez[i])+theme(axis.text=element_blank())
+  country_plots[[i]] <- ggplot(data=subset(Oxford_V1,COUNTRY==countriez[i]), aes_string(x="Date",y="new_rolling_average_mortality"))+geom_line(size=1)+theme_bw()+ylab("")+xlab(countriez[i])+theme(axis.text=element_blank())
 }
 
 Plot28F <- do.call("grid.arrange", c(country_plots))
@@ -1906,21 +1926,49 @@ Plot_28G.1 <- plot_ly(Oxford_Death, x=~Date, y=~Total_Deaths_Per_Million) %>%
   layout(title="Total Total_Deaths_Per_Million")
 Plot_28G.1
 
-Oxford_Death_High <- Oxford_V1 %>%
-  dplyr::filter(COUNTRY == "Belgium" | COUNTRY == "Spain" | COUNTRY == "Italy" | COUNTRY == "France" | COUNTRY == "Netherlands" | COUNTRY == "Estonia")
 
+# Here I am subsetting for the top and bottom 5 mortality countries per the end of April 
+Oxford_Death_April30 <- subset(Oxford_Death, Date == as.Date("2020-04-30"))
+
+Oxford_Death_April30decreasing <- arrange(Oxford_Death_April30, desc(Total_Deaths_Per_Million) )
+Top5_Oxford_Death_Countries <- Oxford_Death_April30decreasing[1:5, "COUNTRY"]
+
+Oxford_Death_April30increasing <- arrange(Oxford_Death_April30, Total_Deaths_Per_Million )
+Bottom5_Oxford_Death_Countries <- First_Death_April30increasing[1:5, "COUNTRY"]
+
+
+
+
+
+First_Death_High <- First_Death %>%
+  dplyr::filter(COUNTRY %in% Top5_Mortality_Countries$COUNTRY)
+# First_Death_High <- First_Death %>%
+#  dplyr::filter(COUNTRY == "Belgium" | COUNTRY == "Spain" | COUNTRY == "Italy" | COUNTRY == "France" | COUNTRY == "Netherlands" | COUNTRY == "Ireland")
+Plot_28D.1 <- ggplot(data = First_Death_High, aes(x = Date, y = new_rolling_average_mortality * 100, color = COUNTRY)) + geom_line() + theme_bw() + theme(axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("New Mortality Rate (%)")
+Plot_28D.1
+
+
+Oxford_Death_High <- Oxford_V1 %>%
+  dplyr::filter(COUNTRY %in% Top5_Oxford_Death_Countries$COUNTRY)
+# Oxford_Death_High <- Oxford_V1 %>%
+#   dplyr::filter(COUNTRY == "Belgium" | COUNTRY == "Spain" | COUNTRY == "Italy" | COUNTRY == "France" | COUNTRY == "Netherlands" | COUNTRY == "Estonia")
 Plot_28H <- ggplot(data = Oxford_Death_High, aes(x = Date, y = Total_Deaths_Per_Million, color = COUNTRY)) + geom_line() + theme_bw() + theme( axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("Total Deaths Per Million")
 Plot_28H
 
-Oxford_Death_Medium <- Oxford_V1 %>%
-  dplyr::filter(COUNTRY == "Portugal" | COUNTRY == "Germany" | COUNTRY == "Finland" | COUNTRY == "Austria" | COUNTRY == "Estonia")
 
+Oxford_Death_Medium <- Oxford_V1 %>%
+  dplyr::filter( !(     (COUNTRY %in% Top5_Oxford_Death_Countries$COUNTRY)  | (COUNTRY %in% Bottom5_Oxford_Death_Countries$COUNTRY)  )        )
+# Oxford_Death_Medium <- Oxford_V1 %>%
+#   dplyr::filter(COUNTRY == "Portugal" | COUNTRY == "Germany" | COUNTRY == "Finland" | COUNTRY == "Austria" | COUNTRY == "Estonia")
 Plot_28I <- ggplot(data = Oxford_Death_Medium, aes(x = Date, y = Total_Deaths_Per_Million, color = COUNTRY)) + geom_line() + theme_bw() + theme( axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("Total Deaths Per Million")
 Plot_28I
 
-Oxford_Death_Low <- Oxford_V1 %>%
-  dplyr::filter(COUNTRY == "Slovenia" | COUNTRY == "Lithuania" | COUNTRY == "Greece" | COUNTRY == "Latvia" | COUNTRY == "Slovakia")
 
+
+Oxford_Death_Low <- Oxford_V1 %>%
+  dplyr::filter(COUNTRY %in% Bottom5_Oxford_Death_Countries$COUNTRY)
+# Oxford_Death_Low <- Oxford_V1 %>%
+#   dplyr::filter(COUNTRY == "Slovenia" | COUNTRY == "Lithuania" | COUNTRY == "Greece" | COUNTRY == "Latvia" | COUNTRY == "Slovakia")
 Plot_28J <- ggplot(data = Oxford_Death_Low, aes(x = Date, y = Total_Deaths_Per_Million, color = COUNTRY)) + geom_line() + theme_bw() + theme( axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("Total Deaths Per Million")
 Plot_28J
 
@@ -1953,11 +2001,19 @@ Hmisc::describe(Oxford_V1)
 # n, nmiss, unique, mean, 5, 10, 25, 50, 75, 90, 95th percentiles
 
 # Next, I generate shareable outputs, using the summarytools package. Set st_options(use.x11 = FALSE).
-saved_x11_option <- st_options("use.x11")
-st_options(use.x11 = TRUE)
-dfSummary(Oxford_V1, plain.ascii = FALSE, style = "grid", 
-          graph.magnif = 0.75, valid.col = FALSE, tmp.img.dir = "/tmp")
-view(dfSummary(Oxford_V1))
+# install.packages("summarytools")
+
+
+
+# This whole thing here below does not work. xxx 
+# saved_x11_option <- st_options("use.x11")
+# st_options(use.x11 = TRUE)
+# dfSummary(Oxford_V1, plain.ascii = FALSE, style = "grid", 
+#           graph.magnif = 0.75, valid.col = FALSE, tmp.img.dir = "/tmp")
+# view(dfSummary(Oxford_V1))
+
+
+
 # For the complete output, please open the summary in the html link.
 
 
@@ -2129,6 +2185,91 @@ print(Plot_78)
 
 
 
+### Generating the heterogenous multi-factor model.
+
+
+
+# loading libraries -------------------------------------------------------
+library(lubridate)
+library(zoo)
+library(quantmod)
+library(fBasics)
+library(tseries)
+library(sandwich)
+library(lmtest)
+library(lattice)
+library(xtable)
+library(vars)
+library(plyr)
+library(gridExtra)
+library(corrplot)
+library(ggplot2)
+library(reshape2)
+library(data.table)
+library(rvest)
+library(plm)
+library(stringr)
+library(stargazer)
+library(ggpubr)
+
+
+
+
+###read in data
+cds_five<-read.csv("data/cds_daily_5y.csv",header=T,sep=',')
+cds_five2<-read.csv("data/markit_CDS5Ydaily.csv",header=T,sep=',') ### markit CDS data to replace some bad data in the initial file (Greece)
+ez_ten<-read.csv("data/cds_daily_10y_Ezone_dum.csv",header=T,sep=',')
+
+cds_five$Name<-as.Date(cds_five$Name,"%m/%d/%Y")
+colnames(cds_five)[1]<-"Date"
+cds_five2$Date<-as.Date(cds_five2$Date,"%Y-%m-%d")
+
+cds_five<-cds_five[which(cds_five$Date>="2014-01-01"),]
+cds_five2<-cds_five2[which(cds_five2$Date>="2014-01-01"),]
+
+ez_cds<-cds_five[,c(1,1+which(ez_ten$EU_dum==1))]
+colnames(ez_cds)<-c("Date","Germany","France","Greece","Ireland","Belgium","Spain","Netherlands","Austria","Cyprus","Estonia","Italy","Latvia","Lithuania","Malta","Portugal","Slovenia","Slovak_Rep","Finland")
+nonez_cds<-cds_five[,c(1,1+which(ez_ten$EU_dum!=1))]
+
+
+###plot individual spreads
+pdat<-melt(ez_cds,id.vars="Date")
+countriez<-unique(pdat$variable)
+country_plots<-list()
+
+for(i in 1:length(countriez)) {
+  country_plots[[i]] <- ggplot(data=subset(pdat,variable==countriez[i]), aes_string(x="Date",y="value"))+geom_line(size=1)+theme_bw()+ylab("")+xlab(countriez[i])
+}
+
+do.call("grid.arrange", c(country_plots))
+
+
+### replace germany, greece with markit CDS data
+ez_cds$Germany<-NA
+ez_cds$Germany[which(ez_cds$Date %in% cds_five2$Date)]<-cds_five2$DE
+ez_cds$Germany[1]<-ez_cds$Germany[2] #fill in 1/1/2014 with 1/2/2014 value
+ez_cds$Germany<-na.locf(ez_cds$Germany)
+
+ez_cds$Greece<-NA
+ez_cds$Greece[which(ez_cds$Date %in% cds_five2$Date)]<-cds_five2$GR
+ez_cds$Greece[1]<-ez_cds$Greece[2] #fill in 1/1/2014 with 1/2/2014 value
+ez_cds$Greece<-na.locf(ez_cds$Greece)
+ez_cds$Greece[which(ez_cds$Greece>4000)]<-ez_cds$Greece[which(ez_cds$Greece>4000)[1]-1] #fix outliers
+
+###REMOVE MALTA
+ez_cds<-ez_cds[,-which(colnames(ez_cds)=="Malta")]
+
+###plot individual spreads
+pdat<-melt(ez_cds,id.vars="Date")
+countriez<-unique(pdat$variable)
+country_plots<-list()
+
+
+for(i in 1:length(countriez)) {
+  country_plots[[i]] <- ggplot(data=subset(pdat,variable==countriez[i]), aes_string(x="Date",y="value"))+geom_line(size=1)+theme_bw()+ylab("")+xlab(countriez[i])
+}
+
+do.call("grid.arrange", c(country_plots)) #much better
 
 
 
@@ -2145,26 +2286,51 @@ print(Plot_78)
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# XXX don't know if I need the section below
 # Defining countries in sample ----
-potentialSamplesDF <- read_excel("Data/SAMPLE_LISTS.xlsx", sheet = "SAMPLE_LISTS_R")
+# potentialSamplesDF <- read_excel("Data/SAMPLE_LISTS.xlsx", sheet = "SAMPLE_LISTS_R")
+# 
+# # Choose one of the following sample possibilities and assign it to 
+# # "EMBI_ISO_NAME"	
+# # "JPM_LEMB_ISO_NAME"	
+# # "EMBI2_ISO_NAME"
+# # "JPM_EMBI_GD_ISO_NAME"
+# # "IMF_ISO_NAME"
+# # "1yrCDS_ISO_NAME"
+# # "5yrCDS_ISO_NAME"
+# # "1yrYield_ISO_NAME"
+# # "5yrYield_ISO_NAME"
+# 
+# sampleColumn <- "JPM_LEMB_ISO_NAME"
+# 
+# # Subsetting the data frame to the sample vector 
+# sampleVector <- potentialSamplesDF[, sampleColumn] 
+# # Removing NAs from this vector so that the countries do not get recycled
+# sampleCountries <- sampleVector[!is.na(sampleVector)]
 
-# Choose one of the following sample possibilities and assign it to 
-# "EMBI_ISO_NAME"	
-# "JPM_LEMB_ISO_NAME"	
-# "EMBI2_ISO_NAME"
-# "JPM_EMBI_GD_ISO_NAME"
-# "IMF_ISO_NAME"
-# "1yrCDS_ISO_NAME"
-# "5yrCDS_ISO_NAME"
-# "1yrYield_ISO_NAME"
-# "5yrYield_ISO_NAME"
 
-sampleColumn <- "JPM_LEMB_ISO_NAME"
 
-# Subsetting the data frame to the sample vector 
-sampleVector <- potentialSamplesDF[, sampleColumn] 
-# Removing NAs from this vector so that the countries do not get recycled
-sampleCountries <- sampleVector[!is.na(sampleVector)]
+
+
+
+
+
+
+
 
 
 
@@ -2372,90 +2538,6 @@ newobject <- as.xts(read.table("Data/TR_Download_11.7.2020.xlsx", sheet = "1yYie
 newobject <- read.zoo("Data/TR_Download_11.7.2020.xlsx", sheet = "1yYield_R")
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# *********************************************************************************************
-# COVID data 
-# The links from which the data is downloaded is dynamically updated every day. 
-# The data is from https://data.humdata.org/dataset/coronavirus-covid-19-cases-and-deaths (and not https://data.humdata.org/dataset/novel-coronavirus-2019-ncov-cases which is an alternative)
-
-# Downloading dataset from the web as a dataframe
-covidDF <- read.csv(url("https://docs.google.com/spreadsheets/d/e/2PACX-1vSe-8lf6l_ShJHvd126J-jGti992SUbNLu-kmJfx1IRkvma_r4DHi0bwEW89opArs8ZkSY5G2-Bc1yT/pub?gid=0&single=true&output=csv"))
-
-# Changing format to data.table
-covidDT <- as.data.table(covidDF)
-
-# *********************************************************************************************
-# *********************************************************************************************
-
-
-# *********************************************************************************************
-# Traffic data
-# The links from which the data is downloaded is dynamically updated every day. 
-# The data is from https://www.apple.com/covid19/mobility
-
-# Downloading dataset from the web as a dataframe
-mobilityDF <- read.csv(url("https://covid19-static.cdn-apple.com/covid19-mobility-data/2011HotfixDev17/v3/en-us/applemobilitytrends-2020-07-07.csv"))
-
-# Changing format to data.table
-mobilityDT <- as.data.table(mobilityDF)
-
-"https://covid19-static.cdn-apple.com/covid19-mobility-data/2011HotfixDev17/v3/en-us/applemobilitytrends-2020-07-07.csv"
-
-
-
-
-# Inspect data ----
-View(covidDF)
-
-
-
-
-
-
-
-# Format data for analysis ----
-
-
-
-
-
-
-
-
-
-# Data manipulation ----
-
-
-
-
-
-
-
-
-# Modeling first stage ----
-
-
-
-
-
-
-
-
-# Visualizing model outputs ----
 
 
 
