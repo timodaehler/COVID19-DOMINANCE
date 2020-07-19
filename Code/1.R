@@ -2216,24 +2216,35 @@ library(ggpubr)
 
 
 ###read in data
-cds_five<-read.csv("data/cds_daily_5y.csv",header=T,sep=',')
-cds_five2<-read.csv("data/markit_CDS5Ydaily.csv",header=T,sep=',') ### markit CDS data to replace some bad data in the initial file (Greece)
-ez_ten<-read.csv("data/cds_daily_10y_Ezone_dum.csv",header=T,sep=',')
 
-cds_five$Name<-as.Date(cds_five$Name,"%m/%d/%Y")
-colnames(cds_five)[1]<-"Date"
-cds_five2$Date<-as.Date(cds_five2$Date,"%Y-%m-%d")
+# cds_five<-read.csv("data/cds_daily_5y.csv",header=T,sep=',')
+library(readxl)
+cds_five <- read_excel("Data/CDS.xlsx", sheet = "5yrCDS")
+countries <- read_excel("Data/laender.xlsx", sheet = "EM")
 
-cds_five<-cds_five[which(cds_five$Date>="2014-01-01"),]
-cds_five2<-cds_five2[which(cds_five2$Date>="2014-01-01"),]
+# subsetting for only EM and non-EM countries and for between 2020-06-30 and 2014-01-01 
+em_countries <- countries[ which(countries$EM_dummy5yr ==1), "COUNTRY5yrCDS"   ]
+non_em_countries <- countries[ which(countries$EM_dummy5yr !=1), "COUNTRY5yrCDS"   ]
+cds_five<-cds_five[which(cds_five$Date>="2014-01-01" & cds_five$Date<="2020-07-01"   ),]
+# xxx just made changes here
 
-ez_cds<-cds_five[,c(1,1+which(ez_ten$EU_dum==1))]
-colnames(ez_cds)<-c("Date","Germany","France","Greece","Ireland","Belgium","Spain","Netherlands","Austria","Cyprus","Estonia","Italy","Latvia","Lithuania","Malta","Portugal","Slovenia","Slovak_Rep","Finland")
-nonez_cds<-cds_five[,c(1,1+which(ez_ten$EU_dum!=1))]
+# cds_five<-cds_five[which(cds_five$Date<"2020-07-01"    ),]
+# & cds_five$Date<"2020-07-01"
+# cds_five2<-cds_five2[which(cds_five2$Date>="2014-01-01"),]
+
+# countriesanddate <- rbind("Date", em_countries)
+# em_cds <- cds_five[, countriesanddate$COUNTRY5yrCDS ]
+
+em_cds <- cds_five[, c("Date", em_countries$COUNTRY5yrCDS )]
+
+
+# colnames(ez_cds)<-c("Date","Germany","France","Greece","Ireland","Belgium","Spain","Netherlands","Austria","Cyprus","Estonia","Italy","Latvia","Lithuania","Malta","Portugal","Slovenia","Slovak_Rep","Finland")
+
+nonem_cds<-cds_five[, c("Date", non_em_countries$COUNTRY5yrCDS )]
 
 
 ###plot individual spreads
-pdat<-melt(ez_cds,id.vars="Date")
+pdat<-melt(em_cds,id.vars="Date")
 countriez<-unique(pdat$variable)
 country_plots<-list()
 
@@ -2241,46 +2252,261 @@ for(i in 1:length(countriez)) {
   country_plots[[i]] <- ggplot(data=subset(pdat,variable==countriez[i]), aes_string(x="Date",y="value"))+geom_line(size=1)+theme_bw()+ylab("")+xlab(countriez[i])
 }
 
-do.call("grid.arrange", c(country_plots))
+# Saving the plot
+# jpeg("Plots/individualspreads.jpg", width = 1920, height = 1080)
+# do.call("grid.arrange", c(country_plots))
+# dev.off()
 
 
-### replace germany, greece with markit CDS data
-ez_cds$Germany<-NA
-ez_cds$Germany[which(ez_cds$Date %in% cds_five2$Date)]<-cds_five2$DE
-ez_cds$Germany[1]<-ez_cds$Germany[2] #fill in 1/1/2014 with 1/2/2014 value
-ez_cds$Germany<-na.locf(ez_cds$Germany)
 
-ez_cds$Greece<-NA
-ez_cds$Greece[which(ez_cds$Date %in% cds_five2$Date)]<-cds_five2$GR
-ez_cds$Greece[1]<-ez_cds$Greece[2] #fill in 1/1/2014 with 1/2/2014 value
-ez_cds$Greece<-na.locf(ez_cds$Greece)
-ez_cds$Greece[which(ez_cds$Greece>4000)]<-ez_cds$Greece[which(ez_cds$Greece>4000)[1]-1] #fix outliers
+# ### replace germany, greece with markit CDS data
+# ez_cds$Germany<-NA
+# ez_cds$Germany[which(ez_cds$Date %in% cds_five2$Date)]<-cds_five2$DE
+# ez_cds$Germany[1]<-ez_cds$Germany[2] #fill in 1/1/2014 with 1/2/2014 value
+# ez_cds$Germany<-na.locf(ez_cds$Germany)
+# 
+# ez_cds$Greece<-NA
+# ez_cds$Greece[which(ez_cds$Date %in% cds_five2$Date)]<-cds_five2$GR
+# ez_cds$Greece[1]<-ez_cds$Greece[2] #fill in 1/1/2014 with 1/2/2014 value
+# ez_cds$Greece<-na.locf(ez_cds$Greece)
+# ez_cds$Greece[which(ez_cds$Greece>4000)]<-ez_cds$Greece[which(ez_cds$Greece>4000)[1]-1] #fix outliers
+# 
+# ###REMOVE MALTA
+# ez_cds<-ez_cds[,-which(colnames(ez_cds)=="Malta")]
 
-###REMOVE MALTA
-ez_cds<-ez_cds[,-which(colnames(ez_cds)=="Malta")]
+### XXX pretty sure I don't need the below. 
+# pdat<-melt(em_cds,id.vars="Date")
+# countriez<-unique(pdat$variable)
+# country_plots<-list()
+# for(i in 1:length(countriez)) {
+#   country_plots[[i]] <- ggplot(data=subset(pdat,variable==countriez[i]), aes_string(x="Date",y="value"))+geom_line(size=1)+theme_bw()+ylab("")+xlab(countriez[i])
+# }
+# do.call("grid.arrange", c(country_plots)) #much better
 
-###plot individual spreads
-pdat<-melt(ez_cds,id.vars="Date")
-countriez<-unique(pdat$variable)
+
+
+###Prepare data for regression
+
+em_cds2<- em_cds
+# xxx nonem_cds2 <- nonem_cds
+
+d_emcds<-apply(log(em_cds2[,-1]),2,diff) #log differences of EM spreads
+d_nemds<-apply(log(nonem_cds[,-1]),2,diff) # log differences of non-EM spreads
+
+
+
+glo_cds<-rowMeans(d_nemds) # create a global CDS factor excluding EM
+em_fac<-matrix(NA,nrow=nrow(d_emcds),ncol=ncol(d_emcds)) # create an EM common factor excluding country i
+for(i in 1:ncol(em_fac)){
+  em_fac[,i]<-rowMeans(d_emcds[,-i])
+}
+
+
+###training - test sample split
+pre.dat<-d_emcds[which(em_cds2$Date[-1]<"2019-06-30"),]
+post.dat<-d_emcds[which(em_cds2$Date[-1]>="2019-06-30"),]
+
+glo_cds_pre<-glo_cds[which(em_cds2$Date[-1]<"2019-06-30")]
+glo_cds_post<-glo_cds[which(em_cds2$Date[-1]>="2019-06-30")]
+
+em_fac_pre<-em_fac[which(em_cds2$Date[-1]<"2019-06-30"),]
+em_fac_post<-em_fac[which(em_cds2$Date[-1]>="2019-06-30"),]
+
+
+# Same -test sample kit for developed countries
+pre.dat.nonem <-d_nemds[which(nonem_cds$Date[-1]<"2019-06-30"),]
+post.dat.nonem<-d_nemds[which(nonem_cds$Date[-1]>="2019-06-30"),]
+
+glo_cds_pre.nonem<-glo_cds[which(nonem_cds$Date[-1]<"2019-06-30")]
+glo_cds_post.nonem<-glo_cds[which(nonem_cds$Date[-1]>="2019-06-30")]
+
+nonem_fac_pre<-em_fac[which(nonem_cds$Date[-1]<"2019-06-30"),]
+nonem_fac_post<-em_fac[which(nonem_cds$Date[-1]>="2019-06-30"),]
+
+
+
+### Fit the models for developed models
+coefz.nonem<-matrix(NA,ncol=4,nrow=ncol(pre.dat.nonem))
+predz.nonem<-matrix(NA,ncol=ncol(pre.dat.nonem),nrow=(nrow(post.dat.nonem)))
+rsqz.nonem<-c(0)
+for(i in 1:nrow(coefz.nonem)){
+  mod<-lm(pre.dat.nonem[,i]~Lag(pre.dat.nonem[,i],1)+glo_cds_pre.nonem+nonem_fac_pre[,i])
+  coefz.nonem[i,]<-coef(mod)
+  predz.nonem[,i]<-coef(mod)[1]*rep(1,nrow(post.dat.nonem))+coef(mod)[2]*Lag(post.dat.nonem[,i],1)+coef(mod)[3]*glo_cds_post.nonem+coef(mod)[4]*nonem_fac_post[,i]
+  rsqz.nonem[i]<-summary(mod)$r.squared
+}
+colnames(predz.nonem)<-colnames(post.dat.nonem)
+
+
+### Fit the models for emerging markets
+coefz<-matrix(NA,ncol=4,nrow=ncol(pre.dat))
+predz<-matrix(NA,ncol=ncol(pre.dat),nrow=(nrow(post.dat)))
+rsqz<-c(0)
+for(i in 1:nrow(coefz)){
+  mod<-lm(pre.dat[,i]~Lag(pre.dat[,i],1)+glo_cds_pre+em_fac_pre[,i])
+  coefz[i,]<-coef(mod)
+  predz[,i]<-coef(mod)[1]*rep(1,nrow(post.dat))+coef(mod)[2]*Lag(post.dat[,i],1)+coef(mod)[3]*glo_cds_post+coef(mod)[4]*em_fac_post[,i]
+  rsqz[i]<-summary(mod)$r.squared
+}
+colnames(predz)<-colnames(post.dat)
+
+
+
+
+
+
+
+# xxx I made a date change here so that the code runs smoothly
+pdat<-data.frame(em_cds2$Date[which(em_cds2$Date>"2019-07-01")], # date
+                 rowMeans(post.dat), # EM_Avg
+                 rowMeans(post.dat.nonem[,which(colnames(post.dat.nonem) %in%  non_em_countries$COUNTRY5yrCDS  )]), # Developed_Avg
+                 rowMeans(post.dat[,which(colnames(post.dat) %in% Top5_Mortality_Countries$COUNTRY  )]), # EM_Avg_COVID
+                 rowMeans(post.dat[,which(!colnames(post.dat) %in% Bottom5_Mortality_Countries$COUNTRY )]), # EM_Avg_nCOVID
+                 rowMeans(predz), # EM_Pred
+                 rowMeans(predz.nonem), # Developed_Pred
+                 rowMeans(predz[,which(colnames(post.dat) %in% Top5_Mortality_Countries$COUNTRY   )]), # EM_Pred_COVID
+                 rowMeans(predz[,which(!colnames(post.dat) %in% Bottom5_Mortality_Countries$COUNTRY  )]), # EM_Pred_nCOVID 
+                 apply(apply(post.dat,2,cumsum),1,sd)) # EM_SD
+colnames(pdat)<-c("date","EM_Avg", "Developed_Avg", "EM_Avg_COVID", "EM_Avg_nCOVID", "EM_Pred", "Developed_Pred", "EM_Pred_COVID","EM_Pred_nCOVID","EM_SD")
+
+p<-ggplot(data=pdat[-1,],aes(x=date,y=cumsum(EM_Avg)))+geom_line()+geom_line(aes(y=cumsum(EM_Pred)),linetype=2)+theme_bw()+xlab("")+ylab("Cumulative Change (Log CDS)")+ggtitle("Emerging Markets Average CDS Spreads, Out-of-Sample Period")+geom_vline(xintercept = c(as.numeric(as.Date("2020-03-18")),as.numeric(as.Date("2020-06-04"))),alpha=.5)
+p
+p2<-ggplot(data=pdat[-1,],aes(x=date,y=EM_SD))+geom_line()+theme_bw()+xlab("")+ylab("Standard Deviation")+ggtitle("Emerging Markets CDS Spreads Dispersion")+geom_vline(xintercept = c(as.numeric(as.Date("2020-03-18")),as.numeric(as.Date("2020-06-04"))),alpha=.5)
+p2
+p4a<-ggplot(data=pdat[-1,],aes(x=date,y=cumsum(EM_Avg_COVID)))+geom_line()+geom_line(aes(y=cumsum(EM_Avg_nCOVID)),size=1)+theme_bw()+xlab("")+ylab("Cumulative Change (Log CDS)")+ggtitle("High Vs. Low COVID Moralities: Actual")  + annotate(geom ="text", x = c(as.POSIXct("2020-01-25"),as.POSIXct("2020-01-25")  ), y = c(.4,.1), label = c("Low Mortality", "High Mortality") , fontface=c("bold","plain"))
+p4a
+p4b<-ggplot(data=pdat[-1,],aes(x=date,y=cumsum(EM_Avg_COVID-EM_Pred_COVID)))+geom_line()+geom_line(aes(y=cumsum(EM_Avg_nCOVID-EM_Pred_nCOVID)),size=1)+theme_bw()+xlab("")+ylab("Cumulative Residuals")+labs(title="High Vs. Low COVID Moralities: Actual-Fitted")+geom_vline(xintercept=c(as.numeric(as.Date("2020-03-18")),as.numeric(as.Date("2020-06-04"))),alpha=.5)+annotate("text", x = c(as.POSIXct("2020-02-01"),as.POSIXct("2020-02-10")), y = c(.0,-.35), label = c("Low Mortality", "High Mortality") , fontface=c("bold","plain"))
+p4b
+grid.arrange(p,p2,p4a,p4b,nrow=2) #1000x700
+
+# jpeg("Plots/pp2p4ap4b.jpg", width = 1920, height = 1080)
+# grid.arrange(p,p2,p4a,p4b,nrow=2)
+# dev.off()
+
+
+p5a<-ggplot(data=pdat[-1,],aes(x=date,y=cumsum(EM_Avg)))+geom_line()+geom_line(aes(y=cumsum(Developed_Avg)),size=1)+theme_bw()+xlab("")+ylab("Cumulative Change (Log CDS)")+ggtitle("Emerging markets Vs. Developed countries: Actual")+annotate("text", x = c(as.POSIXct("2020-01-25"),as.POSIXct("2020-01-05")), y = c(.1,-.5), label = c("Developed", "EM") , fontface=c("bold","plain")) # geom_vline(xintercept=c(c(as.POSIXct("2020-03-18")),as.POSIXct(as.Date("2020-06-04"))),alpha=.5)+ylim(c(-.6,1))+
+p5a
+
+p5b<-ggplot(data=pdat[-1,],aes(x=date,y=cumsum(EM_Avg-EM_Pred)))+geom_line()+geom_line(aes(y=cumsum(Developed_Avg-Developed_Pred)),size=1)+theme_bw()+xlab("")+ylab("Cumulative Residuals")+labs(title="Emerging Markets Vs. Developed countries: Actual-Fitted")+annotate("text", x = c(as.POSIXct("2020-01-25"),as.POSIXct("2020-02-10")), y = c(.05,-.1), label = c("Developed", "EM") , fontface=c("bold","plain")) # geom_vline(xintercept=c(as.numeric(as.POSIXct("2020-03-18")),as.numeric(as.POSIXct("2020-06-04"))),alpha=.5)+
+p5b
+grid.arrange(p5a,p5b,nrow=1)
+# p5b<-ggplot(data=pdat[-1,],aes(x=date,y=cumsum(EZ_Avg_PIIGS-EZ_Pred_PIIGS)))+geom_line()+geom_line(aes(y=cumsum(EZ_Avg_Core-EZ_Pred_Core)),size=1)+theme_bw()+xlab("")+ylab("Cumulative Residuals")+labs(title="GIIPS Vs. Core: Actual-Fitted")+geom_vline(xintercept=c(as.numeric(as.Date("2020-03-18")),as.numeric(as.Date("2020-06-04"))),alpha=.5)+annotate("text", x = c(as.Date("2020-01-25"),as.Date("2020-02-10")), y = c(.1,-.1), label = c("Core", "GIIPS") , fontface=c("bold","plain"))
+
+# jpeg("Plots/p5ap5b.jpg", width = 1920, height = 1080)
+# grid.arrange(p5a,p5b,nrow=1)
+# dev.off()
+# 
+# 
+# ### FIGURES
+# pdat<-data.frame(em_cds2$Date[which(em_cds2$Date>"2019-06-30")],     #date
+#                  rowMeans(post.dat), # EZ_Avg
+#                  rowMeans(post.dat[,which(colnames(post.dat) %in% c("Portugal","Italy","Ireland","Greece","Spain"))]), # EM_Avg_PIIGS
+#                  rowMeans(post.dat[,which(!colnames(post.dat) %in% c("Portugal","Italy","Ireland","Greece","Spain"))]), # EZ_Avg_nPIIGS
+#                  rowMeans(post.dat[,which(colnames(post.dat) %in% c("France","Germany","Belgium","Netherlands"))]), # EZ_Avg_Core
+#                  rowMeans(post.dat[,which(colnames(post.dat) %in% c("Belgium","Spain","Italy","France","Netherlands"))]), # EZ_Avg_COVID
+#                  rowMeans(post.dat[,which(!colnames(post.dat) %in% c("Slovakia","Latvia","Cyprus","Greece","Lithuania"))]), # EZ_Avg_nCOVID
+#                  rowMeans(predz), # EZ_Pred
+#                  rowMeans(predz[,which(colnames(post.dat) %in% c("Portugal","Italy","Spain","Greece","Spain"))]), # EZ_Pred_PIIGS
+#                  rowMeans(predz[,which(!colnames(post.dat) %in% c("Portugal","Italy","Ireland","Greece","Spain"))]), # EZ_Pred_nPIIGS
+#                  rowMeans(predz[,which(!colnames(post.dat) %in% c("France","Germany","Belgium","Netherlands"))]), # EZ_Pred_Core
+#                  rowMeans(predz[,which(colnames(post.dat) %in% c("Belgium","Spain","Italy","France","Netherlands"))]), # EZ_Pred_COVID
+#                  rowMeans(predz[,which(!colnames(post.dat) %in% c("Slovakia","Latvia","Cyprus","Greece","Lithuania"))]), # EZ_Pred_nCOVID 
+#                  apply(apply(post.dat,2,cumsum),1,sd)) # EZ_SD
+# 
+# colnames(pdat)<-c("date","EM_Avg","EM_Avg_PIIGS","EZ_Avg_nPIIGS","EZ_Avg_Core","EZ_Avg_COVID","EZ_Avg_nCOVID","EZ_Pred","EZ_Pred_PIIGS","EZ_Pred_nPIIGS","EZ_Pred_Core","EZ_Pred_COVID","EZ_Pred_nCOVID","EZ_SD")
+# p<-ggplot(data=pdat[-1,],aes(x=date,y=cumsum(EZ_Avg)))+geom_line()+geom_line(aes(y=cumsum(EZ_Pred)),linetype=2)+theme_bw()+xlab("")+ylab("Cumulative Change (Log CDS)")+ggtitle("Eurozone Average CDS Spreads, Out-of-Sample Period")+geom_vline(xintercept = c(as.numeric(as.Date("2020-03-18")),as.numeric(as.Date("2020-06-04"))),alpha=.5)
+# 
+# p2<-ggplot(data=pdat[-1,],aes(x=date,y=EZ_SD))+geom_line()+theme_bw()+xlab("")+ylab("Standard Deviation")+ggtitle("Eurozone CDS Spreads Dispersion")+geom_vline(xintercept = c(as.numeric(as.Date("2020-03-18")),as.numeric(as.Date("2020-06-04"))),alpha=.5)
+# 
+# p3a<-ggplot(data=pdat[-1,],aes(x=date,y=cumsum(EZ_Avg_PIIGS)))+geom_line()+geom_line(aes(y=cumsum(EZ_Avg_nPIIGS)),size=1)+theme_bw()+xlab("")+ylab("Cumulative Change (Log CDS)")+ggtitle("GIIPS Vs. Non-GIIPS: Actual")+geom_vline(xintercept=c(as.numeric(as.Date("2020-03-18")),as.numeric(as.Date("2020-06-04"))),alpha=.5)+ylim(c(-.6,1))+annotate("text", x = c(as.Date("2020-01-25"),as.Date("2020-01-05")), y = c(.1,-.5), label = c("non-GIIPS", "GIIPS") , fontface=c("bold","plain"))
+# 
+# p3b<-ggplot(data=pdat[-1,],aes(x=date,y=cumsum(EZ_Avg_PIIGS-EZ_Pred_PIIGS)))+geom_line()+geom_line(aes(y=cumsum(EZ_Avg_nPIIGS-EZ_Pred_nPIIGS)),size=1)+theme_bw()+xlab("")+ylab("Cumulative Residuals")+labs(title="GIIPS Vs. Non-GIIPS: Actual-Fitted")+geom_vline(xintercept=c(as.numeric(as.Date("2020-03-18")),as.numeric(as.Date("2020-06-04"))),alpha=.5)+annotate("text", x = c(as.Date("2020-01-25"),as.Date("2020-02-10")), y = c(.1,-.1), label = c("Non-GIIPS", "GIIPS") , fontface=c("bold","plain"))
+# 
+# p5a<-ggplot(data=pdat[-1,],aes(x=date,y=cumsum(EZ_Avg_PIIGS)))+geom_line()+geom_line(aes(y=cumsum(EZ_Avg_Core)),size=1)+theme_bw()+xlab("")+ylab("Cumulative Change (Log CDS)")+ggtitle("GIIPS Vs. Core: Actual")+geom_vline(xintercept=c(as.numeric(as.Date("2020-03-18")),as.numeric(as.Date("2020-06-04"))),alpha=.5)+ylim(c(-.6,1))+annotate("text", x = c(as.Date("2020-01-25"),as.Date("2020-01-05")), y = c(.1,-.5), label = c("Core", "GIIPS") , fontface=c("bold","plain"))
+# p5b<-ggplot(data=pdat[-1,],aes(x=date,y=cumsum(EZ_Avg_PIIGS-EZ_Pred_PIIGS)))+geom_line()+geom_line(aes(y=cumsum(EZ_Avg_Core-EZ_Pred_Core)),size=1)+theme_bw()+xlab("")+ylab("Cumulative Residuals")+labs(title="GIIPS Vs. Core: Actual-Fitted")+geom_vline(xintercept=c(as.numeric(as.Date("2020-03-18")),as.numeric(as.Date("2020-06-04"))),alpha=.5)+annotate("text", x = c(as.Date("2020-01-25"),as.Date("2020-02-10")), y = c(.1,-.1), label = c("Core", "GIIPS") , fontface=c("bold","plain"))
+# 
+# p4a<-ggplot(data=pdat[-1,],aes(x=date,y=cumsum(EZ_Avg_COVID)))+geom_line()+geom_line(aes(y=cumsum(EZ_Avg_nCOVID)),size=1)+theme_bw()+xlab("")+ylab("Cumulative Change (Log CDS)")+ggtitle("High Vs. Low COVID Moralities: Actual")+geom_vline(xintercept=c(as.numeric(as.Date("2020-03-18")),as.numeric(as.Date("2020-06-04"))),alpha=.5)+ylim(c(-.6,1))+annotate("text", x = c(as.Date("2020-01-25"),as.Date("2020-01-25")  ), y = c(.1,.75), label = c("Low Mortality", "High Mortality") , fontface=c("bold","plain"))
+# 
+# p4b<-ggplot(data=pdat[-1,],aes(x=date,y=cumsum(EZ_Avg_COVID-EZ_Pred_COVID)))+geom_line()+geom_line(aes(y=cumsum(EZ_Avg_nCOVID-EZ_Pred_nCOVID)),size=1)+theme_bw()+xlab("")+ylab("Cumulative Residuals")+labs(title="High Vs. Low COVID Moralities: Actual-Fitted")+geom_vline(xintercept=c(as.numeric(as.Date("2020-03-18")),as.numeric(as.Date("2020-06-04"))),alpha=.5)+annotate("text", x = c(as.Date("2020-02-01"),as.Date("2020-02-10")), y = c(.1,.5), label = c("Low Mortality", "High Mortality") , fontface=c("bold","plain"))
+# 
+# grid.arrange(p,p2,p4a,p4b,nrow=2) #1000x700
+# 
+# 
+# grid.arrange(p3a,p3b,p5a,p5b,nrow=2)
+
+#write.csv(data.frame(pdat$date,post.dat),"covid_ez_spreads.csv")
+#write.csv(data.frame(pdat$date,predz),"covid_ez_prediction.csv")
+
+corz<-c(0)
+for(i in 1:ncol(post.dat)){
+  corz[i]<-cor(post.dat[,i],predz[,i],use="complete.obs")
+}
+
+
+
+###plot individual spreads xxx here I had to change the date again
+pdat<-data.frame(em_cds2$Date[which(em_cds2$Date>"2019-07-01")],post.dat,predz)
+colnames(pdat)[1]<-"date"
+countriez<-colnames(pdat)[-1]
 country_plots<-list()
 
 
-for(i in 1:length(countriez)) {
-  country_plots[[i]] <- ggplot(data=subset(pdat,variable==countriez[i]), aes_string(x="Date",y="value"))+geom_line(size=1)+theme_bw()+ylab("")+xlab(countriez[i])
+for(i in 1:(length(countriez)/2)) {
+  plotdat<-pdat[-1,c(1,i+1,i+18)]
+  plotdat[,-1]<-apply(plotdat[,-1],2,cumsum)
+  country_plots[[i]] <- ggplot(data=(plotdat), aes_string(x="date",y=colnames(plotdat)[2]))+geom_line()+theme_bw()+ylab("")+xlab(countriez[i])+geom_line(aes_string(x="date",y=colnames(plotdat)[3]),linetype=2)
 }
 
-do.call("grid.arrange", c(country_plots)) #much better
+do.call("grid.arrange", c(country_plots)) 
+
+
+# jpeg("Plots/individualpredvsactual.jpg", width = 1920, height = 1080)
+# do.call("grid.arrange", c(country_plots)) 
+# dev.off()
 
 
 
 
+###plots vs fundamentals
 
 
+fstim<-read.csv("Data/CESI_7.csv",header=T,sep=',')
+###keep EU 
+em_countries<-em_countries
+em_countries
+#eu_countries2<-c("Austria","Belgium","Cyprus","Estonia","Finland","France","Germany","Greece","Ireland","Italy","Latvia","Lithuania","Luxembourg","Malta","Netherlands","Portugal","Slovakia","Slovenia","Spain")
+
+fstim<-fstim[which(fstim$Country %in% eu_countries),]
+fstim<-fstim[-which(fstim$Country %in% c("Malta","Luxembourg")),]
+colnames(fstim)[which(colnames(fstim)=="Slovak Republic")]<-"Slovak_Rep"
+fstim<-fstim[,c("Country","fiscal_7")]
+###quick plot
 
 
+p.cds.coefs<-data.frame(coefz)
+p.cds.coefs$countries<-colnames(post.dat)
+p.cds.coefs.stim<-merge(p.cds.coefs,fstim,by.x="countries",by.y="Country")
 
 
+pd<-read.csv("data/EZ_PublicDebtToGDPYearly.csv",header=T,sep=',')
+pd2<-pd[which(pd$Date %in% c("2014Q4","2015Q4","2016Q4","2017Q4","2018Q4")),]
+colnames(pd2)<-c("Date","Austria","Belgium","Cyprus","Finland","France","Germany","Greece","Ireland","Italy","Lithuania","Malta","Netherlands","Portugal","Slovak_Rep","Slovenia","Spain")
 
+p.cds.coefs.pd<-p.cds.coefs[-which(colnames(post.dat) %in% c("Estonia","Latvia")),] #no PD data on these two
+pd2<-pd2[,-which(colnames(pd2) %in% c("Malta","Estonia"))]
+#pd2<-pd2[,c("Date","Germany","France","Ireland","Belgium","Spain","Netherlands","Austria","Cyprus","Italy","Lithuania","Portugal","Slovenia","Slovak_Rep","Finland")]
+pd2<-pd2[,c("Date",p.cds.coefs.pd$countries)]
+pd3<-colMeans(pd2[,-1])
+
+rates<-read.csv("data/_rMinusg.csv",header=T,sep=',')
+rates$Date<-as.yearqtr((rates$Date))
+rmg<-rates[which(rates$Date >= "2014 Q4"),]
+rmg<-rmg[which(rmg$Date<="2018 Q4"),]
+rmg<-colMeans(rmg[,-1],na.rm=T)
+rmg<-rmg[-length(rmg)]
+names(rmg)<-c("Austria","Belgium","Cyprus","Finland","France","Germany","Greece","Ireland","Italy","Lithuania","Malta","Netherlands","Portugal","Slovak_Rep","Slovenia","Spain")
+rmg<-rmg[-which(names(rmg)=="Malta")]
+rmg<-rmg[p.cds.coefs.pd$countries]
 
 
 
