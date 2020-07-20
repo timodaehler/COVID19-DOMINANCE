@@ -1519,7 +1519,7 @@ label(Final_Data_Country$cinc) <- "Composite Index of National Capability score"
 
 # Because the country names in Final_Data_Country are not according to the same standard as ISO country names (for example "Philippines" instead of "Philippines (the)"), I need to export the file below to do some manual Excel adjustment work to make sure that the names of the countries in the "SAMPLE_LISTS" sheet are conform with the country names in Final_Country_Data
 laender <- as.data.frame(unique(Final_Data_Country$COUNTRY))
-write_xlsx(laender,"Data/laender.xlsx")
+# xxx write_xlsx(laender,"Data/laender.xlsx")
 
 # I restrict the analysis to Emerging Market countries, from a list pulled from here: https://www.ishares.com/us/products/239572/ishares-jp-morgan-usd-emerging-markets-bond-etf for EMBI (plus India and Thailand for EMBI+2) and here https://www.ishares.com/us/products/239528/ishares-emerging-markets-local-currency-bond-etf for LEMB
 EMBI <- read_excel("Data/SAMPLE_LISTS.xlsx", sheet = "EMBI")
@@ -1778,12 +1778,18 @@ Plot_25 <- plot_ly(data = subset(Oxford_V1, Date < as.Date("2020-06-30")), x=~Da
   layout(title="Total Mortality Rate Across Countries")
 Plot_25
 
-Plot_26 <- plot_ly(data = subset(Oxford_V1, Date < as.Date("2020-06-30")), x=~Date, y=~New_Mortality_Rate_Per_Capita) %>%
+# This was the original time frame
+# Plot_26 <- plot_ly(data = subset(Oxford_V1, Date < as.Date("2020-06-30")), x=~Date, y=~New_Mortality_Rate_Per_Capita) %>%
+#   add_lines(linetype = ~COUNTRY) %>%
+#   layout(title="New Mortality Rate Across Countries")
+# Plot_26
+
+# I subset for March to June
+Plot_26 <- plot_ly(data = subset(Oxford_V1, Date < as.Date("2020-06-30") & Date >= as.Date("2020-04-01") ), x=~Date, y=~New_Mortality_Rate_Per_Capita) %>%
   add_lines(linetype = ~COUNTRY) %>%
-  layout(title="New Mortality Rate Across Countries")
+  layout(title="COVID-19 mortality rate curves, by country") # New Mortality Rate Across Countries
 Plot_26
-
-
+orca(Plot_26, "Plots/Other/Figure4a.pdf")
 
 # Weekly Growth Rate Visualizations
 
@@ -1822,11 +1828,17 @@ First_Death$new_mortality_growth_b  <- log(First_Death$`... <- NULL`,10)
 
 # Please see the First Death dataset in the data folder. xxx
 
+
+
+
+
+
 # The following code allows us to visualize the rolling average of the mortality rate by country.
-Plot_27A <- plot_ly(First_Death, x=~Date, y=~total_rolling_average_mortality) %>%
+Plot_27A <- plot_ly(data  = subset(First_Death, Date < as.Date("2020-06-30") & Date >= as.Date("2020-04-01") ), x=~Date, y=~total_rolling_average_mortality) %>%
   add_lines(linetype = ~COUNTRY) %>%
-  layout(title="Total Rolling Average of Mortality Rate Over Time - COVID19")
+  layout(title="COVID-19 deaths per million, by country")
 Plot_27A
+orca(Plot_27A, "Plots/Other/Figure4b.pdf")
 
 Plot_28 <- Plot_27A %>% layout(yaxis = list(type = "log"))
 Plot_28
@@ -1855,6 +1867,7 @@ library(gghighlight)
 
 Plot_28D <- ggplot(data = First_Death, aes(x = Date, y = new_rolling_average_mortality * 100, color = COUNTRY)) + geom_line() + theme_bw() + theme(axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("New Mortality Rate (%)")
 Plot_28D
+ggsave("Plots/Figure4a.pdf")
 
 
 # Here I am subsetting for the top and bottom 5 mortality countries per the end of April 
@@ -1920,6 +1933,7 @@ Oxford_Death <- Oxford_V1 %>%
 
 Plot_28G <- ggplot(data = Oxford_Death, aes(x = Date, y = Total_Deaths_Per_Million, color = COUNTRY)) + geom_line() + theme_bw() + theme( axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("Total Deaths Per Million")
 Plot_28G
+ggsave("Plots/Figure4b.pdf")
 
 Plot_28G.1 <- plot_ly(Oxford_Death, x=~Date, y=~Total_Deaths_Per_Million) %>%
   add_lines(linetype = ~COUNTRY) %>%
@@ -2745,16 +2759,16 @@ eval[3] <- mean(cds_5yr_EM_Mar$residual2, na.rm = TRUE)
 p_EM_preMar <- ggplot(dat = cds_5yr_EM_preMar,aes(x=Date,y=CDS_5y_Actual,linetype="Actual"))+geom_line()+geom_line(aes(y=CDS_5y_Prediction,linetype="Fitted"))+theme_bw()+xlab("")+ylab("Daily Change (Log CDS)")+ggtitle("Emerging Markets Average CDS Spreads, Mid Dec 2019 - Feb 2020")+theme(axis.title.y = element_text(size = 10),axis.text = element_text(size = 10),legend.title = element_blank(),plot.title = element_text(size=12),legend.position = c(0.8, 0.8))+ylim(-0.15,0.2)
 p_EM_preMar
 
-p_EM_postMar <- ggplot(dat = cds_5yr_EM_postMar,aes(x=Date,y=CDS_5y_Actual,linetype="Actual"))+geom_line()+geom_line(aes(y=CDS_5y_Prediction,linetype="Fitted"))+theme_bw()+xlab("")+ylab("Daily Change (Log CDS)")+ggtitle("Emerging Markets Average CDS Spreads, Apr 2020 - Mid June 2020")+theme(axis.title.y = element_text(size = 10),axis.text = element_text(size = 10),legend.title = element_blank(),plot.title = element_text(size=12),legend.position = c(0.8, 0.8))+ylim(-0.15,0.2)
+p_EM_postMar <- ggplot(dat = cds_5yr_EM_postMar,aes(x=Date,y=CDS_5y_Actual,linetype="Actual"))+geom_line()+geom_line(aes(y=CDS_5y_Prediction,linetype="Fitted"))+theme_bw()+xlab("")+ylab("Daily Change (Log CDS)")+ggtitle("Emerging Markets Average CDS Spreads, Apr 2020 - June 2020")+theme(axis.title.y = element_text(size = 10),axis.text = element_text(size = 10),legend.title = element_blank(),plot.title = element_text(size=12),legend.position = c(0.8, 0.8))+ylim(-0.15,0.2)
 p_EM_postMar
 
 p_EM_Mar <- ggplot(dat = cds_5yr_EM_Mar,aes(x=Date,y=CDS_5y_Actual,linetype="Actual"))+geom_line()+geom_line(aes(y=CDS_5y_Prediction,linetype="Fitted"))+theme_bw()+xlab("")+ylab("Daily Change (Log CDS)")+ggtitle("Emerging Markets Average CDS Spreads, March 2020")+theme(axis.title.y = element_text(size = 10),axis.text = element_text(size = 10),legend.title = element_blank(),plot.title = element_text(size=12),legend.position = c(0.8, 0.8))+ylim(-0.15,0.2)
 p_EM_Mar
 
 p_EM <- grid.arrange(p_EM_preMar, p_EM_Mar, p_EM_postMar, ncol=3,nrow=1)
-# jpeg("Plots/figure10.jpg", width = 1920, height = 1080)
-# p_EM <- grid.arrange(p_EM_preMar, p_EM_Mar, p_EM_postMar, ncol=3,nrow=1)
-# dev.off()
+jpeg("Plots/figure10.jpg", width = 1920, height = 1080)
+p_EM <- grid.arrange(p_EM_preMar, p_EM_Mar, p_EM_postMar, ncol=3,nrow=1)
+dev.off()
 
 
 
@@ -2918,252 +2932,6 @@ p_EM_Mar_New
 
 
 
-
-
-
-
-
-
-
-
-
-
-# XXX don't know if I need the section below
-# Defining countries in sample ----
-# potentialSamplesDF <- read_excel("Data/SAMPLE_LISTS.xlsx", sheet = "SAMPLE_LISTS_R")
-# 
-# # Choose one of the following sample possibilities and assign it to 
-# # "EMBI_ISO_NAME"	
-# # "JPM_LEMB_ISO_NAME"	
-# # "EMBI2_ISO_NAME"
-# # "JPM_EMBI_GD_ISO_NAME"
-# # "IMF_ISO_NAME"
-# # "1yrCDS_ISO_NAME"
-# # "5yrCDS_ISO_NAME"
-# # "1yrYield_ISO_NAME"
-# # "5yrYield_ISO_NAME"
-# 
-# sampleColumn <- "JPM_LEMB_ISO_NAME"
-# 
-# # Subsetting the data frame to the sample vector 
-# sampleVector <- potentialSamplesDF[, sampleColumn] 
-# # Removing NAs from this vector so that the countries do not get recycled
-# sampleCountries <- sampleVector[!is.na(sampleVector)]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Plot individual CDS spreads ----
-# Importing the 5 year CDS data
-cds_fiveDF <- read_excel("Data/EIKON_Download.xlsx", sheet = "5yCDS_R")
-
-# Subsetting for the sample countries specified above
-cds_fiveDF <- cds_fiveDF[, c("Date", sampleCountries) ]
-
-# Making sure "Date" column has correct date format
-cds_fiveDF$Date<-as.Date(cds_fiveDF$Date, "%m/%d/%Y")
-
-# Definint start and end date of pre period
-start_date <- "2014-01-01"
-end_date <- "2020-06-30"
-
-# Subsetting the right period: training period 
-cds_fiveDF <-cds_fiveDF[which(cds_fiveDF$Date >= start_date & cds_fiveDF$Date <= end_date,  ),]
-
-#plot individual spreads
-pdat <- melt(cds_fiveDF,id.vars="Date")
-countriez <- unique(pdat$variable)
-country_plots<-list()
-
-for(i in 1:length(countriez)) {
-  country_plots[[i]] <- ggplot(data=subset(pdat,variable==countriez[i]), aes_string(x="Date",y="value"))+geom_line(size=1)+theme_bw()+ylab("")+xlab(countriez[i])
-}
-
-do.call("grid.arrange", c(country_plots))
-
-
-
-
-
-
-# Plot individual yields  ----
-# Importing the 5 year CDS data
-yield_fiveDF <- read_excel("Data/EIKON_Download.xlsx", sheet = "5yYield_R")
-
-# It appears that Dom. Rep. and Uruguay need to be removed from Sample
-x <- c("Dominican Republic (the)", "Uruguay" )
-sampleCountries <- sampleCountries[!sampleCountries %in% x] 
-
-# Subsetting for the sample countries specified above
-yield_fiveDF <- yield_fiveDF[, c("Date", sampleCountries) ]
-
-# Making sure "Date" column has correct date format
-yield_fiveDF$Date<-as.Date(yield_fiveDF$Date, "%m/%d/%Y")
-
-# Definint start and end date of pre period
-start_date <- "2014-01-01"
-end_date <- "2020-06-30"
-
-# Subsetting the right period: training period 
-yield_fiveDF <- yield_fiveDF[which(yield_fiveDF$Date >= start_date & yield_fiveDF$Date <= end_date,  ),]
-
-#plot individual spreads
-pdat <- melt(yield_fiveDF,id.vars="Date")
-countriez <- unique(pdat$variable)
-country_plots<-list()
-
-for(i in 1:length(countriez)) {
-  country_plots[[i]] <- ggplot(data=subset(pdat,variable==countriez[i]), aes_string(x="Date",y="value"))+geom_line(size=1)+theme_bw()+ylab("")+xlab(countriez[i])
-}
-
-do.call("grid.arrange", c(country_plots))
-
-
-
-###Prepare data for regression: CDS ----
-em_cds2 <- cds_fiveDF
-nonem_cds <- read_excel("Data/EIKON_Download.xlsx", sheet = "5yCDS_R")
-nonem_cds <- nonem_cds[ ,c("Date", "United States of America (the)", "Japan", "Germany") ]
-  
-# minimums <- apply(em_cds2,2,min)
-
-d_emcds<-apply(log(em_cds2[,-1]),2,diff) #log differences of EM spreads
-d_nemcds<-apply(log(nonem_cds[,-1]),2,diff) # log differences of global spreads
-
-glo_cds<-rowMeans(d_nemcds) # create a global CDS factor excluding EM
-
-em_fac<-matrix(NA,nrow=nrow(d_emcds),ncol=ncol(d_emcds)) # create an EM common factor excluding country i
-
-for(i in 1:ncol(em_fac)){
-  em_fac[,i]<-rowMeans(d_emcds[,-i])
-}
-
-
-###training - test sample split
-pre.dat<-d_emcds[which(em_cds2$Date[-1]<"2019-06-30"),]
-post.dat<-d_emcds[which(em_cds2$Date[-1]>="2019-06-30"),]
-
-glo_cds_pre<-glo_cds[which(em_cds2$Date[-1]<"2019-06-30")]
-glo_cds_post<-glo_cds[which(em_cds2$Date[-1]>="2019-06-30")]
-
-em_fac_pre<-em_fac[which(em_cds2$Date[-1]<"2019-06-30"),]
-em_fac_post<-em_fac[which(em_cds2$Date[-1]>="2019-06-30"),]
-
-
-
-
-### Fit the models
-
-coefz<-matrix(NA,ncol=4,nrow=ncol(pre.dat))
-predz<-matrix(NA,ncol=ncol(pre.dat),nrow=(nrow(post.dat)))
-rsqz<-c(0)
-for(i in 1:nrow(coefz)){
-  mod<-lm(pre.dat[,i]~lag(pre.dat[,i],1)+glo_cds_pre+em_fac_pre[,i])
-  coefz[i,]<-coef(mod)
-  predz[,i]<-coef(mod)[1]*rep(1,nrow(post.dat))+coef(mod)[2]*Lag(post.dat[,i],1)+coef(mod)[3]*glo_cds_post+coef(mod)[4]*em_fac_post[,i]
-  rsqz[i]<-summary(mod)$r.squared
-}
-
-colnames(predz)<-colnames(post.dat)
-
-
-
-
-
-
-
-
-
-
-# Load data ----
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Yield data 
-# The data is from Eikon 
-
-
-# Importing
-Yield1YearDF <- read_excel("Data/TR_Download_11.7.2020.xlsx", sheet = "1yYield_R") 
-
-# Changing format to data.table
-Yield1YearDT <- as.data.table(Yield1YearDF)
-
-# Creating an XTS object
-Yield1YearTS <- xts(x = Yield1YearDT[, -(1:2)], order.by = as.POSIXct(Yield1YearDT$Date)  )
-
-
-temp <- data.frame(index(Yield1YearDT), stack(as.data.frame(coredata(Yield1YearDT[, -1]) ) )  )
-
-
-
-ggplot(temp, aes (x = "Date", y = ) ) + geom_line()
-
-summary(Yield1YearTS)
-
-
-
-
-
-plot(Yield1YearTS)
-
-
-# *********************************************************************************************
-# *********************************************************************************************
-
-tsobject <- as.xts(Yield1YearDT)
-
-str(Yield1YearDT)
-
-selectionDT <- Yield1YearDT[, 1:2]
-ts.plot()
-ts <- zoo(selectionDT)
-
-time_series <- ts(selectionDT)
-
-
-time_series <- xts(x = Yield1YearDT[, -1], order.by = Yield1YearDT[,1]  )
-
-
-plot(time_series)
-
-
-
-newobject <- as.xts(read.table("Data/TR_Download_11.7.2020.xlsx", sheet = "1yYield_R") )
-
-newobject <- read.zoo("Data/TR_Download_11.7.2020.xlsx", sheet = "1yYield_R")
 
 
 
