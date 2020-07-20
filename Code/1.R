@@ -2434,8 +2434,9 @@ grid.arrange(p5a,p5b,nrow=1)
 # 
 # grid.arrange(p3a,p3b,p5a,p5b,nrow=2)
 
-#write.csv(data.frame(pdat$date,post.dat),"covid_ez_spreads.csv")
-#write.csv(data.frame(pdat$date,predz),"covid_ez_prediction.csv")
+
+# write.csv(data.frame(pdat$date,post.dat),"Data/covid_ez_spreads.csv")
+# write.csv(data.frame(pdat$date,predz),"Data/covid_ez_prediction.csv")
 
 corz<-c(0)
 for(i in 1:ncol(post.dat)){
@@ -2476,9 +2477,11 @@ em_countries<-em_countries
 em_countries
 #eu_countries2<-c("Austria","Belgium","Cyprus","Estonia","Finland","France","Germany","Greece","Ireland","Italy","Latvia","Lithuania","Luxembourg","Malta","Netherlands","Portugal","Slovakia","Slovenia","Spain")
 
-fstim<-fstim[which(fstim$Country %in% eu_countries),]
-fstim<-fstim[-which(fstim$Country %in% c("Malta","Luxembourg")),]
-colnames(fstim)[which(colnames(fstim)=="Slovak Republic")]<-"Slovak_Rep"
+fstim<-fstim[which(fstim$Country %in% c(em_countries$COUNTRY5yrCDS, non_em_countries$COUNTRY5yrCDS) ),]
+nrow(fstim)
+
+# fstim<-fstim[-which(fstim$Country %in% c("Malta","Luxembourg")),]
+# colnames(fstim)[which(colnames(fstim)=="Slovak Republic")]<-"Slovak_Rep"
 fstim<-fstim[,c("Country","fiscal_7")]
 ###quick plot
 
@@ -2486,17 +2489,21 @@ fstim<-fstim[,c("Country","fiscal_7")]
 p.cds.coefs<-data.frame(coefz)
 p.cds.coefs$countries<-colnames(post.dat)
 p.cds.coefs.stim<-merge(p.cds.coefs,fstim,by.x="countries",by.y="Country")
+p.cds.coefs.pd <-p.cds.coefs
 
 
-pd<-read.csv("data/EZ_PublicDebtToGDPYearly.csv",header=T,sep=',')
-pd2<-pd[which(pd$Date %in% c("2014Q4","2015Q4","2016Q4","2017Q4","2018Q4")),]
-colnames(pd2)<-c("Date","Austria","Belgium","Cyprus","Finland","France","Germany","Greece","Ireland","Italy","Lithuania","Malta","Netherlands","Portugal","Slovak_Rep","Slovenia","Spain")
+pd <- read_excel("Data/PublicDebttoGDPyearly.xlsx", sheet = "DebttoGDP")
+pd <- pd[, em_countries$COUNTRY5yrCDS]
+pd2 <- pd
+# pd<-read.csv("data/EZ_PublicDebtToGDPYearly.csv",header=T,sep=',')
+# pd2<-pd[which(pd$Date %in% c("2014Q4","2015Q4","2016Q4","2017Q4","2018Q4")),]
+# colnames(pd2)<-c("Date","Austria","Belgium","Cyprus","Finland","France","Germany","Greece","Ireland","Italy","Lithuania","Malta","Netherlands","Portugal","Slovak_Rep","Slovenia","Spain")
 
-p.cds.coefs.pd<-p.cds.coefs[-which(colnames(post.dat) %in% c("Estonia","Latvia")),] #no PD data on these two
-pd2<-pd2[,-which(colnames(pd2) %in% c("Malta","Estonia"))]
+# p.cds.coefs.pd<-p.cds.coefs[-which(colnames(post.dat) %in% c("Estonia","Latvia")),] #no PD data on these two
+# pd2<-pd2[,-which(colnames(pd2) %in% c("Malta","Estonia"))]
 #pd2<-pd2[,c("Date","Germany","France","Ireland","Belgium","Spain","Netherlands","Austria","Cyprus","Italy","Lithuania","Portugal","Slovenia","Slovak_Rep","Finland")]
-pd2<-pd2[,c("Date",p.cds.coefs.pd$countries)]
-pd3<-colMeans(pd2[,-1])
+# pd2<-pd2[,c("Date",p.cds.coefs.pd$countries)]
+pd3<-colMeans(pd2[,])
 
 rates<-read.csv("data/_rMinusg.csv",header=T,sep=',')
 rates$Date<-as.yearqtr((rates$Date))
@@ -2509,10 +2516,405 @@ rmg<-rmg[-which(names(rmg)=="Malta")]
 rmg<-rmg[p.cds.coefs.pd$countries]
 
 
+###fundamentals plot 
+pdat<-data.frame(pd3,p.cds.coefs.pd)
+colnames(pdat)<-c("PD","Intercept","AR","Global","EM","countries")
+
+# pdat<-data.frame(pd3,rmg,p.cds.coefs.pd)   xxx
+# colnames(pdat)<-c("PD","RMG","Intercept","AR","Global","Euro","countries")
+
+p<-ggplot(data=pdat,aes(x=PD,y=Global))+geom_point(shape=21,fill="grey",size=3)+theme_bw()+geom_text(aes(label=countries),hjust="inward", vjust="inward")+xlab("Public Debt/GDP (%)")+ylab("Global Beta")+stat_cor(method = "pearson", label.x = 50, label.y = .5)+geom_smooth(method="lm",se=F,color="red",linetype=2,size=.5)
+p
+# jpeg("Plots/Figure6a.jpg", width = 1920, height = 1080)
+# p
+# dev.off()
+
+
+p2<-ggplot(data=pdat,aes(x=PD,y=EM))+geom_point(shape=21,fill="grey",size=3)+theme_bw()+geom_text(aes(label=countries),hjust="inward", vjust="inward")+xlab("Public Debt/GDP (%)")+ylab("Regional Beta")+stat_cor(method = "pearson", label.x = 45, label.y = 1.9)+geom_smooth(method="lm",se=F,color="red",linetype=2,size=.5)
+p2
+# jpeg("Plots/Figure6b.jpg", width = 1920, height = 1080)
+# p2
+# dev.off()
+
+
+
+grid.arrange(p,p2,nrow=1)## 1000x400
+# jpeg("Plots/Figure6.jpg", width = 1920, height = 1080)
+# grid.arrange(p,p2,nrow=1)## 1000x400
+# dev.off()
+
+pdat2<-data.frame(p.cds.coefs.stim)
+colnames(pdat2)<-c("Country","Intercept","AR","Global","EM","Fiscal")
+
+p4<-ggplot(data=pdat2,aes(x=Global,y=Fiscal))+geom_point(shape=21,size=3,fill="grey")+theme_bw()+geom_text(aes(label=Country),hjust="inward", vjust="inward")+ylab("COVID Stimulus/GDP (%)")+xlab("Global Beta")+stat_cor(method = "pearson", label.x = -.15, label.y = 20)+geom_smooth(method="lm",se=F,color="red",linetype=2,size=.5)
+p4
+p5<-ggplot(data=pdat2,aes(x=EM,y=Fiscal))+geom_point(shape=21,size=3,fill="grey")+theme_bw()+geom_text(aes(label=Country),hjust="inward", vjust="inward")+ylab("COVID Stimulus/GDP (%)")+xlab("Regional Beta")+stat_cor(method = "pearson", label.x = 1, label.y = 20)+geom_smooth(method="lm",se=F,color="red",linetype=2,size=.5)
+p5
+p7<-ggplot(data=pdat2,aes(x=Country,y=Fiscal))+geom_bar(stat="identity")+theme_bw()+theme(axis.text.x=element_text(angle = 60))+xlab("")+ylab("Fiscal Stimulus Announced (% of GDP)")
+p7
+
+grid.arrange(p7,p4,p5,nrow=1)## 1000x400
+# jpeg("Plots/Figure7.jpg", width = 1920, height = 1080)
+# grid.arrange(p7,p4,p5,nrow=1)## 1000x400
+# dev.off()
+
+pdat3<-data.frame(names(pd3),pd3,colSums(post.dat[1:197,],na.rm=T),colSums(post.dat[1:197,]-predz[1:197,],na.rm=T))
+colnames(pdat3)<-c("country","pd","post","covidresid")
+p8<-ggplot(data=pdat3,aes(x=pd,y=post))+geom_point(shape=21,fill="grey",size=3)+theme_bw()+stat_cor(method = "pearson", label.x =-.50, label.y = -.5)+geom_text(aes(label=country),hjust="inward",check_overlap = T)+xlab("Public Debt/GDP (%)")+ylab("Realized log CDS Change (2020)")
+p8
+p9<-ggplot(data=pdat3,aes(x=pd,y=covidresid))+geom_point(shape=21,fill="grey",size=3)+theme_bw()+stat_cor(method = "pearson", label.x =-.50, label.y = -.5)+geom_text(aes(label=country),hjust="inward",check_overlap = T)+xlab("Public Debt/GDP (%)")+ylab("Cumulative COVID Residual")
+p9
+
+
+fstim<-read.csv("Data/CESI_7.csv",header=T,sep=',')
+
+fstim<-fstim[which(fstim$Country %in% c(em_countries$COUNTRY5yrCDS) ),]
+fstim<-fstim[,c("Country","fiscal_7")]
+nrow(fstim)
+
+
+post.dat.without <- post.dat[, -30 ]
+post.dat.without.redundant <- post.dat.without
+ncol(post.dat.without)
+
+post.dat.without <- colSums(post.dat.without[1:197,],na.rm=T)
+post.dat.without <- as.data.frame(post.dat.without)
+post.dat.without$country <- rownames(post.dat.without)
+post.dat.without <- post.dat.without[order(post.dat.without[,2]) , ]
+post.dat.without <- post.dat.without[,1]
+
+
+postminuspredz <- colSums(post.dat.without.redundant[1:197,]-predz[1:197,-30],na.rm=T)
+postminuspredz <- as.data.frame(postminuspredz)
+postminuspredz$country <- rownames(postminuspredz)
+postminuspredz <- postminuspredz[order(postminuspredz[,2]) , ]
+postminuspredz <- postminuspredz[,1]
+
+
+pdat4<-data.frame(fstim,post.dat.without,postminuspredz )
+colSums(post.dat.without[1:197,],na.rm=T)
+colnames(pdat4)<-c("country","fstim","post","covidresid")
+p10<-ggplot(data=pdat4,aes(y=post,x=fstim))+geom_point(shape=21,fill="grey",size=3)+theme_bw()+stat_cor(method = "pearson", label.x =15, label.y = -.5)+geom_text(aes(label=country),hjust="inward",check_overlap = T)+ylab("Realized log CDS Change (2020)")+xlab("COVID Stimulus/GDP (%)")
+p10
+# jpeg("Plots/Figure7.jpg", width = 1920, height = 1080)
+# grid.arrange(p7,p4,p5,nrow=1)## 1000x400
+# dev.off()
+
+p11<-ggplot(data=pdat4,aes(y=covidresid,x=fstim))+geom_point(shape=21,fill="grey",size=3)+theme_bw()+stat_cor(method = "pearson", label.x =15, label.y = -.5)+geom_text(aes(label=country),hjust="inward",check_overlap = T)+ylab("Cumulative COVID Residual")+xlab("COVID Stimulus/GDP (%)")
+p11
+
+grid.arrange(p10,p11,nrow=1)
+# jpeg("Plots/stimulusvsresiduals.jpg", width = 1920, height = 1080)
+# grid.arrange(p10,p11,nrow=1)
+# dev.off()
 
 
 
 
+
+
+
+### Weining Analysis - Linking COVID Residuals to COVID Mortality
+library(lubridate)
+library(zoo)
+library(quantmod)
+library(fBasics)
+library(tseries)
+library(sandwich)
+library(lmtest)
+library(lattice)
+library(xtable)
+library(vars)
+library(tidyverse)
+library(plyr)
+library(reshape2)
+library(gridExtra)
+library(corrplot)
+library(ggplot2)
+library(reshape2)
+library(data.table)
+library(rvest)
+library(plm)
+library(stringr)
+library(readxl)
+library(stargazer)
+
+
+cds_5yr_prediction <- read.csv("data/covid_ez_prediction.csv", header = T, sep=',')
+cds_5yr_actual <- read.csv("data/covid_ez_spreads.csv", header = T, sep = ',')
+
+oxford <- read_excel("Data/Oxford_V1EM.xlsx")
+oxford <- oxford %>% dplyr::select(-contains("Flag"))
+oxford <- oxford %>% dplyr::select(-contains("Lagged"))
+colnames(oxford)[which(colnames(oxford) == "Total_Cases_Country")] <- "Total_Case"
+colnames(oxford)[which(colnames(oxford) == "Total_Deceased_Country")] <- "Total_Death"
+colnames(oxford)[which(colnames(oxford) == "New_Confirmed_Country")] <- "New_Case"
+colnames(oxford)[which(colnames(oxford) == "New_Total_Deceased_Country")] <- "New_Death"
+oxford$Total_Case_Rate <- oxford$Total_Case/oxford$Population*1000000 ### Total case rate per one million people
+oxford$Total_Mortality_Rate <- oxford$Total_Death/oxford$Population*1000000 ### Total mortality rate per one million people
+oxford$New_Case_Rate <- oxford$New_Case/oxford$Population*1000000 ### New case rate per one million people
+oxford$New_Mortality_Rate <- oxford$New_Death/oxford$Population*1000000 ### New mortality rate per one million people
+oxford$Total_Mortality_Rate_Per_Capita <- NULL
+oxford$New_Mortality_Rate_Per_Capita <- NULL
+oxford$Total_Cases_Country_Per_Capita <- NULL
+oxford$rolling_average_confirmed <- NULL
+oxford$rolling_average_deceased <- NULL
+oxford$total_rolling_average_mortality <- NULL
+oxford$new_rolling_average_mortality <- NULL
+
+colnames(oxford)[1] <- "Country"
+
+oxford <- pdata.frame(oxford, index = c("Country", "Date"))
+oxford$Date <- as.Date(oxford$Date,"%Y-%m-%d")
+#reorder
+oxford <- oxford[order(oxford$Date),]
+oxford <- oxford[order(oxford$Country),]
+
+oxford <- oxford %>%
+  dplyr::group_by(Country) %>%
+  dplyr::mutate(Total_Mortality_Rate_Growth = (Total_Mortality_Rate - Lag(Total_Mortality_Rate,1))/Lag(Total_Mortality_Rate,1))
+
+oxford <- oxford %>%
+  dplyr::group_by(Country) %>%
+  dplyr::mutate(New_Mortality_Rate_Growth = (New_Mortality_Rate - Lag(New_Mortality_Rate,1))/Lag(New_Mortality_Rate,1))
+
+oxford <- oxford %>%
+  dplyr::group_by(Country) %>%
+  dplyr::mutate(Total_Case_Rate_Growth = (Total_Case_Rate - Lag(Total_Case_Rate,1))/Lag(Total_Case_Rate,1))
+
+oxford <- oxford %>%
+  dplyr::group_by(Country) %>%
+  dplyr::mutate(New_Case_Rate_Growth = (New_Case_Rate - Lag(New_Case_Rate,1))/Lag(New_Case_Rate,1))
+
+# xxx I have to add zeros here for the code to work 
+oxford$StringencyIndex[is.na(oxford$StringencyIndex)] <- 0
+oxford <- oxford %>%
+  dplyr::group_by(Country) %>%
+  dplyr::mutate(SI_Growth = (StringencyIndex - Lag(StringencyIndex,1))/Lag(StringencyIndex,1))
+
+oxford$Country <- as.character(oxford$Country)
+
+# xxx I have to add zeros here for the code to work 
+oxford$driving[is.na(oxford$driving)] <- 0
+oxford$SI_Growth[is.na(oxford$SI_Growth)] <- 0
+oxford$SI_Growth[is.na(oxford$SI_Growth)] <- 0
+oxford$SI_Growth[is.infinite(oxford$SI_Growth)] <- 0
+
+
+
+# oxford$Country[which(oxford$Country == "Slovakia")] <- "Slovak_Rep"
+
+
+
+cds_5yr_prediction_long <- reshape2::melt(cds_5yr_prediction, id.vars=c("X", "pdat.date"))
+colnames(cds_5yr_prediction_long) <- c("X", "Date", "Country", "CDS_5y_Prediction")
+cds_5yr_prediction_long$X <- NULL
+
+cds_5yr_actual_long <- reshape2::melt(cds_5yr_actual, id.vars=c("X", "pdat.date"))
+colnames(cds_5yr_actual_long) <- c("X", "Date", "Country", "CDS_5y_Actual")
+cds_5yr_actual_long$X <- NULL
+
+cds_5yr_merged <- merge(cds_5yr_actual_long, cds_5yr_prediction_long, by=c("Country", "Date"), all.x=TRUE)
+cds_5yr_merged$CDS_5y_Residual <- cds_5yr_merged$CDS_5y_Actual - cds_5yr_merged$CDS_5y_Prediction
+
+cds_5yr_merged$Date <- as.Date(cds_5yr_merged$Date,"%Y-%m-%d")
+cds_5yr_merged <- cds_5yr_merged[which(cds_5yr_merged$Date < '2020-07-01'),]
+
+
+
+
+
+cds_5y_actual_EM <- aggregate(CDS_5y_Actual ~ Date, cds_5yr_merged, mean)
+cds_5y_prediction_EM <- aggregate(CDS_5y_Prediction ~ Date, cds_5yr_merged, mean)
+
+eval <- c(0)
+
+cds_5yr_EM <- merge(cds_5y_actual_EM, cds_5y_prediction_EM, by = c("Date"), all.x = TRUE)
+cds_5yr_EM_preMar <- cds_5yr_EM[which(cds_5yr_EM$Date < '2020-03-01' & cds_5yr_EM$Date >= '2020-01-01'),]
+cds_5yr_EM_preMar$residual2 <- (cds_5yr_EM_preMar$CDS_5y_Actual - cds_5yr_EM_preMar$CDS_5y_Predictio)^2  
+eval[1] <- mean(cds_5yr_EM_preMar$residual2, na.rm = TRUE)
+
+cds_5yr_EM_postMar <- cds_5yr_EM[which(cds_5yr_EM$Date >= '2020-04-01' & cds_5yr_EM <= '2020-06-30'),]
+cds_5yr_EM_postMar$residual2 <- (cds_5yr_EM_postMar$CDS_5y_Actual - cds_5yr_EM_postMar$CDS_5y_Predictio)^2  
+eval[2] <- mean(cds_5yr_EM_postMar$residual2, na.rm = TRUE)
+
+cds_5yr_EM_Mar <- cds_5yr_EM[which(cds_5yr_EM$Date >= '2020-03-01' & cds_5yr_EM$Date < '2020-04-01'),]
+cds_5yr_EM_Mar$residual2 <- (cds_5yr_EM_Mar$CDS_5y_Actual - cds_5yr_EM_Mar$CDS_5y_Predictio)^2  
+eval[3] <- mean(cds_5yr_EM_Mar$residual2, na.rm = TRUE)
+
+p_EM_preMar <- ggplot(dat = cds_5yr_EM_preMar,aes(x=Date,y=CDS_5y_Actual,linetype="Actual"))+geom_line()+geom_line(aes(y=CDS_5y_Prediction,linetype="Fitted"))+theme_bw()+xlab("")+ylab("Daily Change (Log CDS)")+ggtitle("Emerging Markets Average CDS Spreads, Mid Dec 2019 - Feb 2020")+theme(axis.title.y = element_text(size = 10),axis.text = element_text(size = 10),legend.title = element_blank(),plot.title = element_text(size=12),legend.position = c(0.8, 0.8))+ylim(-0.15,0.2)
+p_EM_preMar
+
+p_EM_postMar <- ggplot(dat = cds_5yr_EM_postMar,aes(x=Date,y=CDS_5y_Actual,linetype="Actual"))+geom_line()+geom_line(aes(y=CDS_5y_Prediction,linetype="Fitted"))+theme_bw()+xlab("")+ylab("Daily Change (Log CDS)")+ggtitle("Emerging Markets Average CDS Spreads, Apr 2020 - Mid June 2020")+theme(axis.title.y = element_text(size = 10),axis.text = element_text(size = 10),legend.title = element_blank(),plot.title = element_text(size=12),legend.position = c(0.8, 0.8))+ylim(-0.15,0.2)
+p_EM_postMar
+
+p_EM_Mar <- ggplot(dat = cds_5yr_EM_Mar,aes(x=Date,y=CDS_5y_Actual,linetype="Actual"))+geom_line()+geom_line(aes(y=CDS_5y_Prediction,linetype="Fitted"))+theme_bw()+xlab("")+ylab("Daily Change (Log CDS)")+ggtitle("Emerging Markets Average CDS Spreads, March 2020")+theme(axis.title.y = element_text(size = 10),axis.text = element_text(size = 10),legend.title = element_blank(),plot.title = element_text(size=12),legend.position = c(0.8, 0.8))+ylim(-0.15,0.2)
+p_EM_Mar
+
+p_EM <- grid.arrange(p_EM_preMar, p_EM_Mar, p_EM_postMar, ncol=3,nrow=1)
+# jpeg("Plots/figure10.jpg", width = 1920, height = 1080)
+# p_EM <- grid.arrange(p_EM_preMar, p_EM_Mar, p_EM_postMar, ncol=3,nrow=1)
+# dev.off()
+
+
+
+
+panel <- merge(cds_5yr_merged, oxford, by = c("Country", "Date"), all.x = TRUE)
+panel$Dummy_Fiscal_Country <- as.numeric(panel$Fiscal_Response_Dummy > 0)
+# panel$Dummy_Fiscal_EU <- as.numeric(panel$EU_Fiscal_Response_Dummy > 0)
+panel$Dummy_Monetary_ECB <- as.numeric(panel$ECB_Announcement > 0)
+panel$Dummy_Monetary_Fed <- as.numeric(panel$Fed_Announcement > 0)
+
+panel <- panel[which(panel$Date > '2019-07-01'),]
+panel <- panel %>%
+  dplyr::group_by(Country) %>%
+  dplyr::mutate(Cum_CDS_5y_Residual = cumsum(CDS_5y_Residual))
+
+panel_inCOVID <- panel[which(panel$Date > "2020-02-29" & panel$Date < "2020-04-01"),]
+
+panel_inCOVID <- panel_inCOVID %>% ungroup()
+
+panel_inCOVID <- pdata.frame(panel_inCOVID, index = c("Country", "Date"))
+panel_inCOVID$Date <- as.Date(panel_inCOVID$Date,"%Y-%m-%d")
+#reorder
+panel_inCOVID <- panel_inCOVID[order(panel_inCOVID$Date),]
+panel_inCOVID <- panel_inCOVID[order(panel_inCOVID$Country),]
+
+
+
+### Panel analysis: COVID residuals
+new_res.mortality.2 <- plm(CDS_5y_Residual ~ Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth),
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+
+se.new_res.mortality.2 <- coeftest(new_res.mortality.2, vcov = vcovHC(new_res.mortality.2, type = "HC1"))
+
+new_res.mortality.3 <- plm(CDS_5y_Residual ~ Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth) + driving + SI_Growth,
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+
+se.new_res.mortality.3 <- coeftest(new_res.mortality.3, vcov = vcovHC(new_res.mortality.3, type = "HC1"))
+
+new_res.mortality.4 <- plm(CDS_5y_Residual ~ Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth) + driving + SI_Growth + Lag(Dummy_Fiscal_Country) + Lag(Dummy_Monetary_ECB) + Lag(Dummy_Monetary_Fed),
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+se.new_res.mortality.4 <- coeftest(new_res.mortality.4, vcov = vcovHC(new_res.mortality.4, type = "HC1"))
+
+stargazer(digits=4,new_res.mortality.2,new_res.mortality.3,new_res.mortality.4,
+          type="latex",se=list(se.new_res.mortality.2[,2],se.new_res.mortality.3[,2],se.new_res.mortality.4[,2]), out=file.path("Table_inCOVID_panel_output_newRES_mortality.htm"),
+          dep.var.labels=c("COVID Residual"),
+          covariate.labels=c("New Mortality Rate", "New Mortality Rate Growth", 
+                             "Total Mortality Rate", "Total Mortality Rate Growth",
+                             "Mobility", "SI Growth",
+                             "Country Fiscal Policy Dummy", "ECB Policy Dummy", "Fed Policy Dummy"), df = FALSE, omit.stat="adj.rsq", 
+          notes = c("*,**,*** correspond to 10%, 5% and 1% significance, respectively.","HAC robust standard errors, clustered by country. Time and Country FEs."),
+          notes.append=F, notes.align ="l",
+          title="COVID-Sample Panel Analysis",add.lines = list(c("Fixed effects?", "Y","Y","Y","Y")))
+
+
+
+
+### Panel analysis: CDS spreads changes in 2020 March
+
+new_CDS.mortality.0 <- plm(CDS_5y_Actual ~ CDS_5y_Prediction,
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID, na.action="na.exclude")
+se.new_CDS.mortality.0 <- coeftest(new_CDS.mortality.0, vcov = vcovHC(new_CDS.mortality.0, type = "HC1"))
+
+new_CDS.mortality.2 <- plm(CDS_5y_Actual ~ CDS_5y_Prediction + Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth),
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+se.new_CDS.mortality.2 <- coeftest(new_CDS.mortality.2, vcov = vcovHC(new_CDS.mortality.2, type = "HC1"))
+
+new_CDS.mortality.3 <- plm(CDS_5y_Actual ~ CDS_5y_Prediction + Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth) + driving + SI_Growth,
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+se.new_CDS.mortality.3 <- coeftest(new_CDS.mortality.3, vcov = vcovHC(new_CDS.mortality.3, type = "HC1"))
+
+new_CDS.mortality.4 <- plm(CDS_5y_Actual ~ CDS_5y_Prediction + Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth) + driving + SI_Growth + Lag(Dummy_Fiscal_Country) + Lag(Dummy_Monetary_ECB) + Lag(Dummy_Monetary_Fed),
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+se.new_CDS.mortality.4 <- coeftest(new_CDS.mortality.4, vcov = vcovHC(new_CDS.mortality.4, type = "HC1"))
+
+
+stargazer(digits=4,new_CDS.mortality.0,new_CDS.mortality.2,new_CDS.mortality.3,new_CDS.mortality.4,
+          type="latex",se=list(se.new_CDS.mortality.0[,2],se.new_CDS.mortality.2[,2],se.new_CDS.mortality.3[,2],se.new_CDS.mortality.4[,2]),out=file.path("Table_inCOVID_panel_output_newCDS_mortality.htm"),
+          dep.var.labels=c("Daily CDS Spread Change"),
+          covariate.labels=c("Fitted Daily CDS Spread Change", "New Mortality Rate", "New Mortality Rate Growth", 
+                             "Total Mortality Rate", "Total Mortality Rate Growth",
+                             "Mobility", "SI Growth",
+                             "Country Fiscal Policy Dummy", "ECB Policy Dummy", "Fed Policy Dummy"), df = FALSE, omit.stat="adj.rsq", 
+          notes = c("*,**,*** correspond to 10%, 5% and 1% significance, respectively.","HAC robust standard errors, clustered by country. Time and Country FEs."),
+          notes.append=F, notes.align ="l",
+          title="COVID-Sample Panel Analysis",add.lines = list(c("Fixed effects?","Y","Y","Y","Y","Y")))
+
+
+
+
+
+### Panel analayis: subsample with observations for which mortality data is available
+
+new_CDS.mortality.2.small <- plm(CDS_5y_Actual ~ CDS_5y_Prediction + Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth),
+                                 method="pooling", effect="twoways",
+                                 data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+se.new_CDS.mortality.2.small <- coeftest(new_CDS.mortality.2.small, vcov = vcovHC(new_CDS.mortality.2.small, type = "HC1"))
+
+panel_inCOVID_small <- cbind(as.vector(new_CDS.mortality.2$model[[1]]), attr(new_CDS.mortality.2$model[[1]], "index"))
+panel_inCOVID_small$Date <- as.Date(panel_inCOVID_small$Date,"%Y-%m-%d")
+panel_inCOVID_small <- merge(panel_inCOVID_small, panel_inCOVID, by = c("Country", "Date"), all.x = TRUE)
+
+new_CDS.mortality.0.small <- plm(CDS_5y_Actual ~ CDS_5y_Prediction,
+                                 method="pooling", effect="twoways",
+                                 data=panel_inCOVID_small, na.action="na.exclude")
+se.new_CDS.mortality.0.small <- coeftest(new_CDS.mortality.0.small, vcov = vcovHC(new_CDS.mortality.0.small, type = "HC1"))
+
+new_CDS.mortality.3.small <- plm(CDS_5y_Actual ~ CDS_5y_Prediction + Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth) + driving + SI_Growth,
+                                 method="pooling", effect="twoways",
+                                 data=panel_inCOVID_small, na.action="na.exclude")
+se.new_CDS.mortality.3.small <- coeftest(new_CDS.mortality.3.small, vcov = vcovHC(new_CDS.mortality.3.small, type = "HC1"))
+
+new_CDS.mortality.4.small <- plm(CDS_5y_Actual ~ CDS_5y_Prediction + Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth) + driving + SI_Growth + Lag(Dummy_Fiscal_Country) + Lag(Dummy_Monetary_ECB) + Lag(Dummy_Monetary_Fed),
+                                 method="pooling", effect="twoways",
+                                 data=panel_inCOVID_small, na.action="na.exclude")
+se.new_CDS.mortality.4.small <- coeftest(new_CDS.mortality.4.small, vcov = vcovHC(new_CDS.mortality.4.small, type = "HC1"))
+
+stargazer(digits=4,new_CDS.mortality.0.small,new_CDS.mortality.2.small,new_CDS.mortality.3.small,new_CDS.mortality.4.small,
+          type="latex",se=list(se.new_CDS.mortality.0.small[,2],se.new_CDS.mortality.2.small[,2],se.new_CDS.mortality.3.small[,2],se.new_CDS.mortality.4.small[,2]),out=file.path("Table_inCOVID_panel_output_newCDS_mortality_small.htm"),
+          dep.var.labels=c("Daily CDS Spread Change"),
+          covariate.labels=c("Fitted Daily CDS Spread Change", "New Mortality Rate", "New Mortality Rate Growth", 
+                             "Total Mortality Rate", "Total Mortality Rate Growth",
+                             "Mobility", "SI Growth",
+                             "Country Fiscal Policy Dummy", "ECB Policy Dummy", "Fed Policy Dummy"), df = FALSE, omit.stat="adj.rsq", 
+          notes = c("*,**,*** correspond to 10%, 5% and 1% significance, respectively.","HAC robust standard errors, clustered by country. Time and Country FEs."),
+          notes.append=F, notes.align ="l",
+          title="COVID-Sample Panel Analysis",add.lines = list(c("Fixed effects?","Y","Y","Y","Y","Y")))
+
+
+
+
+### EM aggregate: realized values versus model-implied values
+panel_inCOVID_CDS_5y_Prediction_New <- cbind(as.vector(new_CDS.mortality.4$model[[1]]-new_CDS.mortality.4$residuals), attr(new_CDS.mortality.4$model[[1]], "index"))
+colnames(panel_inCOVID_CDS_5y_Prediction_New)[1] <- c("CDS_5y_Prediction_New")
+
+panel_inCOVID_CDS_5y_Prediction_New$Date <- as.Date(panel_inCOVID_CDS_5y_Prediction_New$Date,"%Y-%m-%d")
+panel_inCOVID_small <- merge(panel_inCOVID_CDS_5y_Prediction_New, panel_inCOVID, by = c("Country", "Date"), all.x = TRUE)
+
+panel_inCOVID_EM_prediction <- aggregate(CDS_5y_Prediction ~ Date, panel_inCOVID_small, mean)
+panel_inCOVID_EM_actual <- aggregate(CDS_5y_Actual ~ Date, panel_inCOVID_small, mean)
+panel_inCOVID_EM_prediction_new <- aggregate(CDS_5y_Prediction_New ~ Date, panel_inCOVID_small, mean)
+
+panel_inCOVID_EM <- merge(panel_inCOVID_EM_prediction_new, panel_inCOVID_EM_prediction, by = c("Date"), all.x = TRUE)
+panel_inCOVID_EM <- merge(panel_inCOVID_EM, panel_inCOVID_EM_actual, by = c("Date"), all.x = TRUE)
+
+p_EM_Mar_New <- ggplot(dat = panel_inCOVID_EM,aes(x=Date,y=CDS_5y_Actual,linetype = "Actual"))+geom_line()+geom_line(aes(y=CDS_5y_Prediction, linetype="Fitted by model [1]"))+
+  geom_line()+geom_line(aes(y=CDS_5y_Prediction_New,linetype="Fitted by model [4]"))+theme_bw()+xlab("")+ylab("Daily Change (Log CDS)")+
+  ggtitle("Emerging markets Average CDS Spreads, March 2020")+
+  theme(axis.title.y = element_text(size = 12), axis.text = element_text(size = 10), legend.title = element_blank(),legend.position = c(0.8, 0.8))
+
+p_EM_Mar_New
+# jpeg("Plots/Figure11.jpg", width = 1920, height = 1080)
+# p_EM_Mar_New
+# dev.off()
 
 
 
