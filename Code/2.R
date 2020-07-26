@@ -2,8 +2,21 @@
 # Author: Timo Daehler, daehler@usc.edu
 # Date of last update: 23 July 2020
 # Inputs: -
-# Outputs: -
-# Other relevant notes: If you do not wish to run the code, please see the final output (graphs and datasets) provided in the Github repository. Make sure to check the relevant README files for the contents of the folder.
+# Outputs: tables "Table 1 short", "Table 2 short", "Table 3 short" in overleaf
+# Other relevant notes: Since for some countries the fitted and actual CDS 
+# did not provide a good match, I rerun the whole analysis for a subset of EM. 
+# Crucially, I leave out those countries for which the fit wasn't good. What 
+# constitutes a bad fit is somewhat arbitrary. By looking at the graph 
+# "Plots/individualpredvsactual.jpg" that 18 countries offer a relatively good
+# fit while 12 countries offer a relatively bad fit. See the sheet 
+# g_o_f_classification.xlsx".
+
+library(readxl)
+goodfitcountries <- read_excel("Data/g_o_f_classification.xlsx", sheet = "Goodfit")
+
+# In order not to have to rewrite the code too much, I call the list of the 18
+# selected countries simply "EMBI". 
+uniquecountries <- goodfitcountries
 # =========================================================================.
 
 
@@ -1573,11 +1586,11 @@ library(readxl)
 
 
 # define sample -----------------------------------------------------------
-# I restrict the analysis to Emerging Market countries, from a list pulled from here: https://www.ishares.com/us/products/239572/ishares-jp-morgan-usd-emerging-markets-bond-etf for EMBI (plus India and Thailand for EMBI+2) and here https://www.ishares.com/us/products/239528/ishares-emerging-markets-local-currency-bond-etf for LEMB
-EMBI <- read_excel("Data/SAMPLE_LISTS.xlsx", sheet = "EMBI")
-EMBI2 <- read_excel("Data/SAMPLE_LISTS.xlsx", sheet = "EMBI2")
-LEMB <- read_excel("Data/SAMPLE_LISTS.xlsx", sheet = "LEMB")
-uniquecountries <- unique(rbind(EMBI, EMBI2, LEMB))
+# See the README section. I defined the sample there 
+# EMBI <- read_excel("Data/SAMPLE_LISTS.xlsx", sheet = "EMBI")
+# EMBI2 <- read_excel("Data/SAMPLE_LISTS.xlsx", sheet = "EMBI2")
+# LEMB <- read_excel("Data/SAMPLE_LISTS.xlsx", sheet = "LEMB")
+# uniquecountries <- unique(rbind(EMBI, EMBI2, LEMB))
 # =========================================================================.
 
 
@@ -1635,13 +1648,16 @@ View(Oxford_V1)
 
 # IMPORTANT ---------------------------------------------------------------
 # 1. step: export dataframe
-# write_xlsx(Oxford_V1,"Data/Oxford_V1.xlsx")
+# write_xlsx(Oxford_V1,"Data/Oxford_V1short.xlsx")
 # 2. step: handcoding
 # 3. step: removing non-augmented dataframe from R
 # remove(Oxford_V1)
 # 4. step: reimporting hand-coded augmented sheet
 # Oxford_V1 <- read_excel("Data/Oxford_V1.xlsx")
 # View(Oxford_V1)
+Oxford_V1 <- Oxford_V1 %>%
+  dplyr::filter(COUNTRY %in% uniquecountries$Country)
+
 # =========================================================================.
 
 
@@ -1658,7 +1674,7 @@ library(readxl)
 # To calculate deaths per million, news sources divide the number of cumulative (total) deaths by the population size, measured in millions. Luxembourg and Malta have less than a million inhabitants, and thus I do not calculate deaths per million for these nations. Data was pulled from: https://www.statista.com/statistics/1104709/coronavirus-deaths-worldwide-per-million-inhabitants/.
 Mill_Pop <- read_excel("Data/Mill_Pop.xlsx")
 
-Oxford_V1 <- merge(Oxford_V1, Mill_Pop, by = c("COUNTRY"), all=TRUE)
+Oxford_V1 <- merge(Oxford_V1, Mill_Pop, by = c("COUNTRY"), all=F)
 
 Oxford_V1 <- Oxford_V1[order(Oxford_V1$COUNTRY, Oxford_V1$Date),]
 
@@ -2271,7 +2287,8 @@ countries <- read_excel("Data/laender.xlsx", sheet = "EM")
 
 # define EM countries -----------------------------------------------------
 # subsetting for only EM and non-EM countries and for between 2020-06-30 and 2014-01-01 
-em_countries <- countries[ which(countries$EM_dummy5yr ==1), "COUNTRY5yrCDS"   ]
+# em_countries <- countries[ which(countries$EM_dummy5yr ==1), "COUNTRY5yrCDS"   ]
+em_countries <- as_tibble(uniquecountries$Country)
 non_em_countries <- countries[ which(countries$EM_dummy5yr !=1), "COUNTRY5yrCDS"   ]
 cds_five<-cds_five[which(cds_five$Date>="2014-01-01" & cds_five$Date<="2020-07-01"   ),]
 # =========================================================================.
@@ -2279,7 +2296,7 @@ cds_five<-cds_five[which(cds_five$Date>="2014-01-01" & cds_five$Date<="2020-07-0
 
 
 # subset CES for EM and non EM --------------------------------------------
-em_cds <- cds_five[, c("Date", em_countries$COUNTRY5yrCDS )]
+em_cds <- cds_five[, c("Date", em_countries$value )]
 nonem_cds<-cds_five[, c("Date", non_em_countries$COUNTRY5yrCDS )]
 # =========================================================================.
 
@@ -2462,7 +2479,7 @@ em_countries<-em_countries
 em_countries
 #eu_countries2<-c("Austria","Belgium","Cyprus","Estonia","Finland","France","Germany","Greece","Ireland","Italy","Latvia","Lithuania","Luxembourg","Malta","Netherlands","Portugal","Slovakia","Slovenia","Spain")
 
-fstim<-fstim[which(fstim$Country %in% c(em_countries$COUNTRY5yrCDS, non_em_countries$COUNTRY5yrCDS) ),]
+fstim<-fstim[which(fstim$Country %in% c(em_countries$value, non_em_countries$COUNTRY5yrCDS) ),]
 nrow(fstim)
 
 # fstim<-fstim[-which(fstim$Country %in% c("Malta","Luxembourg")),]
@@ -2476,7 +2493,7 @@ p.cds.coefs.stim<-merge(p.cds.coefs,fstim,by.x="countries",by.y="Country")
 p.cds.coefs.pd <-p.cds.coefs
 
 pd <- read_excel("Data/PublicDebttoGDPyearly.xlsx", sheet = "DebttoGDP")
-pd <- pd[, em_countries$COUNTRY5yrCDS]
+pd <- pd[, em_countries$value]
 pd2 <- pd
 pd3<-colMeans(pd2[,])
 
@@ -2539,7 +2556,7 @@ p9
 
 fstim<-read.csv("Data/CESI_7.csv",header=T,sep=',')
 
-fstim<-fstim[which(fstim$Country %in% c(em_countries$COUNTRY5yrCDS) ),]
+fstim<-fstim[which(fstim$Country %in% c(em_countries$value) ),]
 fstim<-fstim[,c("Country","fiscal_7")]
 nrow(fstim)
 
@@ -2620,6 +2637,8 @@ cds_5yr_prediction <- read.csv("data/covid_ez_prediction.csv", header = T, sep='
 cds_5yr_actual <- read.csv("data/covid_ez_spreads.csv", header = T, sep = ',')
 
 oxford <- read_excel("Data/Oxford_V1.xlsx")
+oxford <- oxford %>%
+  dplyr::filter(Country %in% uniquecountries$Country)
 oxford <- oxford %>% dplyr::select(-contains("Flag"))
 oxford <- oxford %>% dplyr::select(-contains("Lagged"))
 colnames(oxford)[which(colnames(oxford) == "Total_Cases_Country")] <- "Total_Case"

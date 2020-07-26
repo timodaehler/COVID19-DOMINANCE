@@ -3,7 +3,8 @@
 # Date of last update: 23 July 2020
 # Inputs: -
 # Outputs: -
-# Other relevant notes: If you do not wish to run the code, please see the final output (graphs and datasets) provided in the Github repository. Make sure to check the relevant README files for the contents of the folder.
+# Other relevant notes: Here, I augment the script "1.R" with four more variables
+# and then I rerun the analysis.
 # =========================================================================.
 
 
