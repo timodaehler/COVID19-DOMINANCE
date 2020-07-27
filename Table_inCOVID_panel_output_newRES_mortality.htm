@@ -1,40 +1,49 @@
 
 <table style="text-align:center"><caption><strong>COVID-Sample Panel Analysis</strong></caption>
-<tr><td colspan="4" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"></td><td colspan="3"><em>Dependent variable:</em></td></tr>
-<tr><td></td><td colspan="3" style="border-bottom: 1px solid black"></td></tr>
-<tr><td style="text-align:left"></td><td colspan="3">COVID Residual</td></tr>
-<tr><td style="text-align:left"></td><td>(1)</td><td>(2)</td><td>(3)</td></tr>
-<tr><td colspan="4" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">New Mortality Rate</td><td>-0.0821</td><td>-0.1257<sup>***</sup></td><td>-0.1005<sup>**</sup></td></tr>
-<tr><td style="text-align:left"></td><td>(0.0501)</td><td>(0.0482)</td><td>(0.0462)</td></tr>
-<tr><td style="text-align:left"></td><td></td><td></td><td></td></tr>
-<tr><td style="text-align:left">New Mortality Rate Growth</td><td>-0.0031</td><td>-0.0108</td><td>-0.0156<sup>*</sup></td></tr>
-<tr><td style="text-align:left"></td><td>(0.0069)</td><td>(0.0068)</td><td>(0.0084)</td></tr>
-<tr><td style="text-align:left"></td><td></td><td></td><td></td></tr>
-<tr><td style="text-align:left">Total Mortality Rate</td><td>0.0038</td><td>0.0184</td><td>0.0205</td></tr>
-<tr><td style="text-align:left"></td><td>(0.0149)</td><td>(0.0190)</td><td>(0.0177)</td></tr>
-<tr><td style="text-align:left"></td><td></td><td></td><td></td></tr>
-<tr><td style="text-align:left">Total Mortality Rate Growth</td><td>0.0367</td><td>0.0542<sup>**</sup></td><td>0.0641<sup>***</sup></td></tr>
-<tr><td style="text-align:left"></td><td>(0.0232)</td><td>(0.0249)</td><td>(0.0248)</td></tr>
-<tr><td style="text-align:left"></td><td></td><td></td><td></td></tr>
-<tr><td style="text-align:left">Mobility</td><td></td><td>-0.0018<sup>**</sup></td><td>-0.0022<sup>***</sup></td></tr>
-<tr><td style="text-align:left"></td><td></td><td>(0.0009)</td><td>(0.0008)</td></tr>
-<tr><td style="text-align:left"></td><td></td><td></td><td></td></tr>
-<tr><td style="text-align:left">SI Growth</td><td></td><td>-0.0026</td><td>-0.0117</td></tr>
-<tr><td style="text-align:left"></td><td></td><td>(0.0266)</td><td>(0.0266)</td></tr>
-<tr><td style="text-align:left"></td><td></td><td></td><td></td></tr>
-<tr><td style="text-align:left">Country Fiscal Policy Dummy</td><td></td><td></td><td>-0.0312<sup>*</sup></td></tr>
-<tr><td style="text-align:left"></td><td></td><td></td><td>(0.0186)</td></tr>
-<tr><td style="text-align:left"></td><td></td><td></td><td></td></tr>
-<tr><td style="text-align:left">ECB Policy Dummy</td><td></td><td></td><td>0.1710<sup>***</sup></td></tr>
-<tr><td style="text-align:left"></td><td></td><td></td><td>(0.0286)</td></tr>
-<tr><td style="text-align:left"></td><td></td><td></td><td></td></tr>
-<tr><td style="text-align:left">Fed Policy Dummy</td><td></td><td></td><td>0.0311</td></tr>
-<tr><td style="text-align:left"></td><td></td><td></td><td>(0.0258)</td></tr>
-<tr><td style="text-align:left"></td><td></td><td></td><td></td></tr>
-<tr><td colspan="4" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">Fixed effects?</td><td>Y</td><td>Y</td><td>Y</td></tr>
-<tr><td style="text-align:left">Observations</td><td>145</td><td>141</td><td>141</td></tr>
-<tr><td style="text-align:left">R<sup>2</sup></td><td>0.0169</td><td>0.0541</td><td>0.1230</td></tr>
-<tr><td style="text-align:left">F Statistic</td><td>0.3905</td><td>0.8479</td><td>1.3408</td></tr>
-<tr><td colspan="4" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"><em>Note:</em></td><td colspan="3" style="text-align:left">*,**,*** correspond to 10%, 5% and 1% significance, respectively.</td></tr>
-<tr><td style="text-align:left"></td><td colspan="3" style="text-align:left">HAC robust standard errors, clustered by country. Time and Country FEs.</td></tr>
+<tr><td colspan="5" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"></td><td colspan="4"><em>Dependent variable:</em></td></tr>
+<tr><td></td><td colspan="4" style="border-bottom: 1px solid black"></td></tr>
+<tr><td style="text-align:left"></td><td colspan="4">COVID Residual</td></tr>
+<tr><td style="text-align:left"></td><td>(1)</td><td>(2)</td><td>(3)</td><td>(4)</td></tr>
+<tr><td colspan="5" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">New Mortality Rate</td><td>0.0066</td><td>0.0004</td><td>-0.0086</td><td>-0.0371</td></tr>
+<tr><td style="text-align:left"></td><td>(0.0351)</td><td>(0.0364)</td><td>(0.0386)</td><td>(0.0469)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">New Mortality Rate Growth</td><td>-0.0059</td><td>-0.0063</td><td>-0.0071</td><td>-0.0066</td></tr>
+<tr><td style="text-align:left"></td><td>(0.0049)</td><td>(0.0046)</td><td>(0.0046)</td><td>(0.0046)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">Total Mortality Rate</td><td>-0.0007</td><td>0.0023</td><td>0.0043</td><td>0.0163</td></tr>
+<tr><td style="text-align:left"></td><td>(0.0081)</td><td>(0.0086)</td><td>(0.0093)</td><td>(0.0151)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">Total Mortality Rate Growth</td><td>0.0193</td><td>0.0180</td><td>0.0279</td><td>0.0304</td></tr>
+<tr><td style="text-align:left"></td><td>(0.0234)</td><td>(0.0242)</td><td>(0.0249)</td><td>(0.0264)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">Mobility</td><td></td><td>-0.0007<sup>**</sup></td><td>-0.0009<sup>**</sup></td><td>-0.0014<sup>**</sup></td></tr>
+<tr><td style="text-align:left"></td><td></td><td>(0.0003)</td><td>(0.0004)</td><td>(0.0007)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">SI Growth</td><td></td><td>0.0116</td><td>0.0084</td><td>0.0090</td></tr>
+<tr><td style="text-align:left"></td><td></td><td>(0.0157)</td><td>(0.0170)</td><td>(0.0190)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">Country Fiscal Policy Dummy</td><td></td><td></td><td>-0.0156</td><td></td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td>(0.0109)</td><td></td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">ECB Policy Dummy</td><td></td><td></td><td>0.0817<sup>**</sup></td><td>0.1010<sup>**</sup></td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td>(0.0385)</td><td>(0.0445)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">Fed Policy Dummy</td><td></td><td></td><td>0.0030</td><td>0.0232</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td>(0.0249)</td><td>(0.0226)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">China debt stock</td><td></td><td></td><td></td><td>0.0096<sup>**</sup></td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td>(0.0048)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">Fiscal dummy X ext. debtGDP</td><td></td><td></td><td></td><td>-0.0003</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td>(0.0003)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">Oil effect</td><td></td><td></td><td></td><td>0.0047</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td>(0.0081)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td></tr>
+<tr><td colspan="5" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">Fixed effects?</td><td>Y</td><td>Y</td><td>Y</td><td>Y</td></tr>
+<tr><td style="text-align:left">Observations</td><td>246</td><td>244</td><td>244</td><td>196</td></tr>
+<tr><td style="text-align:left">R<sup>2</sup></td><td>0.0094</td><td>0.0238</td><td>0.0521</td><td>0.0593</td></tr>
+<tr><td style="text-align:left">F Statistic</td><td>0.4350</td><td>0.7406</td><td>1.0939</td><td>0.7567</td></tr>
+<tr><td colspan="5" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"><em>Note:</em></td><td colspan="4" style="text-align:left">*,**,*** correspond to 10%, 5% and 1% significance, respectively.</td></tr>
+<tr><td style="text-align:left"></td><td colspan="4" style="text-align:left">HAC robust standard errors, clustered by country. Time and Country FEs.</td></tr>
 </table>

@@ -2427,9 +2427,8 @@ grid.arrange(p5a,p5b,nrow=1)
 # grid.arrange(p5a,p5b,nrow=1)
 # dev.off()
 
-# XXX writing these?
-# write.csv(data.frame(pdat$date,post.dat),"Data/covid_ez_spreads.csv")
-# write.csv(data.frame(pdat$date,predz),"Data/covid_ez_prediction.csv")
+write.csv(data.frame(pdat$date,post.dat),"Data/covid_ez_spreads.csv")
+write.csv(data.frame(pdat$date,predz),"Data/covid_ez_prediction.csv")
 
 corz<-c(0)
 for(i in 1:ncol(post.dat)){
@@ -2721,9 +2720,9 @@ p_EM_Mar <- ggplot(dat = cds_5yr_EM_Mar,aes(x=Date,y=CDS_5y_Actual,linetype="Act
 p_EM_Mar
 
 p_EM <- grid.arrange(p_EM_preMar, p_EM_Mar, p_EM_postMar, ncol=3,nrow=1)
-jpeg("Plots/figure10.jpg", width = 1920, height = 1080)
-p_EM <- grid.arrange(p_EM_preMar, p_EM_Mar, p_EM_postMar, ncol=3,nrow=1)
-dev.off()
+# jpeg("Plots/figure10.jpg", width = 1920, height = 1080)
+# p_EM <- grid.arrange(p_EM_preMar, p_EM_Mar, p_EM_postMar, ncol=3,nrow=1)
+# dev.off()
 # =========================================================================.
 
 
@@ -2739,6 +2738,18 @@ panel <- panel[which(panel$Date > '2019-07-01'),]
 panel <- panel %>%
   dplyr::group_by(Country) %>%
   dplyr::mutate(Cum_CDS_5y_Residual = cumsum(CDS_5y_Residual))
+
+paneladdition <- read_excel("Data/paneladdition.xlsx")
+
+newpanel <- as_tibble(merge(panel, paneladdition, by=c("Country", "Date")))
+panel <- newpanel
+
+# IMPORTANT ---------------------------------------------------------------
+# Here I export the panel to excel and manually add some data that we need and then reimport it. 
+# write_xlsx(panel,"Data/panel.xlsx")
+# sicherungskopiealtespanel <- panel
+# panel <- sicherungskopiealtespanel
+# panel <- read_excel("Data/panel.xlsx")
 
 panel_inCOVID <- panel[which(panel$Date > "2020-02-29" & panel$Date < "2020-04-01"),]
 
@@ -2787,6 +2798,50 @@ stargazer(digits=4,new_res.mortality.2,new_res.mortality.3,new_res.mortality.4,
 
 
 
+
+# panel analysis of COVID residuals with additional controls --------------
+### Panel analysis: COVID residuals
+new_res.mortality.2 <- plm(CDS_5y_Residual ~ Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth),
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+
+se.new_res.mortality.2 <- coeftest(new_res.mortality.2, vcov = vcovHC(new_res.mortality.2, type = "HC1"))
+
+new_res.mortality.3 <- plm(CDS_5y_Residual ~ Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth) + driving + SI_Growth,
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+
+se.new_res.mortality.3 <- coeftest(new_res.mortality.3, vcov = vcovHC(new_res.mortality.3, type = "HC1"))
+
+new_res.mortality.4 <- plm(CDS_5y_Residual ~ Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth) + driving + SI_Growth + Lag(Dummy_Fiscal_Country) + Lag(Dummy_Monetary_ECB) + Lag(Dummy_Monetary_Fed),
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+se.new_res.mortality.4 <- coeftest(new_res.mortality.4, vcov = vcovHC(new_res.mortality.4, type = "HC1"))
+
+new_res.mortality.5 <- plm(CDS_5y_Residual ~ Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth) + driving + SI_Growth  + Lag(Dummy_Monetary_ECB) + Lag(Dummy_Monetary_Fed) + Lag(China_debt_stock_GDP) + Lag(Dummy_Fiscal_Country_weighted_extdebt) + Lag(RFI_GDP) + Lag(Oil_effect),
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+se.new_res.mortality.5 <- coeftest(new_res.mortality.5, vcov = vcovHC(new_res.mortality.5, type = "HC1"))
+
+stargazer(digits=4,new_res.mortality.2,new_res.mortality.3,new_res.mortality.4, new_res.mortality.5,
+          type="latex",se=list(se.new_res.mortality.2[,2],se.new_res.mortality.3[,2],se.new_res.mortality.4[,2], se.new_res.mortality.5[,2]), out=file.path("Table_inCOVID_panel_output_newRES_mortality.htm"),
+          dep.var.labels=c("COVID Residual"), 
+          covariate.labels=c("New Mortality Rate", "New Mortality Rate Growth", 
+                             "Total Mortality Rate", "Total Mortality Rate Growth",
+                             "Mobility", "SI Growth",
+                             "Country Fiscal Policy Dummy", "ECB Policy Dummy", "Fed Policy Dummy", 
+                             "China debt stock", "Fiscal dummy X ext. debtGDP", "Oil effect"),
+          df = FALSE, omit.stat="adj.rsq", 
+          notes = c("*,**,*** correspond to 10%, 5% and 1% significance, respectively.","HAC robust standard errors, clustered by country. Time and Country FEs."),
+          notes.append=F, notes.align ="l",
+          title="COVID-Sample Panel Analysis",add.lines = list(c("Fixed effects?", "Y","Y","Y","Y")))
+# =========================================================================.
+
+
+
+
+
+
 # panel analysis of COVID spreads changes in march 2020 -------------------
 ### Panel analysis: CDS spreads changes in 2020 March
 
@@ -2822,6 +2877,65 @@ stargazer(digits=4,new_CDS.mortality.0,new_CDS.mortality.2,new_CDS.mortality.3,n
           notes.append=F, notes.align ="l",
           title="COVID-Sample Panel Analysis",add.lines = list(c("Fixed effects?","Y","Y","Y","Y","Y")))
 # =========================================================================.
+
+
+
+
+
+# panel analysis of COVID spreads changes in march 2020 with additional controls--------
+### Panel analysis: CDS spreads changes in 2020 March
+new_CDS.mortality.0 <- plm(CDS_5y_Actual ~ CDS_5y_Prediction,
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID, na.action="na.exclude")
+se.new_CDS.mortality.0 <- coeftest(new_CDS.mortality.0, vcov = vcovHC(new_CDS.mortality.0, type = "HC1"))
+
+new_CDS.mortality.2 <- plm(CDS_5y_Actual ~ CDS_5y_Prediction + Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth),
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+se.new_CDS.mortality.2 <- coeftest(new_CDS.mortality.2, vcov = vcovHC(new_CDS.mortality.2, type = "HC1"))
+
+new_CDS.mortality.3 <- plm(CDS_5y_Actual ~ CDS_5y_Prediction + Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth) + driving + SI_Growth,
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+se.new_CDS.mortality.3 <- coeftest(new_CDS.mortality.3, vcov = vcovHC(new_CDS.mortality.3, type = "HC1"))
+
+new_CDS.mortality.4 <- plm(CDS_5y_Actual ~ CDS_5y_Prediction + Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth) + driving + SI_Growth + Lag(Dummy_Fiscal_Country) + Lag(Dummy_Monetary_ECB) + Lag(Dummy_Monetary_Fed),
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+se.new_CDS.mortality.4 <- coeftest(new_CDS.mortality.4, vcov = vcovHC(new_CDS.mortality.4, type = "HC1"))
+
+new_CDS.mortality.5 <- plm(CDS_5y_Actual ~ CDS_5y_Prediction + Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth) + driving + SI_Growth  + Lag(Dummy_Monetary_ECB) + Lag(Dummy_Monetary_Fed) + Lag(China_debt_stock_GDP) + Lag(Dummy_Fiscal_Country_weighted_extdebt) + Lag(RFI_GDP) + Lag(Oil_effect),
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+se.new_CDS.mortality.5 <- coeftest(new_CDS.mortality.5, vcov = vcovHC(new_CDS.mortality.5, type = "HC1"))
+
+
+stargazer(digits=4,new_CDS.mortality.0,new_CDS.mortality.2,new_CDS.mortality.3,new_CDS.mortality.4, new_CDS.mortality.5,
+          type="latex",se=list(se.new_CDS.mortality.0[,2],se.new_CDS.mortality.2[,2],se.new_CDS.mortality.3[,2],se.new_CDS.mortality.4[,2], se.new_CDS.mortality.5[,2]),out=file.path("Table_inCOVID_panel_output_newCDS_mortality.htm"),
+          dep.var.labels=c("Daily CDS Spread Change"),
+          covariate.labels=c("Fitted Daily CDS Spread Change", "New Mortality Rate", "New Mortality Rate Growth", 
+                             "Total Mortality Rate", "Total Mortality Rate Growth",
+                             "Mobility", "SI Growth",
+                             "Country Fiscal Policy Dummy", "ECB Policy Dummy", "Fed Policy Dummy", "China debt stock", "Fiscal dummy X ext. debtGDP", "Oil effect"),
+          df = FALSE, omit.stat="adj.rsq", 
+          notes = c("*,**,*** correspond to 10%, 5% and 1% significance, respectively.","HAC robust standard errors, clustered by country. Time and Country FEs."),
+          notes.append=F, notes.align ="l",
+          title="COVID-Sample Panel Analysis",add.lines = list(c("Fixed effects?","Y","Y","Y","Y","Y")))
+
+stargazer(digits=4,new_CDS.mortality.0,new_CDS.mortality.2,new_CDS.mortality.3,new_CDS.mortality.4, new_CDS.mortality.5,
+          type="html",se=list(se.new_CDS.mortality.0[,2],se.new_CDS.mortality.2[,2],se.new_CDS.mortality.3[,2],se.new_CDS.mortality.4[,2], se.new_CDS.mortality.5[,2]),out=file.path("Table_inCOVID_panel_output_newCDS_mortality.htm"),
+          dep.var.labels=c("Daily CDS Spread Change"),
+          covariate.labels=c("Fitted Daily CDS Spread Change", "New Mortality Rate", "New Mortality Rate Growth", 
+                             "Total Mortality Rate", "Total Mortality Rate Growth",
+                             "Mobility", "SI Growth",
+                             "Country Fiscal Policy Dummy", "ECB Policy Dummy", "Fed Policy Dummy", "China debt stock", "Fiscal dummy X ext. debtGDP", "Oil effect"),
+          df = FALSE, omit.stat="adj.rsq", 
+          notes = c("*,**,*** correspond to 10%, 5% and 1% significance, respectively.","HAC robust standard errors, clustered by country. Time and Country FEs."),
+          notes.append=F, notes.align ="l",
+          title="COVID-Sample Panel Analysis",add.lines = list(c("Fixed effects?","Y","Y","Y","Y","Y")))
+# =========================================================================.
+
+
 
 
 

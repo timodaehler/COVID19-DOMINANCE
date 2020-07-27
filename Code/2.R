@@ -2465,9 +2465,9 @@ for(i in 1:(length(countriez)/2)) {
 }
 do.call("grid.arrange", c(country_plots)) 
 
-# jpeg("Plots/individualpredvsactual.jpg", width = 1920, height = 1080)
-# do.call("grid.arrange", c(country_plots)) 
-# dev.off()
+jpeg("Plots/individualpredvsactualshort.jpg", width = 1920, height = 1080)
+do.call("grid.arrange", c(country_plots)) 
+dev.off()
 # =========================================================================.
 
 
