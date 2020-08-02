@@ -2587,58 +2587,11 @@ nonEMindividualspreadsroster
 
 
 
-
-
-
-
-# prepare data for regression ---------------------------------------------
-###Prepare data for regression
-em_cds2<- em_cds
-# xxx nonem_cds2 <- nonem_cds
-
-# em_cds_test <- em_cds[which(em_cds$Date>="2020-06-20" & cds_five$Date<="2020-07-01"   ),]
-# d_emcds_test<-apply(log(em_cds_test[,-1]),2,diff) #log differences of EM spreads
-# View(em_cds_test)
-# View(d_emcds_test)
-
-d_emcds<-apply(log(em_cds2[,-1]),2,diff) #log differences of EM spreads
-d_nemds<-apply(log(nonem_cds[,-1]),2,diff) # log differences of non-EM spreads
-
-# This was the old way before we starting weighting things
-glo_cds<- as.data.frame(rowMeans(d_nemds) )# create a global CDS factor excluding EM
-
-# This is the new way when we start weighting things
-test <- as.data.frame(d_nemds[1,])
-weighted_matrix <- test*GDP2019USDMIL_D$weight
-glo_cds_weighted <- 
-a <- as.data.frame(c("Germany", "France"), c(100,40) )
-countryexample <- c("Germany", "France")
-countrynumbers <- c(100,40)
-country.roster <- data.frame(countryexample, countrynumbers)
-
-em_fac<-matrix(NA,nrow=nrow(d_emcds),ncol=ncol(d_emcds)) # create an EM common factor excluding country i
-for(i in 1:ncol(em_fac)){
-  em_fac[,i]<-rowMeans(d_emcds[,-i])
-}
-
-for(i in 1:ncol(em_fac)){
-  em_fac[,i]<-rowMeans(d_emcds[,-i])
-}
-
-
-
-
+# Create country weights for CDS data -------------------------------------
 # Importing GDP 2019 data for developed markets
 GDP2019USDMIL_D <- read_excel("Data/GDP.xlsx", sheet = "GLOBAL")
 total <- sum(GDP2019USDMIL_D$GDP2019MIL)
 GDP2019USDMIL_D <- GDP2019USDMIL_D %>% mutate(weight = GDP2019MIL/ total  )
-
-
-
-# Summing all GDO
-for(i in 1:(nrow(Africa)) ) {
-  Africa[i,"sumofothers"] <-  sum(Africa[-i,]$GDP2019MIL) 
-}
 
 # Importing GDP 2019 data for all emerging markets
 GDP2019USDMIL <- read_excel("Data/GDP.xlsx", sheet = "EM")
@@ -2674,10 +2627,7 @@ LATAM <- merge(LATAM, GDP2019USDMIL, by = c("COUNTRY"), all.x = TRUE)
 MiddleEast <- merge(MiddleEast, GDP2019USDMIL, by = c("COUNTRY"), all.x = TRUE)
 SouthAsia <- merge(SouthAsia, GDP2019USDMIL, by = c("COUNTRY"), all.x = TRUE)
 
-
 str(as.data.frame(drop_na(geographic_classification[,1] ) ) )
-
-
 
 # sum of others
 for(i in 1:(nrow(Africa)) ) {
@@ -2707,8 +2657,6 @@ for(i in 1:(nrow(MiddleEast)) ) {
 for(i in 1:(nrow(SouthAsia)) ) {
   SouthAsia[i,"sumofothers"] <-  sum(SouthAsia[-i,]$GDP2019MIL) 
 }
-
-
 
 # Adding additional country columns
 Countries_Africa <- Africa$COUNTRY
@@ -2747,30 +2695,11 @@ Matrix_SouthAsia <- matrix(NA, nrow = nrow(SouthAsia), ncol = nrow(SouthAsia))
 colnames(Matrix_SouthAsia) <- Countries_SouthAsia
 SouthAsia <- cbind(SouthAsia, Matrix_SouthAsia )
 
-
-
-# for(i in 4:(ncol(Africa)) ) {
-#   Africa[1, i ] <- Africa[i-3, "GDP2019MIL"]   / Africa[1,"sumofothers"]
-# }
-# 
-# for(i in 4:(ncol(Africa)) ) {
-#   Africa[2, i ] <- Africa[i-3, "GDP2019MIL"]   / Africa[2,"sumofothers"]
-# }
-# 
-# for(i in 4:(ncol(Africa)) ) {
-#   Africa[3, i ] <- Africa[i-3, "GDP2019MIL"]   / Africa[3,"sumofothers"]
-# }
-# 
-# for(i in 4:(ncol(Africa)) ) {
-#   Africa[i-3, i ] <- NA
-# }
-
-
 # Creating country specific weights 
 for(i in 4:(ncol(Africa)) ) {
   for(j in 1:nrow(Africa)) {
-  
-  Africa[j, i ] <- Africa[i-3, "GDP2019MIL"]   / Africa[j,"sumofothers"] }
+    
+    Africa[j, i ] <- Africa[i-3, "GDP2019MIL"]   / Africa[j,"sumofothers"] }
 }
 
 for(i in 4:(ncol(CentralAsia)) ) {
@@ -2855,105 +2784,115 @@ LATAM
 MiddleEast
 SouthAsia
 
-
-
-
-
-
-
-# 
-# for(k in 1:length(regions)) {
-# for(i in 4:(ncol(get(regions[k]))) ) {
-#   for(j in 1:nrow(get(regions[k]))) {
-#     
-#     get(regions[k])[j, i ] <- get(regions[k])[i-3, "GDP2019MIL"]   / get(regions[k])[j,"sumofothers"] } } }
-
-
-# for(i in 4:(ncol(Africa)) ) {
-#   Africa[i-3, i ] <- NA
-# }
-# 
-# 
-# 
-# for(i in 4:(ncol(Europe)) ) {
-#   for(j in 1:nrow(Europe)) {
-#     
-#     Europe[j, i ] <- Europe[i-3, "GDP2019MIL"]   / Europe[j,"sumofothers"] }
-# }
-# 
-# for(i in 4:(ncol(Europe)) ) {
-#   Europe[i-3, i ] <- NA
-# }
-#
-# 
-# for(i in 4:(ncol(Africa)) ) {
-#   Africa[3, i ] <- Africa[i-3, "GDP2019MIL"]   / Africa[3,"sumofothers"] 
-# }
-# 
-# 
-# for(i in 1:(nrow(Africa)) ) {
-#   Africa[i, 4 ] <- Africa[(i-3), "GDP2019MIL"]   / sum(Africa[-nrow(Africa), ][-i,]$GDP2019MIL) 
-# }
-# 
-# 
-# 
-# for(i in 1:(nrow(Africa)) ) {
-#   Africa[i, Africa[(i+1),1] ] <-  sum(Africa[-i,]$GDP2019MIL) 
-# }
-# 
-# 
-# for(i in 1:(nrow(Africa)) ) {
-#   Africa[i, Africa[(i+1),1] ] <-  sum(Africa[-i,]$GDP2019MIL) 
-# }
-# 
-# Africa[1,"Egypt"] <- 0
-# Africa
-# Africa[1,"Ghana"] <- Africa[2,"GDP2019MIL"]/Africa[1,"sumofothers"]
-# Africa[1,"South Africa"] <- Africa[3,"GDP2019MIL"]/Africa[1,"sumofothers"]
-# 
-# Africa <- mutate(total = 'Ghana' + 'South Africa')
-# 
-# Africa[,6]+Africa[,7]
-# 
-# 
-# 
-# 
-# for(i in 1:(nrow(Africa)-1) ) {
-#   Africa[i,"sumofothers"] <- Africa[i, "GDP2019MIL"] / sum(Africa[-nrow(Africa), ][-i,]$GDP2019MIL) 
-# }
-# 
-# for(i in 1:(nrow(Africa)-1) ) {
-#   Africa[i,"sharewithout"] <- Africa[i, "GDP2019MIL"] / sum(Africa[-nrow(Africa), ][-i,]$GDP2019MIL) 
-# }
-# 
-# Africa[1, Africa[1,1]]
-# Africa[2, Africa[2,1]]
-# Africa[3, Africa[3,1]]
-# 
-# em_fac<-matrix(NA,nrow=nrow(d_emcds),ncol=ncol(d_emcds)) # create an EM common factor excluding country i
-# for(i in 1:ncol(em_fac)){
-#   em_fac[,i]<-rowMeans(d_emcds[,-i])
-# }
-# 
-# for(i in 1:ncol(em_fac)){
-#   em_fac[,i]<-rowMeans(d_emcds[,-i])
-# }
-# 
-# 
-# 
-# 
-# Africa <- drop_na(geographic_classification[,1])
-# 
-# 
-# Africa <- drop_na(geographic_classification[,1])
-
-
-
-em_fac_test <- matrix(NA, nrow=nrow(d_emcds), ncol = ncol(d_emcds) )
-
-
-
 # =========================================================================.
+
+
+
+# prepare log difference data sets ----------------------------------------
+###Prepare data for regression
+em_cds2<- em_cds
+# xxx nonem_cds2 <- nonem_cds
+
+# em_cds_test <- em_cds[which(em_cds$Date>="2020-06-20" & cds_five$Date<="2020-07-01"   ),]
+# d_emcds_test<-apply(log(em_cds_test[,-1]),2,diff) #log differences of EM spreads
+# View(em_cds_test)
+# View(d_emcds_test)
+
+d_emcds<-apply(log(em_cds2[,-1]),2,diff) #log differences of EM spreads
+d_nemds<-apply(log(nonem_cds[,-1]),2,diff) # log differences of non-EM spreads
+
+# This was the old way before we started weighting things
+glo_cds <- rowMeans(d_nemds) 
+# =========================================================================.
+
+
+
+
+# global weight vector ----------------------------------------------------
+# This is the new way when we start weighting things
+glo_cds <- rowSums( t(t(d_nemds)*GDP2019USDMIL_D$weight) )
+
+# This was the old way before we started weighting things
+em_fac<-matrix(NA,nrow=nrow(d_emcds),ncol=ncol(d_emcds)) # create an EM common factor excluding country i
+for(i in 1:ncol(em_fac)){
+  em_fac[,i]<-rowMeans(d_emcds[,-i])
+}
+
+# This is the new way when we start weighting things
+em_fac<-matrix(NA,nrow=nrow(d_emcds),ncol=ncol(d_emcds)) 
+
+colnames(d_emcds)
+# =========================================================================.
+
+
+
+
+regions
+
+
+Africa$COUNTRY
+
+
+
+
+Argentina_affiliates <- LATAM$COUNTRY[!LATAM$COUNTRY %in% "Argentina"]
+Argentina_affiliates
+
+Argentina_weights <- subset(LATAM, COUNTRY == "Argentina")
+Argentina_weights 
+
+Argentina_weights <- Argentina_weights[,Argentina_affiliates]
+Argentina_weights
+
+sum(Argentina_weights) # just a check
+
+Argentina_affiliates_matrix <- d_emcds[, Argentina_affiliates]
+Argentinatest <- head(Argentina_affiliates_matrix, n = 10) # just a check
+
+Argentinatest <- data.frame(Argentinatest)
+
+Argentina <- rowSums(data.frame(mapply(`*`,Argentinatest,Argentina_weights)) )
+Argentina
+
+
+
+
+
+
+Brazil_affiliates <- LATAM$COUNTRY[!LATAM$COUNTRY %in% "Brazil"]
+Brazil_affiliates
+
+Brazil_weights <- subset(LATAM, COUNTRY == "Brazil")
+Brazil_weights 
+
+# Argentina_weights[is.na(Argentina_weights)] <- 0
+# Argentina_weights
+
+Brazil_weights <- Brazil_weights[,Brazil_affiliates]
+Brazil_weights
+
+sum(Brazil_weights) # just a check
+
+Brazil_affiliates_matrix <- d_emcds[, Brazil_affiliates]
+Braziltest <- head(Brazil_affiliates_matrix, n = 10) # just a check
+
+Braziltest <- data.frame(Braziltest)
+
+Brazil <- rowSums(data.frame(mapply(`*`,Braziltest,Brazil_weights)) )
+Brazil
+length(Brazil)
+
+
+
+
+
+
+
+
+
+Argentina_Vector
+asdf <- cbind(Argentina, Brazil)
+asdf
 
 
 
