@@ -116,7 +116,25 @@ library(gghighlight)
 # set number format -------------------------------------------------------
 #I don't want scientific notation for my values, so I specify this below. 
 options(scipen = 999)
+`%notin%` <- Negate(`%in%`)
 # =========================================================================.
+
+library(readxl)
+cds_five <- read_excel("Data/CDS.xlsx", sheet = "5yrCDS")
+countries <- read_excel("Data/laender.xlsx", sheet = "EM")
+
+em_countries <- countries[ which(countries$EM_dummy5yr ==1), "COUNTRY5yrCDS"   ]
+non_em_countries <- countries[ which(countries$EM_dummy5yr !=1), "COUNTRY5yrCDS"   ]
+cds_five <- cds_five[which(cds_five$Date>="2014-01-01" & cds_five$Date<="2020-07-01"   ),]
+
+em_cds <- cds_five[, c("Date", em_countries$COUNTRY5yrCDS )]
+nonem_cds<-cds_five[, c("Date", non_em_countries$COUNTRY5yrCDS )]
+
+
+# countriesinoxforddataset <- as_tibble(unique(Oxford_V1$COUNTRY))
+countrieswithcdsdata <- em_countries
+# countrieswithoutcds <- countriesinoxforddataset[countriesinoxforddataset$value %notin% countrieswithcdsdata$COUNTRY5yrCDS,]
+# countrieswithoutcds
 
 
 
@@ -167,7 +185,7 @@ Temporary_Data_Country <- Merged_Data[myvars]
 Temporary_Data_Country$Date <- as.Date(Temporary_Data_Country$Date) # XXX I added this. Maybe it is not necessary
 
 # We might also want a dataset with the total number of global confirmed cases and deaths per day.
-# I first have to deatch plyr for it group and summarise correctly. 
+# I first have to deatch plyr for it to group and summarise correctly. 
 # detach(package:plyr)    
 library(dplyr)
 World_Data <- Temporary_Data_Country %>% group_by(Date) %>%
@@ -983,10 +1001,6 @@ realproblems
 
 # I subset the file to only include the nations in our final data.
 Country_Coordinates <- subset(Country_Coordinates, is.element(Country_Coordinates$COUNTRY, Final_Data_Country$COUNTRY))
-
-
-
-
 
 # Lastly, I merge the two dataframes.
 Final_Data_Country <- merge(Final_Data_Country, Country_Coordinates, by = c("COUNTRY"), all=TRUE)
@@ -1883,7 +1897,7 @@ Final_Data_Country <- merge(Final_Data_Country, govt, by = c("COUNTRY"), all=TRU
 Final_Data_Country <- Final_Data_Country[order(Final_Data_Country$COUNTRY, Final_Data_Country$Date),]
 # =========================================================================.
 
-
+unique(Final_Data_Country$COUNTRY)
 
 # saving Oxford_V1  --------------------------------------------------------
 Oxford_V1 <- Final_Data_Country
@@ -1899,13 +1913,15 @@ View(Oxford_V1)
 # 1. step: export dataframe
 # write_xlsx(Oxford_V1,"Data/Oxford_V1.xlsx")
 # 2. step: handcoding FED, ECB etc. dummy time series and saving it as "Oxford_V1_dummyts_additions.xlsx"
-# 3. step: removing non-augmented dataframe from R
-# remove(Oxford_V1)
-# 4. step: importing additional dummy ts
+# 3. step: importing additional dummy ts
 # Oxford_addition <- read_excel("Data/Oxford_V1_dummyts_additions.xlsx")
-# 5. step: merging Oxford_V1 with Oxford_addition and calling it mergedOxford
-# Oxford_V1 <- as_tibble(merge(Oxford_V1, oxford_addition, by=c("COUNTRY", "Date")))
+# 4. step: merging Oxford_V1 with Oxford_addition and calling it mergedOxford
+# Oxford_V1 <- as_tibble(merge(Oxford_V1, Oxford_addition, by=c("COUNTRY", "Date")))
 # View(Oxford_V1)
+# 5. step: For future reference, I am gong to export the augmented dataset once so I have it again when I need it:
+# write_xlsx(Oxford_V1,"Data/Oxford_V1_augmented_3_8_2020.xlsx")
+# If I ever wanted to reimport the dataset instead of performing every step so far just use the line below
+# Oxford_V1 <- read_excel("Data/Oxford_V1_augmented_3_8_2020.xlsx")
 # =========================================================================.
 
 
@@ -2117,7 +2133,7 @@ Plot_26 <- plot_ly(data = subset(Oxford_V1, Date < as.Date("2020-06-30") & Date 
   add_lines(linetype = ~COUNTRY) %>%
   layout(title="COVID-19 mortality rate curves, by country") # New Mortality Rate Across Countries
 Plot_26
-orca(Plot_26, "Plots/Other/Figure4a.pdf")
+# orca(Plot_26, "Plots/Weighted/Figure4a.pdf")
 # =========================================================================.
 
 
@@ -2153,8 +2169,6 @@ First_Death <- First_Death %>%
   dplyr::mutate(new_mortality_growth_b <- (new_rolling_average_mortality-Lag(new_rolling_average_mortality,7))/Lag(new_rolling_average_mortality,7))
 
 First_Death$new_mortality_growth_b  <- log(First_Death$`... <- NULL`,10)
-
-# Please see the First Death dataset in the data folder. xxx
 # =========================================================================.
 
 
@@ -2165,7 +2179,7 @@ Plot_27A <- plot_ly(data  = subset(First_Death, Date < as.Date("2020-06-30") & D
   add_lines(linetype = ~COUNTRY) %>%
   layout(title="COVID-19 deaths per million, by country")
 Plot_27A
-orca(Plot_27A, "Plots/Other/Figure4b.pdf")
+# orca(Plot_27A, "Plots/Weighted/Figure4b.pdf")
 
 Plot_28 <- Plot_27A %>% layout(yaxis = list(type = "log"))
 Plot_28
@@ -2567,6 +2581,11 @@ for(i in 1:length(countriez)) {
 }
 EMindividualspreadsroster <- do.call("grid.arrange", c(country_plots))
 EMindividualspreadsroster 
+# XYZ plot
+# Saving the plot
+# pdf("Plots/weighted/individualspreads.pdf")
+# grid.arrange(EMindividualspreadsroster,nrow=1)
+# dev.off() 
 
 # plot individual spreads for non EM
 pdat<-melt(nonem_cds,id.vars="Date")
@@ -2578,7 +2597,7 @@ for(i in 1:length(countriez)) {
 }
 nonEMindividualspreadsroster <- do.call("grid.arrange", c(country_plots))
 nonEMindividualspreadsroster
-
+# XYZ plot
 # Saving the plot
 # jpeg("Plots/individualspreads.jpg", width = 1920, height = 1080)
 # do.call("grid.arrange", c(country_plots))
@@ -2627,7 +2646,7 @@ LATAM <- merge(LATAM, GDP2019USDMIL, by = c("COUNTRY"), all.x = TRUE)
 MiddleEast <- merge(MiddleEast, GDP2019USDMIL, by = c("COUNTRY"), all.x = TRUE)
 SouthAsia <- merge(SouthAsia, GDP2019USDMIL, by = c("COUNTRY"), all.x = TRUE)
 
-str(as.data.frame(drop_na(geographic_classification[,1] ) ) )
+# str(as.data.frame(drop_na(geographic_classification[,1] ) ) )
 
 # sum of others
 for(i in 1:(nrow(Africa)) ) {
@@ -2678,7 +2697,6 @@ Countries_Europe <- Europe$COUNTRY
 Matrix_Europe <- matrix(NA, nrow = nrow(Europe), ncol = nrow(Europe))
 colnames(Matrix_Europe) <- Countries_Europe
 Europe <- cbind(Europe, Matrix_Europe )
-
 
 Countries_LATAM <- LATAM$COUNTRY
 Matrix_LATAM <- matrix(NA, nrow = nrow(LATAM), ncol = nrow(LATAM))
@@ -2787,11 +2805,9 @@ SouthAsia
 # =========================================================================.
 
 
-
 # prepare log difference data sets ----------------------------------------
 ###Prepare data for regression
 em_cds2<- em_cds
-# xxx nonem_cds2 <- nonem_cds
 
 # em_cds_test <- em_cds[which(em_cds$Date>="2020-06-20" & cds_five$Date<="2020-07-01"   ),]
 # d_emcds_test<-apply(log(em_cds_test[,-1]),2,diff) #log differences of EM spreads
@@ -2801,98 +2817,772 @@ em_cds2<- em_cds
 d_emcds<-apply(log(em_cds2[,-1]),2,diff) #log differences of EM spreads
 d_nemds<-apply(log(nonem_cds[,-1]),2,diff) # log differences of non-EM spreads
 
-# This was the old way before we started weighting things
-glo_cds <- rowMeans(d_nemds) 
-# =========================================================================.
 
+# head(em_cds2)
+# d_emcds_test <- log(em_cds2[,-1])
+# head(d_emcds_test)
+# diff_d_emcds_test <- apply(d_emcds_test, 2, diff)
+# head(diff_d_emcds_test)
+
+# This was the old way before we started weighting things
+#glo_cds <- rowMeans(d_nemds) 
+# =========================================================================.
 
 
 
 # global weight vector ----------------------------------------------------
 # This is the new way when we start weighting things
 glo_cds <- rowSums( t(t(d_nemds)*GDP2019USDMIL_D$weight) )
+# =========================================================================.
 
-# This was the old way before we started weighting things
-em_fac<-matrix(NA,nrow=nrow(d_emcds),ncol=ncol(d_emcds)) # create an EM common factor excluding country i
-for(i in 1:ncol(em_fac)){
-  em_fac[,i]<-rowMeans(d_emcds[,-i])
-}
 
-# This is the new way when we start weighting things
-em_fac<-matrix(NA,nrow=nrow(d_emcds),ncol=ncol(d_emcds)) 
 
-colnames(d_emcds)
+# Africa weights ----------------------------------------------------------
+regions
+Africa$COUNTRY
+
+Egypt_affiliate_countries <- Africa$COUNTRY[!Africa$COUNTRY %in% "Egypt"]
+Egypt_affiliate_countries
+
+Egypt_weights <- subset(Africa, COUNTRY == "Egypt")
+Egypt_weights 
+
+Egypt_weights <- Egypt_weights[,Egypt_affiliate_countries]
+Egypt_weights
+
+sum(Egypt_weights) # just a check
+
+# Subset for affiliates countries
+Egypt_affiliates_matrix <- d_emcds[, Egypt_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Egypt_affiliates_matrix <- data.frame(Egypt_affiliates_matrix)
+
+Egypt <- rowSums(data.frame(mapply(`*`,Egypt_affiliates_matrix,Egypt_weights)) )
+Egypt
+
+
+
+Ghana_affiliate_countries <- Africa$COUNTRY[!Africa$COUNTRY %in% "Ghana"]
+Ghana_affiliate_countries
+
+Ghana_weights <- subset(Africa, COUNTRY == "Ghana")
+Ghana_weights 
+
+Ghana_weights <- Ghana_weights[,Ghana_affiliate_countries]
+Ghana_weights
+
+sum(Ghana_weights) # just a check
+
+# Subset for affiliates countries
+Ghana_affiliates_matrix <- d_emcds[, Ghana_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Ghana_affiliates_matrix <- data.frame(Ghana_affiliates_matrix)
+
+Ghana <- rowSums(data.frame(mapply(`*`,Ghana_affiliates_matrix,Ghana_weights)) )
+Ghana
+
+
+South.Africa_affiliate_countries <- Africa$COUNTRY[!Africa$COUNTRY %in% "South Africa"]
+South.Africa_affiliate_countries
+
+South.Africa_weights <- subset(Africa, COUNTRY == "South Africa")
+South.Africa_weights 
+
+South.Africa_weights <- South.Africa_weights[,South.Africa_affiliate_countries]
+South.Africa_weights
+
+sum(South.Africa_weights) # just a check
+
+# Subset for affiliates countries
+South.Africa_affiliates_matrix <- d_emcds[, South.Africa_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+South.Africa_affiliates_matrix <- data.frame(South.Africa_affiliates_matrix)
+
+South.Africa <- rowSums(data.frame(mapply(`*`,South.Africa_affiliates_matrix,South.Africa_weights)) )
+South.Africa
 # =========================================================================.
 
 
 
 
+
+# Central Asia weights ----------------------------------------------------
 regions
+CentralAsia$COUNTRY
+
+Kazakhstan_affiliate_countries <- CentralAsia$COUNTRY[!CentralAsia $COUNTRY %in% "Kazakhstan"]
+Kazakhstan_affiliate_countries
+
+Kazakhstan_weights <- subset(CentralAsia, COUNTRY == "Kazakhstan")
+Kazakhstan_weights 
+
+Kazakhstan_weights <- Kazakhstan_weights[,Kazakhstan_affiliate_countries]
+Kazakhstan_weights
+
+sum(Kazakhstan_weights) # just a check
+
+# Subset for affiliates countries
+Kazakhstan_affiliates_matrix <- d_emcds[, Kazakhstan_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Kazakhstan_affiliates_matrix <- data.frame(Kazakhstan_affiliates_matrix)
+
+Kazakhstan <- rowSums(data.frame(mapply(`*`,Kazakhstan_affiliates_matrix,Kazakhstan_weights)) )
+Kazakhstan
 
 
-Africa$COUNTRY
+Russia_affiliate_countries <- CentralAsia$COUNTRY[!CentralAsia $COUNTRY %in% "Russia"]
+Russia_affiliate_countries
+
+Russia_weights <- subset(CentralAsia, COUNTRY == "Russia")
+Russia_weights 
+
+Russia_weights <- Russia_weights[,Russia_affiliate_countries]
+Russia_weights
+
+sum(Russia_weights) # just a check
+
+# Subset for affiliates countries
+Russia_affiliates_matrix <- d_emcds[, Russia_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Russia_affiliates_matrix <- data.frame(Russia_affiliates_matrix)
+
+Russia <- rowSums(data.frame(mapply(`*`,Russia_affiliates_matrix,Russia_weights)) )
+Russia
+# =========================================================================.
 
 
 
 
-Argentina_affiliates <- LATAM$COUNTRY[!LATAM$COUNTRY %in% "Argentina"]
-Argentina_affiliates
+# East Asia weights -------------------------------------------------------
+regions
+EastAsia$COUNTRY
+
+China_affiliate_countries <- EastAsia$COUNTRY[!EastAsia $COUNTRY %in% "China"]
+China_affiliate_countries
+
+China_weights <- subset(EastAsia, COUNTRY == "China")
+China_weights 
+
+China_weights <- China_weights[,China_affiliate_countries]
+China_weights
+
+sum(China_weights) # just a check
+
+# Subset for affiliates countries
+China_affiliates_matrix <- d_emcds[, China_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+China_affiliates_matrix <- data.frame(China_affiliates_matrix)
+
+China <- rowSums(data.frame(mapply(`*`,China_affiliates_matrix,China_weights)) )
+China
+
+
+
+Indonesia_affiliate_countries <- EastAsia$COUNTRY[!EastAsia $COUNTRY %in% "Indonesia"]
+Indonesia_affiliate_countries
+
+Indonesia_weights <- subset(EastAsia, COUNTRY == "Indonesia")
+Indonesia_weights 
+
+Indonesia_weights <- Indonesia_weights[,Indonesia_affiliate_countries]
+Indonesia_weights
+
+sum(Indonesia_weights) # just a check
+
+# Subset for affiliates countries
+Indonesia_affiliates_matrix <- d_emcds[, Indonesia_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Indonesia_affiliates_matrix <- data.frame(Indonesia_affiliates_matrix)
+
+Indonesia <- rowSums(data.frame(mapply(`*`,Indonesia_affiliates_matrix,Indonesia_weights)) )
+Indonesia
+
+
+
+Malaysia_affiliate_countries <- EastAsia$COUNTRY[!EastAsia $COUNTRY %in% "Malaysia"]
+Malaysia_affiliate_countries
+
+Malaysia_weights <- subset(EastAsia, COUNTRY == "Malaysia")
+Malaysia_weights 
+
+Malaysia_weights <- Malaysia_weights[,Malaysia_affiliate_countries]
+Malaysia_weights
+
+sum(Malaysia_weights) # just a check
+
+# Subset for affiliates countries
+Malaysia_affiliates_matrix <- d_emcds[, Malaysia_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Malaysia_affiliates_matrix <- data.frame(Malaysia_affiliates_matrix)
+
+Malaysia <- rowSums(data.frame(mapply(`*`,Malaysia_affiliates_matrix,Malaysia_weights)) )
+Malaysia
+
+
+
+Philippines_affiliate_countries <- EastAsia$COUNTRY[!EastAsia $COUNTRY %in% "Philippines"]
+Philippines_affiliate_countries
+
+Philippines_weights <- subset(EastAsia, COUNTRY == "Philippines")
+Philippines_weights 
+
+Philippines_weights <- Philippines_weights[,Philippines_affiliate_countries]
+Philippines_weights
+
+sum(Philippines_weights) # just a check
+
+# Subset for affiliates countries
+Philippines_affiliates_matrix <- d_emcds[, Philippines_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Philippines_affiliates_matrix <- data.frame(Philippines_affiliates_matrix)
+
+Philippines <- rowSums(data.frame(mapply(`*`,Philippines_affiliates_matrix,Philippines_weights)) )
+Philippines
+
+
+Thailand_affiliate_countries <- EastAsia$COUNTRY[!EastAsia $COUNTRY %in% "Thailand"]
+Thailand_affiliate_countries
+
+Thailand_weights <- subset(EastAsia, COUNTRY == "Thailand")
+Thailand_weights 
+
+Thailand_weights <- Thailand_weights[,Thailand_affiliate_countries]
+Thailand_weights
+
+sum(Thailand_weights) # just a check
+
+# Subset for affiliates countries
+Thailand_affiliates_matrix <- d_emcds[, Thailand_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Thailand_affiliates_matrix <- data.frame(Thailand_affiliates_matrix)
+
+Thailand <- rowSums(data.frame(mapply(`*`,Thailand_affiliates_matrix,Thailand_weights)) )
+Thailand
+# =========================================================================.
+
+
+
+
+# Europe weights ----------------------------------------------------------
+regions
+Europe$COUNTRY
+
+Czechia_affiliate_countries <- Europe$COUNTRY[!Europe $COUNTRY %in% "Czechia"]
+Czechia_affiliate_countries
+
+Czechia_weights <- subset(Europe, COUNTRY == "Czechia")
+Czechia_weights 
+
+Czechia_weights <- Czechia_weights[,Czechia_affiliate_countries]
+Czechia_weights
+
+sum(Czechia_weights) # just a check
+
+# Subset for affiliates countries
+Czechia_affiliates_matrix <- d_emcds[, Czechia_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Czechia_affiliates_matrix <- data.frame(Czechia_affiliates_matrix)
+
+Czechia <- rowSums(data.frame(mapply(`*`,Czechia_affiliates_matrix,Czechia_weights)) )
+Czechia
+
+
+Hungary_affiliate_countries <- Europe$COUNTRY[!Europe $COUNTRY %in% "Hungary"]
+Hungary_affiliate_countries
+
+Hungary_weights <- subset(Europe, COUNTRY == "Hungary")
+Hungary_weights 
+
+Hungary_weights <- Hungary_weights[,Hungary_affiliate_countries]
+Hungary_weights
+
+sum(Hungary_weights) # just a check
+
+# Subset for affiliates countries
+Hungary_affiliates_matrix <- d_emcds[, Hungary_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Hungary_affiliates_matrix <- data.frame(Hungary_affiliates_matrix)
+
+Hungary <- rowSums(data.frame(mapply(`*`,Hungary_affiliates_matrix,Hungary_weights)) )
+Hungary
+
+
+Poland_affiliate_countries <- Europe$COUNTRY[!Europe $COUNTRY %in% "Poland"]
+Poland_affiliate_countries
+
+Poland_weights <- subset(Europe, COUNTRY == "Poland")
+Poland_weights 
+
+Poland_weights <- Poland_weights[,Poland_affiliate_countries]
+Poland_weights
+
+sum(Poland_weights) # just a check
+
+# Subset for affiliates countries
+Poland_affiliates_matrix <- d_emcds[, Poland_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Poland_affiliates_matrix <- data.frame(Poland_affiliates_matrix)
+
+Poland <- rowSums(data.frame(mapply(`*`,Poland_affiliates_matrix,Poland_weights)) )
+Poland
+
+
+Romania_affiliate_countries <- Europe$COUNTRY[!Europe $COUNTRY %in% "Romania"]
+Romania_affiliate_countries
+
+Romania_weights <- subset(Europe, COUNTRY == "Romania")
+Romania_weights 
+
+Romania_weights <- Romania_weights[,Romania_affiliate_countries]
+Romania_weights
+
+sum(Romania_weights) # just a check
+
+# Subset for affiliates countries
+Romania_affiliates_matrix <- d_emcds[, Romania_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Romania_affiliates_matrix <- data.frame(Romania_affiliates_matrix)
+
+Romania <- rowSums(data.frame(mapply(`*`,Romania_affiliates_matrix,Romania_weights)) )
+Romania
+
+
+Turkey_affiliate_countries <- Europe$COUNTRY[!Europe $COUNTRY %in% "Turkey"]
+Turkey_affiliate_countries
+
+Turkey_weights <- subset(Europe, COUNTRY == "Turkey")
+Turkey_weights 
+
+Turkey_weights <- Turkey_weights[,Turkey_affiliate_countries]
+Turkey_weights
+
+sum(Turkey_weights) # just a check
+
+# Subset for affiliates countries
+Turkey_affiliates_matrix <- d_emcds[, Turkey_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Turkey_affiliates_matrix <- data.frame(Turkey_affiliates_matrix)
+
+Turkey <- rowSums(data.frame(mapply(`*`,Turkey_affiliates_matrix,Turkey_weights)) )
+Turkey
+
+
+Ukraine_affiliate_countries <- Europe$COUNTRY[!Europe $COUNTRY %in% "Ukraine"]
+Ukraine_affiliate_countries
+
+Ukraine_weights <- subset(Europe, COUNTRY == "Ukraine")
+Ukraine_weights 
+
+Ukraine_weights <- Ukraine_weights[,Ukraine_affiliate_countries]
+Ukraine_weights
+
+sum(Ukraine_weights) # just a check
+
+# Subset for affiliates countries
+Ukraine_affiliates_matrix <- d_emcds[, Ukraine_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Ukraine_affiliates_matrix <- data.frame(Ukraine_affiliates_matrix)
+
+Ukraine <- rowSums(data.frame(mapply(`*`,Ukraine_affiliates_matrix,Ukraine_weights)) )
+Ukraine
+# =========================================================================.
+
+
+
+
+# LATAM weights -----------------------------------------------------------
+regions
+LATAM$COUNTRY
+
+Argentina_affiliate_countries <- LATAM$COUNTRY[!LATAM $COUNTRY %in% "Argentina"]
+Argentina_affiliate_countries
 
 Argentina_weights <- subset(LATAM, COUNTRY == "Argentina")
 Argentina_weights 
 
-Argentina_weights <- Argentina_weights[,Argentina_affiliates]
+Argentina_weights <- Argentina_weights[,Argentina_affiliate_countries]
 Argentina_weights
 
 sum(Argentina_weights) # just a check
 
-Argentina_affiliates_matrix <- d_emcds[, Argentina_affiliates]
-Argentinatest <- head(Argentina_affiliates_matrix, n = 10) # just a check
+# Subset for affiliates countries
+Argentina_affiliates_matrix <- d_emcds[, Argentina_affiliate_countries]
 
-Argentinatest <- data.frame(Argentinatest)
+# Change to a dataframe so that the multiplication works
+Argentina_affiliates_matrix <- data.frame(Argentina_affiliates_matrix)
 
-Argentina <- rowSums(data.frame(mapply(`*`,Argentinatest,Argentina_weights)) )
+Argentina <- rowSums(data.frame(mapply(`*`,Argentina_affiliates_matrix,Argentina_weights)) )
 Argentina
 
 
-
-
-
-
-Brazil_affiliates <- LATAM$COUNTRY[!LATAM$COUNTRY %in% "Brazil"]
-Brazil_affiliates
+Brazil_affiliate_countries <- LATAM$COUNTRY[!LATAM $COUNTRY %in% "Brazil"]
+Brazil_affiliate_countries
 
 Brazil_weights <- subset(LATAM, COUNTRY == "Brazil")
 Brazil_weights 
 
-# Argentina_weights[is.na(Argentina_weights)] <- 0
-# Argentina_weights
-
-Brazil_weights <- Brazil_weights[,Brazil_affiliates]
+Brazil_weights <- Brazil_weights[,Brazil_affiliate_countries]
 Brazil_weights
 
 sum(Brazil_weights) # just a check
 
-Brazil_affiliates_matrix <- d_emcds[, Brazil_affiliates]
-Braziltest <- head(Brazil_affiliates_matrix, n = 10) # just a check
+# Subset for affiliates countries
+Brazil_affiliates_matrix <- d_emcds[, Brazil_affiliate_countries]
 
-Braziltest <- data.frame(Braziltest)
+# Change to a dataframe so that the multiplication works
+Brazil_affiliates_matrix <- data.frame(Brazil_affiliates_matrix)
 
-Brazil <- rowSums(data.frame(mapply(`*`,Braziltest,Brazil_weights)) )
+Brazil <- rowSums(data.frame(mapply(`*`,Brazil_affiliates_matrix,Brazil_weights)) )
 Brazil
-length(Brazil)
+
+
+Chile_affiliate_countries <- LATAM$COUNTRY[!LATAM $COUNTRY %in% "Chile"]
+Chile_affiliate_countries
+
+Chile_weights <- subset(LATAM, COUNTRY == "Chile")
+Chile_weights 
+
+Chile_weights <- Chile_weights[,Chile_affiliate_countries]
+Chile_weights
+
+sum(Chile_weights) # just a check
+
+# Subset for affiliates countries
+Chile_affiliates_matrix <- d_emcds[, Chile_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Chile_affiliates_matrix <- data.frame(Chile_affiliates_matrix)
+
+Chile <- rowSums(data.frame(mapply(`*`,Chile_affiliates_matrix,Chile_weights)) )
+Chile
+
+
+Colombia_affiliate_countries <- LATAM$COUNTRY[!LATAM $COUNTRY %in% "Colombia"]
+Colombia_affiliate_countries
+
+Colombia_weights <- subset(LATAM, COUNTRY == "Colombia")
+Colombia_weights 
+
+Colombia_weights <- Colombia_weights[,Colombia_affiliate_countries]
+Colombia_weights
+
+sum(Colombia_weights) # just a check
+
+# Subset for affiliates countries
+Colombia_affiliates_matrix <- d_emcds[, Colombia_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Colombia_affiliates_matrix <- data.frame(Colombia_affiliates_matrix)
+
+Colombia <- rowSums(data.frame(mapply(`*`,Colombia_affiliates_matrix,Colombia_weights)) )
+Colombia
+
+
+
+Dominican.Republic_affiliate_countries <- LATAM$COUNTRY[!LATAM$COUNTRY %in% "Dominican Republic"]
+Dominican.Republic_affiliate_countries
+
+Dominican.Republic_weights <- subset(LATAM, COUNTRY == "Dominican Republic")
+Dominican.Republic_weights 
+
+Dominican.Republic_weights <- Dominican.Republic_weights[,Dominican.Republic_affiliate_countries]
+Dominican.Republic_weights
+
+sum(Dominican.Republic_weights) # just a check
+
+# Subset for affiliates countries
+Dominican.Republic_affiliates_matrix <- d_emcds[, Dominican.Republic_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Dominican.Republic_affiliates_matrix <- data.frame(Dominican.Republic_affiliates_matrix)
+
+Dominican.Republic <- rowSums(data.frame(mapply(`*`,Dominican.Republic_affiliates_matrix,Dominican.Republic_weights)) )
+Dominican.Republic
+
+
+Mexico_affiliate_countries <- LATAM$COUNTRY[!LATAM$COUNTRY %in% "Mexico"]
+Mexico_affiliate_countries
+
+Mexico_weights <- subset(LATAM, COUNTRY == "Mexico")
+Mexico_weights 
+
+Mexico_weights <- Mexico_weights[,Mexico_affiliate_countries]
+Mexico_weights
+
+sum(Mexico_weights) # just a check
+
+# Subset for affiliates countries
+Mexico_affiliates_matrix <- d_emcds[, Mexico_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Mexico_affiliates_matrix <- data.frame(Mexico_affiliates_matrix)
+
+Mexico <- rowSums(data.frame(mapply(`*`,Mexico_affiliates_matrix,Mexico_weights)) )
+Mexico
+
+
+Panama_affiliate_countries <- LATAM$COUNTRY[!LATAM$COUNTRY %in% "Panama"]
+Panama_affiliate_countries
+
+Panama_weights <- subset(LATAM, COUNTRY == "Panama")
+Panama_weights 
+
+Panama_weights <- Panama_weights[,Panama_affiliate_countries]
+Panama_weights
+
+sum(Panama_weights) # just a check
+
+# Subset for affiliates countries
+Panama_affiliates_matrix <- d_emcds[, Panama_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Panama_affiliates_matrix <- data.frame(Panama_affiliates_matrix)
+
+Panama <- rowSums(data.frame(mapply(`*`,Panama_affiliates_matrix,Panama_weights)) )
+Panama
+
+
+Peru_affiliate_countries <- LATAM$COUNTRY[!LATAM$COUNTRY %in% "Peru"]
+Peru_affiliate_countries
+
+Peru_weights <- subset(LATAM, COUNTRY == "Peru")
+Peru_weights 
+
+Peru_weights <- Peru_weights[,Peru_affiliate_countries]
+Peru_weights
+
+sum(Peru_weights) # just a check
+
+# Subset for affiliates countries
+Peru_affiliates_matrix <- d_emcds[, Peru_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Peru_affiliates_matrix <- data.frame(Peru_affiliates_matrix)
+
+Peru <- rowSums(data.frame(mapply(`*`,Peru_affiliates_matrix,Peru_weights)) )
+Peru
+
+
+Uruguay_affiliate_countries <- LATAM$COUNTRY[!LATAM$COUNTRY %in% "Uruguay"]
+Uruguay_affiliate_countries
+
+Uruguay_weights <- subset(LATAM, COUNTRY == "Uruguay")
+Uruguay_weights 
+
+Uruguay_weights <- Uruguay_weights[,Uruguay_affiliate_countries]
+Uruguay_weights
+
+sum(Uruguay_weights) # just a check
+
+# Subset for affiliates countries
+Uruguay_affiliates_matrix <- d_emcds[, Uruguay_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Uruguay_affiliates_matrix <- data.frame(Uruguay_affiliates_matrix)
+
+Uruguay <- rowSums(data.frame(mapply(`*`,Uruguay_affiliates_matrix,Uruguay_weights)) )
+Uruguay
+# =========================================================================.
 
 
 
 
 
+# Middle East weights -----------------------------------------------------
+regions
+MiddleEast$COUNTRY
+
+Bahrain_affiliate_countries <- MiddleEast$COUNTRY[!MiddleEast$COUNTRY %in% "Bahrain"]
+Bahrain_affiliate_countries
+
+Bahrain_weights <- subset(MiddleEast, COUNTRY == "Bahrain")
+Bahrain_weights 
+
+Bahrain_weights <- Bahrain_weights[,Bahrain_affiliate_countries]
+Bahrain_weights
+
+sum(Bahrain_weights) # just a check
+
+# Subset for affiliates countries
+Bahrain_affiliates_matrix <- d_emcds[, Bahrain_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Bahrain_affiliates_matrix <- data.frame(Bahrain_affiliates_matrix)
+
+Bahrain <- rowSums(data.frame(mapply(`*`,Bahrain_affiliates_matrix,Bahrain_weights)) )
+Bahrain
+
+
+Qatar_affiliate_countries <- MiddleEast$COUNTRY[!MiddleEast$COUNTRY %in% "Qatar"]
+Qatar_affiliate_countries
+
+Qatar_weights <- subset(MiddleEast, COUNTRY == "Qatar")
+Qatar_weights 
+
+Qatar_weights <- Qatar_weights[,Qatar_affiliate_countries]
+Qatar_weights
+
+sum(Qatar_weights) # just a check
+
+# Subset for affiliates countries
+Qatar_affiliates_matrix <- d_emcds[, Qatar_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Qatar_affiliates_matrix <- data.frame(Qatar_affiliates_matrix)
+
+Qatar <- rowSums(data.frame(mapply(`*`,Qatar_affiliates_matrix,Qatar_weights)) )
+Qatar
+
+
+Saudi.Arabia_affiliate_countries <- MiddleEast$COUNTRY[!MiddleEast$COUNTRY %in% "Saudi Arabia"]
+Saudi.Arabia_affiliate_countries
+
+Saudi.Arabia_weights <- subset(MiddleEast, COUNTRY == "Saudi Arabia")
+Saudi.Arabia_weights 
+
+Saudi.Arabia_weights <- Saudi.Arabia_weights[,Saudi.Arabia_affiliate_countries]
+Saudi.Arabia_weights
+
+sum(Saudi.Arabia_weights) # just a check
+
+# Subset for affiliates countries
+Saudi.Arabia_affiliates_matrix <- d_emcds[, Saudi.Arabia_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Saudi.Arabia_affiliates_matrix <- data.frame(Saudi.Arabia_affiliates_matrix)
+
+Saudi.Arabia <- rowSums(data.frame(mapply(`*`,Saudi.Arabia_affiliates_matrix,Saudi.Arabia_weights)) )
+Saudi.Arabia
+# =========================================================================.
 
 
 
 
-Argentina_Vector
-asdf <- cbind(Argentina, Brazil)
-asdf
+
+# South Asia weights ------------------------------------------------------
+regions
+SouthAsia$COUNTRY
+
+India_affiliate_countries <- SouthAsia$COUNTRY[!SouthAsia$COUNTRY %in% "India"]
+India_affiliate_countries
+
+India_weights <- subset(SouthAsia, COUNTRY == "India")
+India_weights 
+
+India_weights <- India_weights[,India_affiliate_countries]
+India_weights
+
+sum(India_weights) # just a check
+
+# Subset for affiliates countries
+India_affiliates_matrix <- d_emcds[, India_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+India_affiliates_matrix <- data.frame(India_affiliates_matrix)
+
+India <- rowSums(data.frame(mapply(`*`,India_affiliates_matrix,India_weights)) )
+India
+
+
+Sri.Lanka_affiliate_countries <- SouthAsia$COUNTRY[!SouthAsia$COUNTRY %in% "Sri Lanka"]
+Sri.Lanka_affiliate_countries
+
+Sri.Lanka_weights <- subset(SouthAsia, COUNTRY == "Sri Lanka")
+Sri.Lanka_weights 
+
+Sri.Lanka_weights <- Sri.Lanka_weights[,Sri.Lanka_affiliate_countries]
+Sri.Lanka_weights
+
+sum(Sri.Lanka_weights) # just a check
+
+# Subset for affiliates countries
+Sri.Lanka_affiliates_matrix <- d_emcds[, Sri.Lanka_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Sri.Lanka_affiliates_matrix <- data.frame(Sri.Lanka_affiliates_matrix)
+
+Sri.Lanka <- rowSums(data.frame(mapply(`*`,Sri.Lanka_affiliates_matrix,Sri.Lanka_weights)) )
+Sri.Lanka
+# =========================================================================.
+
+
+
+
+# regional weight vector --------------------------------------------------
+# This was the old way before we started weighting things
+# em_fac<-matrix(NA,nrow=nrow(d_emcds),ncol=ncol(d_emcds)) # create an EM common factor excluding country i
+# for(i in 1:ncol(em_fac)){
+#   em_fac[,i]<-rowMeans(d_emcds[,-i])
+# }
+
+# This is the new way when we start weighting things
+# First I create an empty matrix of 30 countries X the number of differenced log CDS spreads
+em_fac<-matrix(NA,nrow=nrow(d_emcds),ncol=ncol(d_emcds)) 
+
+# Then I rename the column names to keep track of the individual columns
+colnames(em_fac) <- colnames(d_emcds)
+
+# Then I fill up all the columns with the right data
+Africa$COUNTRY
+em_fac[, "Egypt"] <- Egypt
+em_fac[, "Ghana"] <- Ghana
+em_fac[, "South Africa"] <- South.Africa
+
+CentralAsia$COUNTRY
+em_fac[, "Kazakhstan"] <- Kazakhstan
+em_fac[, "Russia"] <- Russia
+
+EastAsia$COUNTRY
+em_fac[, "China"] <- China
+em_fac[, "Indonesia"] <- Indonesia
+em_fac[, "Malaysia"] <- Malaysia
+em_fac[, "Philippines"] <- Philippines
+em_fac[, "Thailand"] <- Thailand
+
+Europe$COUNTRY
+em_fac[, "Czechia"] <- Czechia
+em_fac[, "Hungary"] <- Hungary
+em_fac[, "Poland"] <- Poland
+em_fac[, "Romania"] <- Romania
+em_fac[, "Turkey"] <- Turkey
+em_fac[, "Ukraine"] <- Ukraine
+
+LATAM$COUNTRY
+em_fac[, "Argentina"] <- Argentina
+em_fac[, "Brazil"] <- Brazil
+em_fac[, "Chile"] <- Chile
+em_fac[, "Colombia"] <- Colombia
+em_fac[, "Dominican Republic"] <- Dominican.Republic
+em_fac[, "Mexico"] <- Mexico
+em_fac[, "Panama"] <- Panama
+em_fac[, "Peru"] <- Peru
+em_fac[, "Uruguay"] <- Uruguay
+
+MiddleEast$COUNTRY
+em_fac[, "Bahrain"] <- Bahrain
+em_fac[, "Qatar"] <- Qatar
+em_fac[, "Saudi Arabia"] <- Saudi.Arabia
+
+SouthAsia$COUNTRY
+em_fac[, "India"] <- India
+em_fac[, "Sri Lanka"] <- Sri.Lanka
+# =========================================================================.
 
 
 
@@ -2946,8 +3636,7 @@ for(i in 1:nrow(coefz)){
 }
 colnames(predz)<-colnames(post.dat)
 
-# I made a date change here so that the code runs smoothly
-pdat<-data.frame(em_cds2$Date[which(em_cds2$Date>"2019-07-01")], # date
+pdat<-data.frame(em_cds2$Date[which(em_cds2$Date>"2019-06-30")], # date
                  rowMeans(post.dat), # EM_Avg
                  rowMeans(post.dat.nonem[,which(colnames(post.dat.nonem) %in%  non_em_countries$COUNTRY5yrCDS  )]), # Developed_Avg
                  rowMeans(post.dat[,which(colnames(post.dat) %in% Top5_Mortality_Countries$COUNTRY  )]), # EM_Avg_COVID
@@ -2963,13 +3652,13 @@ p<-ggplot(data=pdat[-1,],aes(x=date,y=cumsum(EM_Avg)))+geom_line()+geom_line(aes
 p
 p2<-ggplot(data=pdat[-1,],aes(x=date,y=EM_SD))+geom_line()+theme_bw()+xlab("")+ylab("Standard Deviation")+ggtitle("Emerging Markets CDS Spreads Dispersion")+geom_vline(xintercept = c(as.numeric(as.Date("2020-03-18")),as.numeric(as.Date("2020-06-04"))),alpha=.5)
 p2
-p4a<-ggplot(data=pdat[-1,],aes(x=date,y=cumsum(EM_Avg_COVID)))+geom_line()+geom_line(aes(y=cumsum(EM_Avg_nCOVID)),size=1)+theme_bw()+xlab("")+ylab("Cumulative Change (Log CDS)")+ggtitle("High Vs. Low COVID Moralities: Actual")  + annotate(geom ="text", x = c(as.POSIXct("2020-01-25"),as.POSIXct("2020-01-25")  ), y = c(.4,.1), label = c("Low Mortality", "High Mortality") , fontface=c("bold","plain"))
+p4a<-ggplot(data=pdat[-1,],aes(x=date,y=cumsum(EM_Avg_COVID)))+geom_line()+geom_line(aes(y=cumsum(EM_Avg_nCOVID)),size=1)+theme_bw()+xlab("")+ylab("Cumulative Change (Log CDS)")+ggtitle("High Vs. Low COVID Mortalities: Actual")  + annotate(geom ="text", x = c(as.POSIXct("2020-01-25"),as.POSIXct("2020-01-25")  ), y = c(.4,.1), label = c("Low Mortality", "High Mortality") , fontface=c("bold","plain"))
 p4a
-p4b<-ggplot(data=pdat[-1,],aes(x=date,y=cumsum(EM_Avg_COVID-EM_Pred_COVID)))+geom_line()+geom_line(aes(y=cumsum(EM_Avg_nCOVID-EM_Pred_nCOVID)),size=1)+theme_bw()+xlab("")+ylab("Cumulative Residuals")+labs(title="High Vs. Low COVID Moralities: Actual-Fitted")+geom_vline(xintercept=c(as.numeric(as.Date("2020-03-18")),as.numeric(as.Date("2020-06-04"))),alpha=.5)+annotate("text", x = c(as.POSIXct("2020-02-01"),as.POSIXct("2020-02-10")), y = c(.0,-.35), label = c("Low Mortality", "High Mortality") , fontface=c("bold","plain"))
+p4b<-ggplot(data=pdat[-1,],aes(x=date,y=cumsum(EM_Avg_COVID-EM_Pred_COVID)))+geom_line()+geom_line(aes(y=cumsum(EM_Avg_nCOVID-EM_Pred_nCOVID)),size=1)+theme_bw()+xlab("")+ylab("Cumulative Residuals")+labs(title="High Vs. Low COVID Mortalities: Actual-Fitted")+geom_vline(xintercept=c(as.numeric(as.Date("2020-03-18")),as.numeric(as.Date("2020-06-04"))),alpha=.5)+annotate("text", x = c(as.POSIXct("2020-02-01"),as.POSIXct("2020-02-10")), y = c(.0,-.35), label = c("Low Mortality", "High Mortality") , fontface=c("bold","plain"))
 p4b
-grid.arrange(p,p2,p4a,p4b,nrow=2) #1000x700
-
-# jpeg("Plots/pp2p4ap4b.jpg", width = 1920, height = 1080)
+grid.arrange(p,p2,p4a,p4b,nrow=2) 
+# XYZ figure
+# pdf("Plots/Weighted/pp2p4ap4b.pdf")
 # grid.arrange(p,p2,p4a,p4b,nrow=2)
 # dev.off()
 
@@ -2979,35 +3668,32 @@ p5a
 p5b<-ggplot(data=pdat[-1,],aes(x=date,y=cumsum(EM_Avg-EM_Pred)))+geom_line()+geom_line(aes(y=cumsum(Developed_Avg-Developed_Pred)),size=1)+theme_bw()+xlab("")+ylab("Cumulative Residuals")+labs(title="Emerging Markets Vs. Developed countries: Actual-Fitted")+annotate("text", x = c(as.POSIXct("2020-01-25"),as.POSIXct("2020-02-10")), y = c(.05,-.1), label = c("Developed", "EM") , fontface=c("bold","plain")) # geom_vline(xintercept=c(as.numeric(as.POSIXct("2020-03-18")),as.numeric(as.POSIXct("2020-06-04"))),alpha=.5)+
 p5b
 grid.arrange(p5a,p5b,nrow=1)
-# p5b<-ggplot(data=pdat[-1,],aes(x=date,y=cumsum(EZ_Avg_PIIGS-EZ_Pred_PIIGS)))+geom_line()+geom_line(aes(y=cumsum(EZ_Avg_Core-EZ_Pred_Core)),size=1)+theme_bw()+xlab("")+ylab("Cumulative Residuals")+labs(title="GIIPS Vs. Core: Actual-Fitted")+geom_vline(xintercept=c(as.numeric(as.Date("2020-03-18")),as.numeric(as.Date("2020-06-04"))),alpha=.5)+annotate("text", x = c(as.Date("2020-01-25"),as.Date("2020-02-10")), y = c(.1,-.1), label = c("Core", "GIIPS") , fontface=c("bold","plain"))
-
-# jpeg("Plots/p5ap5b.jpg", width = 1920, height = 1080)
+# XYZ figure
+# jpeg("Plots/Weighted/p5ap5b.jpg", width = 1920, height = 1080)
 # grid.arrange(p5a,p5b,nrow=1)
 # dev.off()
 
-# XXX writing these?
-# write.csv(data.frame(pdat$date,post.dat),"Data/covid_ez_spreads.csv")
-# write.csv(data.frame(pdat$date,predz),"Data/covid_ez_prediction.csv")
+write.csv(data.frame(pdat$date,post.dat),"Data/covid_ez_spreads_weighted.csv")
+write.csv(data.frame(pdat$date,predz),"Data/covid_ez_prediction_weighted.csv")
 
 corz<-c(0)
 for(i in 1:ncol(post.dat)){
   corz[i]<-cor(post.dat[,i],predz[,i],use="complete.obs")
 }
 
-###plot individual spreads. Here I had to change the date again
-pdat<-data.frame(em_cds2$Date[which(em_cds2$Date>"2019-07-01")],post.dat,predz)
+###plot individual spreads. 
+pdat<-data.frame(em_cds2$Date[which(em_cds2$Date>"2019-06-30")],post.dat,predz)
 colnames(pdat)[1]<-"date"
 countriez<-colnames(pdat)[-1]
 country_plots<-list()
 
 for(i in 1:(length(countriez)/2)) {
-  plotdat<-pdat[-1,c(1,i+1,i+18)]
+  plotdat<-pdat[-1,c(1,i+1,i+31)]
   plotdat[,-1]<-apply(plotdat[,-1],2,cumsum)
   country_plots[[i]] <- ggplot(data=(plotdat), aes_string(x="date",y=colnames(plotdat)[2]))+geom_line()+theme_bw()+ylab("")+xlab(countriez[i])+geom_line(aes_string(x="date",y=colnames(plotdat)[3]),linetype=2)
 }
 do.call("grid.arrange", c(country_plots)) 
-
-# jpeg("Plots/individualpredvsactual.jpg", width = 1920, height = 1080)
+# jpeg("Plots/Weighted/individualpredvsactual.jpg", width = 1920, height = 1080)
 # do.call("grid.arrange", c(country_plots)) 
 # dev.off()
 # =========================================================================.
@@ -3016,10 +3702,8 @@ do.call("grid.arrange", c(country_plots))
 
 # plots vs fundamentals ---------------------------------------------------
 fstim<-read.csv("Data/CESI_7.csv",header=T,sep=',')
-###keep EU 
-em_countries<-em_countries
+###keep EM
 em_countries
-#eu_countries2<-c("Austria","Belgium","Cyprus","Estonia","Finland","France","Germany","Greece","Ireland","Italy","Latvia","Lithuania","Luxembourg","Malta","Netherlands","Portugal","Slovakia","Slovenia","Spain")
 
 fstim<-fstim[which(fstim$Country %in% c(em_countries$COUNTRY5yrCDS, non_em_countries$COUNTRY5yrCDS) ),]
 nrow(fstim)
@@ -3035,43 +3719,41 @@ p.cds.coefs.stim<-merge(p.cds.coefs,fstim,by.x="countries",by.y="Country")
 p.cds.coefs.pd <-p.cds.coefs
 
 pd <- read_excel("Data/PublicDebttoGDPyearly.xlsx", sheet = "DebttoGDP")
+
 pd <- pd[, em_countries$COUNTRY5yrCDS]
 pd2 <- pd
 pd3<-colMeans(pd2[,])
 
-rates<-read.csv("Data/_rMinusg.csv",header=T,sep=',')
-rates$Date<-as.yearqtr((rates$Date))
-rmg<-rates[which(rates$Date >= "2014 Q4"),]
-rmg<-rmg[which(rmg$Date<="2018 Q4"),]
-rmg<-colMeans(rmg[,-1],na.rm=T)
-rmg<-rmg[-length(rmg)]
-names(rmg)<-c("Austria","Belgium","Cyprus","Finland","France","Germany","Greece","Ireland","Italy","Lithuania","Malta","Netherlands","Portugal","Slovak_Rep","Slovenia","Spain")
-rmg<-rmg[-which(names(rmg)=="Malta")]
-rmg<-rmg[p.cds.coefs.pd$countries]
+# rates<-read.csv("Data/_rMinusg.csv",header=T,sep=',')
+# rates$Date<-as.yearqtr((rates$Date))
+# rmg<-rates[which(rates$Date >= "2014 Q4"),]
+# rmg<-rmg[which(rmg$Date<="2018 Q4"),]
+# rmg<-colMeans(rmg[,-1],na.rm=T)
+# rmg<-rmg[-length(rmg)]
+# names(rmg)<-c("Austria","Belgium","Cyprus","Finland","France","Germany","Greece","Ireland","Italy","Lithuania","Malta","Netherlands","Portugal","Slovak_Rep","Slovenia","Spain")
+# rmg<-rmg[-which(names(rmg)=="Malta")]
+# rmg<-rmg[p.cds.coefs.pd$countries]
 
 
 ###fundamentals plot 
 pdat<-data.frame(pd3,p.cds.coefs.pd)
 colnames(pdat)<-c("PD","Intercept","AR","Global","EM","countries")
 
-# pdat<-data.frame(pd3,rmg,p.cds.coefs.pd)   xxx
-# colnames(pdat)<-c("PD","RMG","Intercept","AR","Global","Euro","countries")
-
-p<-ggplot(data=pdat,aes(x=PD,y=Global))+geom_point(shape=21,fill="grey",size=3)+theme_bw()+geom_text(aes(label=countries),hjust="inward", vjust="inward")+xlab("Public Debt/GDP (%)")+ylab("Global Beta")+stat_cor(method = "pearson", label.x = 50, label.y = .5)+geom_smooth(method="lm",se=F,color="red",linetype=2,size=.5)
+p<-ggplot(data=pdat,aes(x=PD,y=Global))+geom_point(shape=21,fill="grey",size=3)+theme_bw()+geom_text(aes(label=countries),hjust="inward", vjust="inward")+xlab("Public Debt/GDP (%)")+ylab("Global Beta")+stat_cor(method = "pearson", label.x = 50, label.y = .5) + geom_smooth(method="lm",se=F,color="red",linetype=2,size=.5)
 p
 # jpeg("Plots/Figure6a.jpg", width = 1920, height = 1080)
 # p
 # dev.off()
 
-p2<-ggplot(data=pdat,aes(x=PD,y=EM))+geom_point(shape=21,fill="grey",size=3)+theme_bw()+geom_text(aes(label=countries),hjust="inward", vjust="inward")+xlab("Public Debt/GDP (%)")+ylab("Regional Beta")+stat_cor(method = "pearson", label.x = 45, label.y = 1.9)+geom_smooth(method="lm",se=F,color="red",linetype=2,size=.5)
+p2<-ggplot(data=pdat,aes(x=PD,y=EM))+geom_point(shape=21,fill="grey",size=3)+theme_bw()+geom_text(aes(label=countries),hjust="inward", vjust="inward")+xlab("Public Debt/GDP (%)")+ylab("Regional Beta")+stat_cor(method = "pearson", label.x = 45, label.y = 1.9) + geom_smooth(method="lm",se=F,color="red",linetype=2,size=.5)
 p2
 # jpeg("Plots/Figure6b.jpg", width = 1920, height = 1080)
 # p2
 # dev.off()
 
 grid.arrange(p,p2,nrow=1)## 1000x400
-# jpeg("Plots/Figure6.jpg", width = 1920, height = 1080)
-# grid.arrange(p,p2,nrow=1)## 1000x400
+# pdf("Plots/Weighted/Figure6_weighted.pdf")
+# grid.arrange(p,p2,nrow=1)
 # dev.off()
 
 pdat2<-data.frame(p.cds.coefs.stim)
@@ -3085,9 +3767,11 @@ p7<-ggplot(data=pdat2,aes(x=Country,y=Fiscal))+geom_bar(stat="identity")+theme_b
 p7
 
 grid.arrange(p7,p4,p5,nrow=1)## 1000x400
-# jpeg("Plots/Figure7.jpg", width = 1920, height = 1080)
+# pdf("Plots/Weighted/Figure7_weighted.pdf")
 # grid.arrange(p7,p4,p5,nrow=1)## 1000x400
 # dev.off()
+
+
 
 pdat3<-data.frame(names(pd3),pd3,colSums(post.dat[1:197,],na.rm=T),colSums(post.dat[1:197,]-predz[1:197,],na.rm=T))
 colnames(pdat3)<-c("country","pd","post","covidresid")
@@ -3121,7 +3805,7 @@ postminuspredz <- postminuspredz[,1]
 
 
 pdat4<-data.frame(fstim,post.dat.without,postminuspredz )
-colSums(post.dat.without[1:197,],na.rm=T)
+colSums(post.dat.without[1:197,],na.rm=T)  #error 
 colnames(pdat4)<-c("country","fstim","post","covidresid")
 p10<-ggplot(data=pdat4,aes(y=post,x=fstim))+geom_point(shape=21,fill="grey",size=3)+theme_bw()+stat_cor(method = "pearson", label.x =15, label.y = -.5)+geom_text(aes(label=country),hjust="inward",check_overlap = T)+ylab("Realized log CDS Change (2020)")+xlab("COVID Stimulus/GDP (%)")
 p10
@@ -3130,7 +3814,7 @@ p10
 # dev.off()
 
 p11<-ggplot(data=pdat4,aes(y=covidresid,x=fstim))+geom_point(shape=21,fill="grey",size=3)+theme_bw()+stat_cor(method = "pearson", label.x =15, label.y = -.5)+geom_text(aes(label=country),hjust="inward",check_overlap = T)+ylab("Cumulative COVID Residual")+xlab("COVID Stimulus/GDP (%)")
-p11
+p11 # XYZ
 
 grid.arrange(p10,p11,nrow=1)
 # jpeg("Plots/stimulusvsresiduals.jpg", width = 1920, height = 1080)
@@ -3175,9 +3859,10 @@ library(stargazer)
 
 
 # import prediction and actual data ---------------------------------------
-cds_5yr_prediction <- read.csv("data/covid_ez_prediction.csv", header = T, sep=',')
-cds_5yr_actual <- read.csv("data/covid_ez_spreads.csv", header = T, sep = ',')
+cds_5yr_prediction <- read.csv("data/covid_ez_prediction_weighted.csv", header = T, sep=',')
+cds_5yr_actual <- read.csv("data/covid_ez_spreads_weighted.csv", header = T, sep = ',')
 
+oxford <- Oxford_V1
 oxford <- read_excel("Data/Oxford_V1.xlsx")
 oxford <- oxford %>% dplyr::select(-contains("Flag"))
 oxford <- oxford %>% dplyr::select(-contains("Lagged"))
@@ -3279,15 +3964,24 @@ p_EM_Mar <- ggplot(dat = cds_5yr_EM_Mar,aes(x=Date,y=CDS_5y_Actual,linetype="Act
 p_EM_Mar
 
 p_EM <- grid.arrange(p_EM_preMar, p_EM_Mar, p_EM_postMar, ncol=3,nrow=1)
-jpeg("Plots/figure10.jpg", width = 1920, height = 1080)
-p_EM <- grid.arrange(p_EM_preMar, p_EM_Mar, p_EM_postMar, ncol=3,nrow=1)
-dev.off()
+# XYZ figure
+# pdf("Plots/Weighted/figure10weighted.pdf", width = 11.69, height = 8.27 )
+# plot(p_EM)
+# dev.off()
+
 # =========================================================================.
 
 
 
 # create panel ------------------------------------------------------------
+# panel <- read_excel("Data/panel.xlsx")
+
 panel <- merge(cds_5yr_merged, oxford, by = c("Country", "Date"), all.x = TRUE)
+paneladdition <- read_excel("Data/paneladdition.xlsx") # adding variables such as the oil, IMF suppot dummy, remittances, RFI, etc.
+
+panel <- merge(panel, paneladdition, by = c("Country", "Date"), all.x = TRUE )
+View(panel)
+
 panel$Dummy_Fiscal_Country <- as.numeric(panel$Fiscal_Response_Dummy > 0)
 # panel$Dummy_Fiscal_EU <- as.numeric(panel$EU_Fiscal_Response_Dummy > 0)
 panel$Dummy_Monetary_ECB <- as.numeric(panel$ECB_Announcement > 0)
@@ -3298,17 +3992,169 @@ panel <- panel %>%
   dplyr::group_by(Country) %>%
   dplyr::mutate(Cum_CDS_5y_Residual = cumsum(CDS_5y_Residual))
 
-panel_inCOVID <- panel[which(panel$Date > "2020-02-29" & panel$Date < "2020-04-01"),]
+panel_inCOVID <- panel[which(panel$Date >= "2020-03-01" & panel$Date < "2020-04-01"),]
 
 panel_inCOVID <- panel_inCOVID %>% ungroup()
 
 panel_inCOVID <- pdata.frame(panel_inCOVID, index = c("Country", "Date"))
+
 panel_inCOVID$Date <- as.Date(panel_inCOVID$Date,"%Y-%m-%d")
 
 #reorder
 panel_inCOVID <- panel_inCOVID[order(panel_inCOVID$Date),]
 panel_inCOVID <- panel_inCOVID[order(panel_inCOVID$Country),]
 # =========================================================================.
+
+
+
+# panel analysis of COVID residuals with additional controls --------------
+### Panel analysis: COVID residuals
+new_res.mortality.2 <- plm(CDS_5y_Residual ~ Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth),
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+
+se.new_res.mortality.2 <- coeftest(new_res.mortality.2, vcov = vcovHC(new_res.mortality.2, type = "HC1"))
+
+new_res.mortality.3 <- plm(CDS_5y_Residual ~ Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth) + driving + SI_Growth,
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+
+se.new_res.mortality.3 <- coeftest(new_res.mortality.3, vcov = vcovHC(new_res.mortality.3, type = "HC1"))
+
+new_res.mortality.4 <- plm(CDS_5y_Residual ~ Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth) + driving + SI_Growth + Lag(Dummy_Fiscal_Country) + Lag(Dummy_Monetary_ECB) + Lag(Dummy_Monetary_Fed),
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+se.new_res.mortality.4 <- coeftest(new_res.mortality.4, vcov = vcovHC(new_res.mortality.4, type = "HC1"))
+
+new_res.mortality.5 <- plm(CDS_5y_Residual ~ Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth) + driving + SI_Growth  + Lag(Dummy_Monetary_ECB) + Lag(Dummy_Monetary_Fed) + Lag(China_debt_stock_GDP) + Lag(Dummy_Fiscal_Country_weighted_extdebt) + Lag(RFI_GDP) + Lag(Oil_effect),
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+se.new_res.mortality.5 <- coeftest(new_res.mortality.5, vcov = vcovHC(new_res.mortality.5, type = "HC1"))
+
+stargazer(digits=4,new_res.mortality.2,new_res.mortality.3,new_res.mortality.4, new_res.mortality.5,
+          type="latex",se=list(se.new_res.mortality.2[,2],se.new_res.mortality.3[,2],se.new_res.mortality.4[,2], se.new_res.mortality.5[,2]), out=file.path("Table_inCOVID_panel_output_newRES_mortality.htm"),
+          dep.var.labels=c("COVID Residual"), 
+          covariate.labels=c("New Mortality Rate", "New Mortality Rate Growth", 
+                             "Total Mortality Rate", "Total Mortality Rate Growth",
+                             "Mobility", "SI Growth",
+                             "Country Fiscal Policy Dummy", "ECB Policy Dummy", "Fed Policy Dummy", 
+                             "China debt stock", "Fiscal dummy X ext. debtGDP", "Oil effect"),
+          df = FALSE, omit.stat="adj.rsq", 
+          notes = c("*,**,*** correspond to 10%, 5% and 1% significance, respectively.","HAC robust standard errors, clustered by country. Time and Country FEs."),
+          notes.append=F, notes.align ="l",
+          title="COVID-Sample Panel Analysis",add.lines = list(c("Fixed effects?", "Y","Y","Y","Y")))
+# =========================================================================.
+
+
+
+# panel analysis of COVID spreads changes in march 2020 with additional controls--------
+### Panel analysis: CDS spreads changes in 2020 March
+new_CDS.mortality.0 <- plm(CDS_5y_Actual ~ CDS_5y_Prediction,
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID, na.action="na.exclude")
+se.new_CDS.mortality.0 <- coeftest(new_CDS.mortality.0, vcov = vcovHC(new_CDS.mortality.0, type = "HC1"))
+
+new_CDS.mortality.2 <- plm(CDS_5y_Actual ~ CDS_5y_Prediction + Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth),
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+se.new_CDS.mortality.2 <- coeftest(new_CDS.mortality.2, vcov = vcovHC(new_CDS.mortality.2, type = "HC1"))
+
+new_CDS.mortality.3 <- plm(CDS_5y_Actual ~ CDS_5y_Prediction + Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth) + driving + SI_Growth,
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+se.new_CDS.mortality.3 <- coeftest(new_CDS.mortality.3, vcov = vcovHC(new_CDS.mortality.3, type = "HC1"))
+
+new_CDS.mortality.4 <- plm(CDS_5y_Actual ~ CDS_5y_Prediction + Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth) + driving + SI_Growth + Lag(Dummy_Fiscal_Country) + Lag(Dummy_Monetary_ECB) + Lag(Dummy_Monetary_Fed),
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+se.new_CDS.mortality.4 <- coeftest(new_CDS.mortality.4, vcov = vcovHC(new_CDS.mortality.4, type = "HC1"))
+
+new_CDS.mortality.5 <- plm(CDS_5y_Actual ~ CDS_5y_Prediction + Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth) + driving + SI_Growth  + Lag(Dummy_Monetary_ECB) + Lag(Dummy_Monetary_Fed) + Lag(China_debt_stock_GDP) + Lag(Dummy_Fiscal_Country_weighted_extdebt) + Lag(RFI_GDP) + Lag(Oil_effect),
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+se.new_CDS.mortality.5 <- coeftest(new_CDS.mortality.5, vcov = vcovHC(new_CDS.mortality.5, type = "HC1"))
+
+
+stargazer(digits=4,new_CDS.mortality.0,new_CDS.mortality.2,new_CDS.mortality.3,new_CDS.mortality.4, new_CDS.mortality.5,
+          type="latex",se=list(se.new_CDS.mortality.0[,2],se.new_CDS.mortality.2[,2],se.new_CDS.mortality.3[,2],se.new_CDS.mortality.4[,2], se.new_CDS.mortality.5[,2]),out=file.path("Table_inCOVID_panel_output_newCDS_mortality.htm"),
+          dep.var.labels=c("Daily CDS Spread Change"),
+          covariate.labels=c("Fitted Daily CDS Spread Change", "New Mortality Rate", "New Mortality Rate Growth", 
+                             "Total Mortality Rate", "Total Mortality Rate Growth",
+                             "Mobility", "SI Growth",
+                             "Country Fiscal Policy Dummy", "ECB Policy Dummy", "Fed Policy Dummy", "China debt stock", "Fiscal dummy X ext. debtGDP", "Oil effect"),
+          df = FALSE, omit.stat="adj.rsq", 
+          notes = c("*,**,*** correspond to 10%, 5% and 1% significance, respectively.","HAC robust standard errors, clustered by country. Time and Country FEs."),
+          notes.append=F, notes.align ="l",
+          title="COVID-Sample Panel Analysis",add.lines = list(c("Fixed effects?","Y","Y","Y","Y","Y")))
+# =========================================================================.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3336,7 +4182,7 @@ stargazer(digits=4,new_res.mortality.2,new_res.mortality.3,new_res.mortality.4,
           dep.var.labels=c("COVID Residual"),
           covariate.labels=c("New Mortality Rate", "New Mortality Rate Growth", 
                              "Total Mortality Rate", "Total Mortality Rate Growth",
-                             "Mobility", "SI Growth",
+                             "Driving Mobility", "SI Growth",
                              "Country Fiscal Policy Dummy", "ECB Policy Dummy", "Fed Policy Dummy"), df = FALSE, omit.stat="adj.rsq", 
           notes = c("*,**,*** correspond to 10%, 5% and 1% significance, respectively.","HAC robust standard errors, clustered by country. Time and Country FEs."),
           notes.append=F, notes.align ="l",
@@ -3383,44 +4229,44 @@ stargazer(digits=4,new_CDS.mortality.0,new_CDS.mortality.2,new_CDS.mortality.3,n
 
 
 
-
-# panel analysis of subsample with mortality data -------------------------
-### Panel analayis: subsample with observations for which mortality data is available
-new_CDS.mortality.2.small <- plm(CDS_5y_Actual ~ CDS_5y_Prediction + Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth),
-                                 method="pooling", effect="twoways",
-                                 data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
-se.new_CDS.mortality.2.small <- coeftest(new_CDS.mortality.2.small, vcov = vcovHC(new_CDS.mortality.2.small, type = "HC1"))
-
-panel_inCOVID_small <- cbind(as.vector(new_CDS.mortality.2$model[[1]]), attr(new_CDS.mortality.2$model[[1]], "index"))
-panel_inCOVID_small$Date <- as.Date(panel_inCOVID_small$Date,"%Y-%m-%d")
-panel_inCOVID_small <- merge(panel_inCOVID_small, panel_inCOVID, by = c("Country", "Date"), all.x = TRUE)
-
-new_CDS.mortality.0.small <- plm(CDS_5y_Actual ~ CDS_5y_Prediction,
-                                 method="pooling", effect="twoways",
-                                 data=panel_inCOVID_small, na.action="na.exclude")
-se.new_CDS.mortality.0.small <- coeftest(new_CDS.mortality.0.small, vcov = vcovHC(new_CDS.mortality.0.small, type = "HC1"))
-
-new_CDS.mortality.3.small <- plm(CDS_5y_Actual ~ CDS_5y_Prediction + Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth) + driving + SI_Growth,
-                                 method="pooling", effect="twoways",
-                                 data=panel_inCOVID_small, na.action="na.exclude")
-se.new_CDS.mortality.3.small <- coeftest(new_CDS.mortality.3.small, vcov = vcovHC(new_CDS.mortality.3.small, type = "HC1"))
-
-new_CDS.mortality.4.small <- plm(CDS_5y_Actual ~ CDS_5y_Prediction + Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth) + driving + SI_Growth + Lag(Dummy_Fiscal_Country) + Lag(Dummy_Monetary_ECB) + Lag(Dummy_Monetary_Fed),
-                                 method="pooling", effect="twoways",
-                                 data=panel_inCOVID_small, na.action="na.exclude")
-se.new_CDS.mortality.4.small <- coeftest(new_CDS.mortality.4.small, vcov = vcovHC(new_CDS.mortality.4.small, type = "HC1"))
-
-stargazer(digits=4,new_CDS.mortality.0.small,new_CDS.mortality.2.small,new_CDS.mortality.3.small,new_CDS.mortality.4.small,
-          type="latex",se=list(se.new_CDS.mortality.0.small[,2],se.new_CDS.mortality.2.small[,2],se.new_CDS.mortality.3.small[,2],se.new_CDS.mortality.4.small[,2]),out=file.path("Table_inCOVID_panel_output_newCDS_mortality_small.htm"),
-          dep.var.labels=c("Daily CDS Spread Change"),
-          covariate.labels=c("Fitted Daily CDS Spread Change", "New Mortality Rate", "New Mortality Rate Growth", 
-                             "Total Mortality Rate", "Total Mortality Rate Growth",
-                             "Mobility", "SI Growth",
-                             "Country Fiscal Policy Dummy", "ECB Policy Dummy", "Fed Policy Dummy"), df = FALSE, omit.stat="adj.rsq", 
-          notes = c("*,**,*** correspond to 10%, 5% and 1% significance, respectively.","HAC robust standard errors, clustered by country. Time and Country FEs."),
-          notes.append=F, notes.align ="l",
-          title="COVID-Sample Panel Analysis",add.lines = list(c("Fixed effects?","Y","Y","Y","Y","Y")))
-# =========================================================================.
+# 
+# # panel analysis of subsample with mortality data -------------------------
+# ### Panel analayis: subsample with observations for which mortality data is available
+# new_CDS.mortality.2.small <- plm(CDS_5y_Actual ~ CDS_5y_Prediction + Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth),
+#                                  method="pooling", effect="twoways",
+#                                  data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+# se.new_CDS.mortality.2.small <- coeftest(new_CDS.mortality.2.small, vcov = vcovHC(new_CDS.mortality.2.small, type = "HC1"))
+# 
+# panel_inCOVID_small <- cbind(as.vector(new_CDS.mortality.2$model[[1]]), attr(new_CDS.mortality.2$model[[1]], "index"))
+# panel_inCOVID_small$Date <- as.Date(panel_inCOVID_small$Date,"%Y-%m-%d")
+# panel_inCOVID_small <- merge(panel_inCOVID_small, panel_inCOVID, by = c("Country", "Date"), all.x = TRUE)
+# 
+# new_CDS.mortality.0.small <- plm(CDS_5y_Actual ~ CDS_5y_Prediction,
+#                                  method="pooling", effect="twoways",
+#                                  data=panel_inCOVID_small, na.action="na.exclude")
+# se.new_CDS.mortality.0.small <- coeftest(new_CDS.mortality.0.small, vcov = vcovHC(new_CDS.mortality.0.small, type = "HC1"))
+# 
+# new_CDS.mortality.3.small <- plm(CDS_5y_Actual ~ CDS_5y_Prediction + Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth) + driving + SI_Growth,
+#                                  method="pooling", effect="twoways",
+#                                  data=panel_inCOVID_small, na.action="na.exclude")
+# se.new_CDS.mortality.3.small <- coeftest(new_CDS.mortality.3.small, vcov = vcovHC(new_CDS.mortality.3.small, type = "HC1"))
+# 
+# new_CDS.mortality.4.small <- plm(CDS_5y_Actual ~ CDS_5y_Prediction + Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth) + driving + SI_Growth + Lag(Dummy_Fiscal_Country) + Lag(Dummy_Monetary_ECB) + Lag(Dummy_Monetary_Fed),
+#                                  method="pooling", effect="twoways",
+#                                  data=panel_inCOVID_small, na.action="na.exclude")
+# se.new_CDS.mortality.4.small <- coeftest(new_CDS.mortality.4.small, vcov = vcovHC(new_CDS.mortality.4.small, type = "HC1"))
+# 
+# stargazer(digits=4,new_CDS.mortality.0.small,new_CDS.mortality.2.small,new_CDS.mortality.3.small,new_CDS.mortality.4.small,
+#           type="latex",se=list(se.new_CDS.mortality.0.small[,2],se.new_CDS.mortality.2.small[,2],se.new_CDS.mortality.3.small[,2],se.new_CDS.mortality.4.small[,2]),out=file.path("Table_inCOVID_panel_output_newCDS_mortality_small.htm"),
+#           dep.var.labels=c("Daily CDS Spread Change"),
+#           covariate.labels=c("Fitted Daily CDS Spread Change", "New Mortality Rate", "New Mortality Rate Growth", 
+#                              "Total Mortality Rate", "Total Mortality Rate Growth",
+#                              "Mobility", "SI Growth",
+#                              "Country Fiscal Policy Dummy", "ECB Policy Dummy", "Fed Policy Dummy"), df = FALSE, omit.stat="adj.rsq", 
+#           notes = c("*,**,*** correspond to 10%, 5% and 1% significance, respectively.","HAC robust standard errors, clustered by country. Time and Country FEs."),
+#           notes.append=F, notes.align ="l",
+#           title="COVID-Sample Panel Analysis",add.lines = list(c("Fixed effects?","Y","Y","Y","Y","Y")))
+# # =========================================================================.
 
 
 
@@ -3450,11 +4296,6 @@ p_EM_Mar_New
 # p_EM_Mar_New
 # dev.off()
 # =========================================================================.
-
-
-
-
-
 
 
 
