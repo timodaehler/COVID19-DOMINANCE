@@ -592,7 +592,6 @@ InternationalReservesTS_long <- InternationalReservesTS_long[,  c("Date", "Count
 # Subsetting such as to have the same time frame as the object "panel"
 InternationalReservesTS_long <- InternationalReservesTS_long[which(InternationalReservesTS_long$Date < '2020-07-01'),]
 InternationalReservesTS_long <- InternationalReservesTS_long[which(InternationalReservesTS_long$Date >= '2019-07-02'),]
-
 dim(InternationalReservesTS_long)
 
 View(InternationalReservesTS_long)
@@ -654,3 +653,133 @@ View(InternationalReserveRatioTS_long)
 dim(InternationalReserveRatioTS_long)
 str(InternationalReserveRatioTS_long)
 # =========================================================================.
+
+
+
+
+
+
+# SWF data ----------------------------------------------------------------
+# Importing data on monthly international reserve to GDP ratio and deleting unnecessary columns
+SWF <- read_excel("Data/SWF.xlsx", sheet = "R")
+
+# Replace funds with NA in AuM with zero
+SWF$AuM_bn[SWF$AuM_bn == "NA"]  <- 0
+
+# Changing AuM to numeric
+SWF$AuM_bn <- as.numeric(SWF$AuM_bn)
+
+# Changin AuM from billion to USD
+SWF <- SWF %>% mutate(AuM = AuM_bn * 10^9)
+
+# Drop Funds which aren't SWF, i.e. PPF
+SWF <- subset(SWF, Type=="SWF" )
+
+# Defining sample countries so that I can subset the SWF dataset 
+countries <- read_excel("Data/laender.xlsx", sheet = "EM")
+allCountriesSWF <- countries[ which(countries$EM_dummy5yr ==1), "COUNTRY5yrCDS"]
+colnames(allCountriesSWF) <- "COUNTRY"
+
+# Subsetting countries with SWF that are in sample
+SWF <- SWF[SWF$COUNTRY %in% allCountriesSWF$COUNTRY,  ]
+
+# Summing funds per country to get country total SWF
+SWF_Countryaggregates <- aggregate(SWF$AuM, by=list(Category=SWF$COUNTRY), FUN=sum)
+colnames(SWF_Countryaggregates) <- c("COUNTRY", "AuM")
+SWF_Countryaggregates
+
+# Here I would do the same but with Aum in bn
+# SWF_Countryaggregates_bn <- aggregate(SWF$AuM_bn, by=list(Category=SWF$COUNTRY), FUN=sum)
+# colnames(SWF_Countryaggregates_bn) <- c("COUNTRY", "AuM_bn")
+# SWF_Countryaggregates_bn
+
+# Merging all countries in sample with countries that have SWF
+SWF <- merge(allCountriesSWF, SWF_Countryaggregates, by =  c("COUNTRY"), all=TRUE ) 
+
+# Countries without SWF are NA, so I set them to zero
+SWF$AuM[is.na(SWF$AuM)] <- 0
+
+# Import GDP data for 2019
+GDP <- read_excel("Data/GDP.xlsx", sheet = "EM_GDP")
+
+# Merging GDP and SWF data
+SWF <- merge(SWF, GDP, by =  c("COUNTRY"), all=TRUE ) 
+
+SWF <- SWF %>% mutate(SWF_GDP_RATIO = AuM / GDP)
+
+SWF <- SWF[, c("COUNTRY", "SWF_GDP_RATIO")]
+
+SWF_transpose <- as.data.frame(t(as.matrix(SWF)))
+SWF_transpose
+
+colnames(SWF_transpose) <- SWF_transpose["COUNTRY",]
+
+SWF <- SWF_transpose["SWF_GDP_RATIO",]
+
+# Adding a date column
+SWF <- SWF %>% mutate(DateBeginOfMonth = "2019-01-01")
+
+# Changeing format to date column
+SWF$DateBeginOfMonth <- as.Date(SWF$DateBeginOfMonth)
+
+
+# Duplicate row
+SWF <- rbind(SWF, SWF[rep(1), ]) 
+
+# Changing 
+SWF["SWF_GDP_RATIO1", "DateBeginOfMonth"] <- "2020-07-01"
+
+# Making dataframe into time seris object
+SWF_TS <- xts(SWF, order.by=SWF$DateBeginOfMonth)
+str(SWF_TS)
+View(SWF_TS)
+
+# Deleting redudant date column 
+SWF_TS <- SWF_TS[, -31]
+
+# Converting monthly data to daily. For example: I use the (end of) February values to create the daily values for 1-31 of March etc.
+SWF_TS <- na.locf(merge(SWF_TS, foo=zoo(NA, order.by=seq(start(SWF_TS), end(SWF_TS),
+                                                                                           "day",drop=F)))[, ])
+
+# Deleting unnecessary column 
+SWF_TS <- SWF_TS[, ! colnames(SWF_TS) %in% c("foo")]
+
+# View if the data is correct
+View(SWF_TS)
+dim(SWF_TS)
+
+# Here I add an id variable so that I can then later resphape the wide data into a long panel
+SWF_TS$id <- seq(from = 1, to = 548, by = 1 )
+
+# Now I make it a dataframe such as to keep the index part of the data
+SWF_TS <- data.frame(Date=index(SWF_TS), coredata(SWF_TS))
+
+# Now I melt the data into long form
+SWF_TS_long <- reshape2::melt(SWF_TS, id.vars=c("Date", "id"))
+
+# Renaming the variables
+colnames(SWF_TS_long) <- c("Date", "id", "Country", "SWF_GDP_ratio")
+
+# Removing the id variable which is no longer needed
+SWF_TS_long <- SWF_TS_long[,  c("Date", "Country", "SWF_GDP_ratio")]
+
+# Subsetting such as to have the same time frame as the object "panel"
+SWF_TS_long <- SWF_TS_long[which(SWF_TS_long$Date < '2020-07-01'),]
+SWF_TS_long <- SWF_TS_long[which(SWF_TS_long$Date >= '2019-07-02'),]
+dim(SWF_TS_long)
+
+View(SWF_TS_long)
+dim(SWF_TS_long)
+str(SWF_TS_long)
+
+merged_test_3 <- merge(panel, SWF_TS_long, by=c("Country", "Date"), all.x=TRUE)
+View(merged_test_3)
+
+
+
+
+
+
+
+
+
