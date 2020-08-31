@@ -1,4 +1,9 @@
 
+# load packages -----------------------------------------------------------
+
+
+
+
 options(scipen = 999)
 
 
@@ -13,10 +18,12 @@ mutate(IR_GDP_ratio_Start_2019 = IR_12_2018 / GDP2018, IR_GDP_ratio_February_202
 
 # Create the change in ratios between April and February
 InternationalReserves <- InternationalReserves %>%
-  mutate(Reserve_ratio_change_February_April_2020 = IR_GDP_ratio_April_2020 - IR_GDP_ratio_February_2020, 
-         Reserve_ratio_change_March_2020 = IR_GDP_ratio_March_2020 - IR_GDP_ratio_February_2020, 
-         Reserve_ratio_change_February_April_2020_percent = (IR_GDP_ratio_April_2020 - IR_GDP_ratio_February_2020)/IR_GDP_ratio_February_2020, 
-         Reserve_ratio_change_March_2020_percent = (IR_GDP_ratio_March_2020 - IR_GDP_ratio_February_2020)/IR_GDP_ratio_February_2020 )
+  mutate(Reserve_ratio_change_February_April_2020 = (IR_GDP_ratio_April_2020 - IR_GDP_ratio_February_2020) * 100, 
+         Reserve_ratio_change_March_2020 = (IR_GDP_ratio_March_2020 - IR_GDP_ratio_February_2020 ) *100, 
+         Reserve_ratio_change_February_April_2020_percent = (IR_GDP_ratio_April_2020 - IR_GDP_ratio_February_2020)/IR_GDP_ratio_February_2020 * 100, 
+         Reserve_ratio_change_March_2020_percent = (IR_GDP_ratio_March_2020 - IR_GDP_ratio_February_2020)/IR_GDP_ratio_February_2020 *100 )
+
+
 # =========================================================================.
 
 
@@ -204,7 +211,7 @@ p1 <- arrange(InternationalReserves, IR_GDP_ratio_Start_2019 ) %>%
   coord_flip() +
   geom_bar(stat="identity", width=.90) + 
   xlab("") + # Set axis labels
-  ylab("Start of January 2019, % of 2018 GDP") 
+  ylab("Start of January 2019, share of 2018 GDP") 
   guides(fill=FALSE) +
   theme_minimal() 
 
@@ -214,7 +221,7 @@ p2 <- arrange(InternationalReserves, IR_GDP_ratio_February_2020 ) %>%
   coord_flip() +
   geom_bar(stat="identity", width=.90) + 
   xlab("") + # Set axis labels
-  ylab("End of February 2020, % of 2019 GDP") 
+  ylab("End of February 2020, share of 2019 GDP") 
   guides(fill=FALSE) +
   theme_minimal() 
 
@@ -224,7 +231,7 @@ p3 <- arrange(InternationalReserves, IR_GDP_ratio_March_2020 ) %>%
   coord_flip() +    
   geom_bar(stat="identity", width=.90) + 
   xlab("") + # Set axis labels
-  ylab("End of March 2020, % of 2019 GDP") 
+  ylab("End of March 2020, share of 2019 GDP") 
   guides(fill=FALSE) +
   theme_minimal() 
   
@@ -234,7 +241,7 @@ p4 <- arrange(InternationalReserves, IR_GDP_ratio_April_2020 ) %>%
   coord_flip() +
   geom_bar(stat="identity", width=.90) + 
   xlab("") + # Set axis labels
-  ylab("End of April 2020, % of 2019 GDP") 
+  ylab("End of April 2020, share of 2019 GDP") 
   guides(fill=FALSE) +
   theme_minimal() 
 
@@ -345,7 +352,7 @@ p6 <- arrange(InternationalReserves, Reserve_ratio_change_March_2020_percent ) %
   coord_flip() +
   geom_bar(stat="identity", width=.90) + 
   xlab("") + # Set axis labels
-  ylab("") + 
+  ylab("%") + 
   guides(fill=FALSE) +
   ggtitle("Change in March 2020") + 
   theme_minimal() 
@@ -356,7 +363,7 @@ p7 <- arrange(InternationalReserves, Reserve_ratio_change_February_April_2020_pe
   coord_flip() +
   geom_bar(stat="identity", width=.90) + 
   xlab("") + # Set axis labels
-  ylab("") + 
+  ylab("%") + 
   guides(fill=FALSE) +
   ggtitle("Change in March/April 2020") + 
   theme_minimal() 
@@ -513,36 +520,33 @@ threshold <- 0.25
 
 CountriesAboveThreshold_BeforeCovid <- CountryCorrelationCoefficients_before_COVID[which(CountryCorrelationCoefficients_before_COVID$Correlation_Coefficient>threshold), ]
 CountriesBelowThreshold_BeforeCovid <- CountryCorrelationCoefficients_before_COVID[which(CountryCorrelationCoefficients_before_COVID$Correlation_Coefficient<threshold), ]
+View(CountriesAboveThreshold_BeforeCovid$COUNTRY)
 View(CountriesBelowThreshold_BeforeCovid$COUNTRY)
 nrow(CountriesAboveThreshold_BeforeCovid)
 # =========================================================================.
 
 
+# Countries to drop -------------------------------------------------------
+# From the previous analysis, it appears that 10 of the 30 countries would drop 
+# from the sample as they had a correlation coefficient between actual vs fitted
+# values in the pre-COVID period of below 0.25. These ten countries are: 
+View(CountriesBelowThreshold_BeforeCovid$COUNTRY)
+CountriesToDrop <- CountriesBelowThreshold_BeforeCovid$COUNTRY
 
-
-# 
-# countriez<-colnames(pdat_before_COVID)[-1]
-# country_lists2<-list()
-# for(i in 1:(length(countriez)/2)) {
-#   plotdat<-pdat_before_COVID[-1,c(1,i+1,i+31)]
-#   CountryName <- colnames(plotdat)[2]
-#   CorrelationCoefficient <- cor(plotdat[,2], plotdat[,3] ) 
-#   country_lists2[[i]] <- c(CountryName, CorrelationCoefficient) }
-# CountryCorrelationCoefficients_before_COVID <- data.frame(matrix(unlist(country_lists2), nrow=30, byrow=T))
-# colnames(CountryCorrelationCoefficients_before_COVID) <- c("COUNTRY", "Correlation_Coefficient")
-# arrange(CountryCorrelationCoefficients_before_COVID, Correlation_Coefficient )
-# 
-# p8 <- arrange(CountryCorrelationCoefficients, Correlation_Coefficient ) %>%
-#   mutate(COUNTRY = fct_reorder(COUNTRY, desc(Correlation_Coefficient))) %>%
-#   ggplot( aes(COUNTRY , Correlation_Coefficient, label = Correlation_Coefficient)) + 
-#   #coord_flip() +
-#   geom_bar(stat="identity", width=.90) + 
-#   xlab("") + # Set axis labels
-#   ylab("") + 
-#   guides(fill=FALSE) +
-#   theme_minimal() 
-# p8
+# The remaning 20 countries for the reduced sample all have a correlation 
+# coefficient above 0.25. These countries are 
+View(CountriesAboveThreshold_BeforeCovid$COUNTRY)
+CountriesToRemain <- CountriesAboveThreshold_BeforeCovid$COUNTRY
 # =========================================================================.
+
+
+# Next step ---------------------------------------------------------------
+# Now that we know which countries to drop, the next step is to add the three
+# missing explanatory variables to the large panel so that we can run the second
+# stage regression. 
+# =========================================================================.
+
+
 
 
 
@@ -560,7 +564,7 @@ InternationalReservesTS <- xts(InternationalReservesTS, order.by=InternationalRe
 str(InternationalReservesTS)
 View(InternationalReservesTS)
 
-# Deleting redudant date column 
+# Deleting redundant date column 
 InternationalReservesTS <- InternationalReservesTS[, -c(1) ]
 
 # Converting monthly data to daily. For example: I use the (end of) February values to create the daily values for 1-31 of March etc.
@@ -574,7 +578,7 @@ InternationalReservesTS <- InternationalReservesTS[, -c(31) ]
 View(InternationalReservesTS)
 dim(InternationalReservesTS)
 
-# Here I add an id variable so that I can then later resphae the wide data into a long panel
+# Here I add an id variable so that I can then later reshape the wide data into a long panel
 InternationalReservesTS$id <- seq(from = 1, to = 548, by = 1 )
 
 # Now I make it a dataframe such as to keep the index part of the data
@@ -584,10 +588,10 @@ InternationalReservesTS <- data.frame(Date=index(InternationalReservesTS), cored
 InternationalReservesTS_long <- reshape2::melt(InternationalReservesTS, id.vars=c("Date", "id"))
 
 # Renaming the variables
-colnames(InternationalReservesTS_long) <- c("Date", "id", "Country", "IR")
+colnames(InternationalReservesTS_long) <- c("Date", "id", "COUNTRY", "IR")
 
 # Removing the id variable which is no longer needed
-InternationalReservesTS_long <- InternationalReservesTS_long[,  c("Date", "Country", "IR")]
+InternationalReservesTS_long <- InternationalReservesTS_long[,  c("Date", "COUNTRY", "IR")]
 
 # Subsetting such as to have the same time frame as the object "panel"
 InternationalReservesTS_long <- InternationalReservesTS_long[which(InternationalReservesTS_long$Date < '2020-07-01'),]
@@ -598,18 +602,25 @@ View(InternationalReservesTS_long)
 dim(InternationalReservesTS_long)
 str(InternationalReservesTS_long)
 
-merged_test <- merge(panel, InternationalReservesTS_long, by=c("Country", "Date"), all.x=TRUE)
+merged_test <- merge(panel, InternationalReservesTS_long, by.x=c("Country", "Date"), by.y=c("COUNTRY", "Date"), all.x=TRUE)
+# xxx here I have to specify the by variable more clearly
 # =========================================================================.
-unique(panel$Country)
-dim(panel)
-dim()
-unique(InternationalReservesTS_long$Country)
-InternationalReservesTS_long <- InternationalReservesTS_long[which(InternationalReservesTS_long$Date < '2020-07-01'),]
-InternationalReservesTS_long <- InternationalReservesTS_long[which(InternationalReservesTS_long$Date >= '2019-07-02'),]
-dim(InternationalReservesTS_long)
-unique(panel$Date)
-dim(merged_test)
-View(merged_test)
+
+
+# Not needed I think -------------------------------------------------------
+# unique(panel$Country)
+# dim(panel)
+# dim()
+# unique(InternationalReservesTS_long$Country)
+# InternationalReservesTS_long <- InternationalReservesTS_long[which(InternationalReservesTS_long$Date < '2020-07-01'),]
+# InternationalReservesTS_long <- InternationalReservesTS_long[which(InternationalReservesTS_long$Date >= '2019-07-02'),]
+# dim(InternationalReservesTS_long)
+# unique(panel$Date)
+# dim(merged_test)
+# View(merged_test)
+# =========================================================================.
+
+
 
 # IR/GDP ratio panel ------------------------------------------------------
 
@@ -621,10 +632,9 @@ InternationalReserveRatioTS
 # Making dataframe into time seris object
 InternationalReserveRatioTS <- xts(InternationalReserveRatioTS, order.by=InternationalReserveRatioTS$DateBeginOfMonth)
 str(InternationalReserveRatioTS)
-# dim(InternationalReserveRatioTS)
-# InternationalReserveRatioTS <- 
+View(InternationalReserveRatioTS)
 
-# Deleting unnecessary column 
+# Deleting redundant column 
 InternationalReserveRatioTS <- InternationalReserveRatioTS[, -c(1) ]
 
 # Converting monthly data to daily. For example: I use the (end of) February values to create the daily values for 1-31 of March etc.
@@ -636,9 +646,8 @@ InternationalReserveRatioTS <- InternationalReserveRatioTS[, -c(31) ]
 # View if the data is correct
 View(InternationalReserveRatioTS)
 dim(InternationalReserveRatioTS)
-str(InternationalReserveRatioTS)
 
-# Here I add an id variable so that I can then later resphae the wide data into a long panel
+# Here I add an id variable so that I can then later reshape the wide data into a long panel
 InternationalReserveRatioTS$id <- seq(from = 1, to = 548, by = 1 )
 
 # Now I make it a dataframe such as to keep the index part of the data
@@ -649,19 +658,29 @@ InternationalReserveRatioTS_long <- reshape2::melt(InternationalReserveRatioTS, 
 
 # Renaming the variables
 colnames(InternationalReserveRatioTS_long) <- c("Date", "id", "COUNTRY", "IR/GDP")
+
+# Removing the id variable which is no longer needed
+InternationalReserveRatioTS_long <- InternationalReserveRatioTS_long[,  c("Date", "COUNTRY", "IR/GDP")]
+
+# Subsetting such as to have the same time frame as the object "panel"
+InternationalReserveRatioTS_long <- InternationalReserveRatioTS_long[which(InternationalReserveRatioTS_long$Date < '2020-07-01'),]
+InternationalReserveRatioTS_long <- InternationalReserveRatioTS_long[which(InternationalReserveRatioTS_long$Date >= '2019-07-02'),]
+dim(InternationalReserveRatioTS_long)
+
 View(InternationalReserveRatioTS_long)
 dim(InternationalReserveRatioTS_long)
 str(InternationalReserveRatioTS_long)
+
+merged_test <- merge(panel, InternationalReserveRatioTS_long, by.x=c("Country", "Date"), by.y=c("COUNTRY", "Date"), all.x=TRUE)
 # =========================================================================.
 
 
 
 
-
-
 # SWF data ----------------------------------------------------------------
-# Importing data on monthly international reserve to GDP ratio and deleting unnecessary columns
+# Importing data on SWF
 SWF <- read_excel("Data/SWF.xlsx", sheet = "R")
+View(SWF)
 
 # Replace funds with NA in AuM with zero
 SWF$AuM_bn[SWF$AuM_bn == "NA"]  <- 0
@@ -705,15 +724,19 @@ GDP <- read_excel("Data/GDP.xlsx", sheet = "EM_GDP")
 # Merging GDP and SWF data
 SWF <- merge(SWF, GDP, by =  c("COUNTRY"), all=TRUE ) 
 
+# Creating SWF/GDP ratio
 SWF <- SWF %>% mutate(SWF_GDP_RATIO = AuM / GDP)
 
+# Drop intermediate data on GDP and AuM 
 SWF <- SWF[, c("COUNTRY", "SWF_GDP_RATIO")]
 
+# Get the data into wide format
 SWF_transpose <- as.data.frame(t(as.matrix(SWF)))
-SWF_transpose
 
+# Renaming the columns with the country names
 colnames(SWF_transpose) <- SWF_transpose["COUNTRY",]
 
+# Subsetting to obtain only the relevant data
 SWF <- SWF_transpose["SWF_GDP_RATIO",]
 
 # Adding a date column
@@ -721,7 +744,6 @@ SWF <- SWF %>% mutate(DateBeginOfMonth = "2019-01-01")
 
 # Changeing format to date column
 SWF$DateBeginOfMonth <- as.Date(SWF$DateBeginOfMonth)
-
 
 # Duplicate row
 SWF <- rbind(SWF, SWF[rep(1), ]) 
@@ -734,7 +756,7 @@ SWF_TS <- xts(SWF, order.by=SWF$DateBeginOfMonth)
 str(SWF_TS)
 View(SWF_TS)
 
-# Deleting redudant date column 
+# Deleting redudant date column as we have a ts object now
 SWF_TS <- SWF_TS[, -31]
 
 # Converting monthly data to daily. For example: I use the (end of) February values to create the daily values for 1-31 of March etc.
@@ -774,10 +796,130 @@ str(SWF_TS_long)
 
 merged_test_3 <- merge(panel, SWF_TS_long, by=c("Country", "Date"), all.x=TRUE)
 View(merged_test_3)
+# =========================================================================.
 
 
 
+# SWF and PPF data ----------------------------------------------------------
+# Importing data on SWF and PPF
+SWFandPPF <- read_excel("Data/SWF.xlsx", sheet = "R")
+View(SWFandPPF)
 
+# Replace funds with NA in AuM with zero
+SWFandPPF$AuM_bn[SWFandPPF$AuM_bn == "NA"]  <- 0
+
+# Changing AuM to numeric
+SWFandPPF$AuM_bn <- as.numeric(SWFandPPF$AuM_bn)
+
+# Changin AuM from billion to USD
+SWFandPPF <- SWFandPPF %>% mutate(AuM = AuM_bn * 10^9)
+
+# # Drop Funds which aren't SWF, i.e. PPF
+# SWF <- subset(SWF, Type=="SWF" )
+
+# Defining sample countries so that I can subset the SWF dataset 
+countries <- read_excel("Data/laender.xlsx", sheet = "EM")
+allCountriesSWFandPPF <- countries[ which(countries$EM_dummy5yr ==1), "COUNTRY5yrCDS"]
+colnames(allCountriesSWFandPPF) <- "COUNTRY"
+
+# Subsetting countries with SWF that are in sample
+SWFandPPF <- SWFandPPF[SWFandPPF$COUNTRY %in% allCountriesSWFandPPF$COUNTRY,  ]
+
+# Summing funds per country to get country total SWF
+SWFandPPF_Countryaggregates <- aggregate(SWFandPPF$AuM, by=list(Category=SWFandPPF$COUNTRY), FUN=sum)
+colnames(SWFandPPF_Countryaggregates) <- c("COUNTRY", "AuM")
+SWFandPPF_Countryaggregates
+
+# Here I would do the same but with Aum in bn
+# SWF_Countryaggregates_bn <- aggregate(SWF$AuM_bn, by=list(Category=SWF$COUNTRY), FUN=sum)
+# colnames(SWF_Countryaggregates_bn) <- c("COUNTRY", "AuM_bn")
+# SWF_Countryaggregates_bn
+
+# Merging all countries in sample with countries that have SWF and or PPF
+SWFandPPF <- merge(allCountriesSWFandPPF, SWFandPPF_Countryaggregates, by =  c("COUNTRY"), all=TRUE ) 
+
+# Countries without SWF are NA, so I set them to zero
+SWFandPPF$AuM[is.na(SWFandPPF$AuM)] <- 0
+
+# Import GDP data for 2019
+GDP <- read_excel("Data/GDP.xlsx", sheet = "EM_GDP")
+
+# Merging GDP and SWF data
+SWFandPPF <- merge(SWFandPPF, GDP, by =  c("COUNTRY"), all=TRUE ) 
+
+# Creating SWF and PPF /GDP ratio
+SWFandPPF <- SWFandPPF %>% mutate(SWFandPPF_GDP_RATIO = AuM / GDP)
+
+# Drop intermediate data on GDP and AuM 
+SWFandPPF <- SWFandPPF[, c("COUNTRY", "SWFandPPF_GDP_RATIO")]
+
+# Get the data into wide format
+SWFandPPF_transpose <- as.data.frame(t(as.matrix(SWFandPPF)))
+
+# Renaming the columns with the country names
+colnames(SWFandPPF_transpose) <- SWFandPPF_transpose["COUNTRY",]
+
+# Subsetting to obtain only the relevant data
+SWFandPPF <- SWFandPPF_transpose["SWFandPPF_GDP_RATIO",]
+
+# Adding a date column
+SWFandPPF <- SWFandPPF %>% mutate(DateBeginOfMonth = "2019-01-01")
+
+# Changeing format to date column
+SWFandPPF$DateBeginOfMonth <- as.Date(SWFandPPF$DateBeginOfMonth)
+
+# Duplicate row
+SWFandPPF <- rbind(SWFandPPF, SWFandPPF[rep(1), ]) 
+
+# Changing 
+SWFandPPF["SWFandPPF_GDP_RATIO1", "DateBeginOfMonth"] <- "2020-07-01"
+
+# Making dataframe into time seris object
+SWFandPPF_TS <- xts(SWFandPPF, order.by=SWFandPPF$DateBeginOfMonth)
+str(SWFandPPF_TS)
+View(SWFandPPF_TS)
+
+# Deleting redudant date column as we have a ts object now
+SWFandPPF_TS <- SWFandPPF_TS[, -31]
+
+# Converting monthly data to daily. For example: I use the (end of) February values to create the daily values for 1-31 of March etc.
+SWFandPPF_TS <- na.locf(merge(SWFandPPF_TS, foo=zoo(NA, order.by=seq(start(SWFandPPF_TS), end(SWFandPPF_TS),
+                                                         "day",drop=F)))[, ])
+
+# Deleting unnecessary column 
+SWFandPPF_TS <- SWFandPPF_TS[, ! colnames(SWFandPPF_TS) %in% c("foo")]
+
+# View if the data is correct
+View(SWFandPPF_TS)
+dim(SWFandPPF_TS)
+
+# Here I add an id variable so that I can then later resphape the wide data into a long panel
+SWFandPPF_TS$id <- seq(from = 1, to = 548, by = 1 )
+
+# Now I make it a dataframe such as to keep the index part of the data
+SWFandPPF_TS <- data.frame(Date=index(SWFandPPF_TS), coredata(SWFandPPF_TS))
+
+# Now I melt the data into long form
+SWFandPPF_TS_long <- reshape2::melt(SWFandPPF_TS, id.vars=c("Date", "id"))
+
+# Renaming the variables
+colnames(SWFandPPF_TS_long) <- c("Date", "id", "Country", "SWFandPPF_GDP_ratio")
+
+# Removing the id variable which is no longer needed
+SWFandPPF_TS_long <- SWFandPPF_TS_long[,  c("Date", "Country", "SWFandPPF_GDP_ratio")]
+
+# Subsetting such as to have the same time frame as the object "panel"
+SWFandPPF_TS_long <- SWFandPPF_TS_long[which(SWFandPPF_TS_long$Date < '2020-07-01'),]
+SWFandPPF_TS_long <- SWFandPPF_TS_long[which(SWFandPPF_TS_long$Date >= '2019-07-02'),]
+dim(SWFandPPF_TS_long)
+
+View(SWFandPPF_TS_long)
+dim(SWFandPPF_TS_long)
+str(SWFandPPF_TS_long)
+
+merged_test_3 <- merge(panel, SWFandPPF_TS_long, by=c("Country", "Date"), all.x=TRUE)
+View(merged_test_3)
+# =========================================================================.
 
 
 

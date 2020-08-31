@@ -116,6 +116,25 @@ library(gghighlight)
 # set number format -------------------------------------------------------
 #I don't want scientific notation for my values, so I specify this below. 
 options(scipen = 999)
+`%notin%` <- Negate(`%in%`)
+
+# library(readxl)
+# cds_five <- read_excel("Data/CDS.xlsx", sheet = "5yrCDS")
+# countries <- read_excel("Data/laender.xlsx", sheet = "EM")
+# 
+# em_countries <- countries[ which(countries$EM_dummy5yr ==1), "COUNTRY5yrCDS"   ]
+# non_em_countries <- countries[ which(countries$EM_dummy5yr !=1), "COUNTRY5yrCDS"   ]
+# cds_five <- cds_five[which(cds_five$Date>="2014-01-01" & cds_five$Date<="2020-07-01"   ),]
+# 
+# em_cds <- cds_five[, c("Date", em_countries$COUNTRY5yrCDS )]
+# nonem_cds<-cds_five[, c("Date", non_em_countries$COUNTRY5yrCDS )]
+# 
+# 
+# 
+# countriesinoxforddataset <- as_tibble(unique(Oxford_V1$COUNTRY))
+# countrieswithcdsdata <- em_countries
+# countrieswithoutcds <- countriesinoxforddataset[countriesinoxforddataset$value %notin% countrieswithcdsdata$COUNTRY5yrCDS,]
+# countrieswithoutcds
 # =========================================================================.
 
 
@@ -168,7 +187,7 @@ Temporary_Data_Country$Date <- as.Date(Temporary_Data_Country$Date) # XXX I adde
 
 # We might also want a dataset with the total number of global confirmed cases and deaths per day.
 # I first have to deatch plyr for it group and summarise correctly. 
-# detach(package:plyr)    
+detach(package:plyr)    
 library(dplyr)
 World_Data <- Temporary_Data_Country %>% group_by(Date) %>%
   summarise(country='World', Global_Confirmed_Cases = sum(Confirmed_Cases, na.rm=T),
@@ -966,17 +985,17 @@ colnames(Country_Coordinates)
 myvarscoords <- c("COUNTRY", "Latitude", "Longitude")
 Country_Coordinates <- Country_Coordinates[myvarscoords]
 
-# Checking for completeness of added data source
-countriesinnewdataset <- as_tibble(unique(Country_Coordinates$COUNTRY))
-countriesintemporaryset <- as_tibble(unique(Temporary_Data_Country$COUNTRY))
-countries_not_in_new_data_set <- countriesintemporaryset[countriesintemporaryset$value %notin% countriesinnewdataset$value,]
-countries_not_in_new_data_set
-
-problems <- countries_not_in_new_data_set[countries_not_in_new_data_set$value %notin% countrieswithcdsdata$COUNTRY5yrCDS,]
-problems 
-
-realproblems <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %in% problems$value,]
-realproblems
+# # Checking for completeness of added data source
+# countriesinnewdataset <- as_tibble(unique(Country_Coordinates$COUNTRY))
+# countriesintemporaryset <- as_tibble(unique(Temporary_Data_Country$COUNTRY))
+# countries_not_in_new_data_set <- countriesintemporaryset[countriesintemporaryset$value %notin% countriesinnewdataset$value,]
+# countries_not_in_new_data_set
+# 
+# problems <- countries_not_in_new_data_set[countries_not_in_new_data_set$value %notin% countrieswithcdsdata$COUNTRY5yrCDS,]
+# problems 
+# 
+# realproblems <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %in% problems$value,]
+# realproblems
 
 
 
@@ -1034,17 +1053,17 @@ pop65yo[132, "COUNTRY"] <- "New Zealand"
 pop65yo[150, "COUNTRY"] <- "Saudi Arabia"
 pop65yo[191, "COUNTRY"] <- "South Africa"
 
-# Checking for completeness of added data source
-countriesinnewdataset <- as_tibble(unique(pop65yo$COUNTRY))
-countriesintemporaryset <- as_tibble(unique(Temporary_Data_Country$COUNTRY))
-countries_not_in_new_data_set <- countriesintemporaryset[countriesintemporaryset$value %notin% countriesinnewdataset$value,]
-countries_not_in_new_data_set
-
-problems <- countries_not_in_new_data_set[countries_not_in_new_data_set$value %notin% countrieswithcdsdata$COUNTRY5yrCDS,]
-problems 
-
-realproblems <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %in% problems$value,]
-realproblems
+# # Checking for completeness of added data source
+# countriesinnewdataset <- as_tibble(unique(pop65yo$COUNTRY))
+# countriesintemporaryset <- as_tibble(unique(Temporary_Data_Country$COUNTRY))
+# countries_not_in_new_data_set <- countriesintemporaryset[countriesintemporaryset$value %notin% countriesinnewdataset$value,]
+# countries_not_in_new_data_set
+# 
+# problems <- countries_not_in_new_data_set[countries_not_in_new_data_set$value %notin% countrieswithcdsdata$COUNTRY5yrCDS,]
+# problems 
+# 
+# realproblems <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %in% problems$value,]
+# realproblems
 
 # subsetting
 pop65yo <- subset(pop65yo, is.element(pop65yo$COUNTRY, Final_Data_Country$COUNTRY))
@@ -1098,17 +1117,17 @@ urbanpp[147, "COUNTRY"] <- "New Zealand"
 urbanpp[166, "COUNTRY"] <- "Saudi Arabia"
 urbanpp[212, "COUNTRY"] <- "South Africa"
 
-# Checking for completeness of added data source
-countriesinnewdataset <- as_tibble(unique(urbanpp$COUNTRY))
-countriesintemporaryset <- as_tibble(unique(Temporary_Data_Country$COUNTRY))
-countries_not_in_new_data_set <- countriesintemporaryset[countriesintemporaryset$value %notin% countriesinnewdataset$value,]
-countries_not_in_new_data_set
-
-problems <- countries_not_in_new_data_set[countries_not_in_new_data_set$value %notin% countrieswithcdsdata$COUNTRY5yrCDS,]
-problems 
-
-realproblems <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %in% problems$value,]
-realproblems
+# # Checking for completeness of added data source
+# countriesinnewdataset <- as_tibble(unique(urbanpp$COUNTRY))
+# countriesintemporaryset <- as_tibble(unique(Temporary_Data_Country$COUNTRY))
+# countries_not_in_new_data_set <- countriesintemporaryset[countriesintemporaryset$value %notin% countriesinnewdataset$value,]
+# countries_not_in_new_data_set
+# 
+# problems <- countries_not_in_new_data_set[countries_not_in_new_data_set$value %notin% countrieswithcdsdata$COUNTRY5yrCDS,]
+# problems 
+# 
+# realproblems <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %in% problems$value,]
+# realproblems
 
 urbanpp <- subset(urbanpp, is.element(urbanpp$COUNTRY, Final_Data_Country$COUNTRY))
 
@@ -1159,17 +1178,17 @@ popdensity[179, "COUNTRY"] <- "New Zealand"
 popdensity[204, "COUNTRY"] <- "Saudi Arabia"
 popdensity[262, "COUNTRY"] <- "South Africa"
 
-# Checking for completeness of added data source
-countriesinnewdataset <- as_tibble(unique(popdensity$COUNTRY))
-countriesintemporaryset <- as_tibble(unique(Temporary_Data_Country$COUNTRY))
-countries_not_in_new_data_set <- countriesintemporaryset[countriesintemporaryset$value %notin% countriesinnewdataset$value,]
-countries_not_in_new_data_set
-
-problems <- countries_not_in_new_data_set[countries_not_in_new_data_set$value %notin% countrieswithcdsdata$COUNTRY5yrCDS,]
-problems 
-
-realproblems <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %in% problems$value,]
-realproblems
+# # Checking for completeness of added data source
+# countriesinnewdataset <- as_tibble(unique(popdensity$COUNTRY))
+# countriesintemporaryset <- as_tibble(unique(Temporary_Data_Country$COUNTRY))
+# countries_not_in_new_data_set <- countriesintemporaryset[countriesintemporaryset$value %notin% countriesinnewdataset$value,]
+# countries_not_in_new_data_set
+# 
+# problems <- countries_not_in_new_data_set[countries_not_in_new_data_set$value %notin% countrieswithcdsdata$COUNTRY5yrCDS,]
+# problems 
+# 
+# realproblems <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %in% problems$value,]
+# realproblems
 
 popdensity <- subset(popdensity, COUNTRY %in% Final_Data_Country$COUNTRY)
 
@@ -1222,20 +1241,20 @@ mobility <- mobility[myvarsmobility]
 
 mobility$COUNTRY <- mobility$region
 
-# Checking for completeness of added data source
-countriesinnewdataset <- as_tibble(unique(mobility$COUNTRY))
-countriesintemporaryset <- as_tibble(unique(Temporary_Data_Country$COUNTRY))
-countries_not_in_new_data_set <- countriesintemporaryset[countriesintemporaryset$value %notin% countriesinnewdataset$value,]
-countries_not_in_new_data_set
+# # Checking for completeness of added data source
+# countriesinnewdataset <- as_tibble(unique(mobility$COUNTRY))
+# countriesintemporaryset <- as_tibble(unique(Temporary_Data_Country$COUNTRY))
+# countries_not_in_new_data_set <- countriesintemporaryset[countriesintemporaryset$value %notin% countriesinnewdataset$value,]
+# countries_not_in_new_data_set
+# 
+# problems <- countries_not_in_new_data_set[countries_not_in_new_data_set$value %notin% countrieswithcdsdata$COUNTRY5yrCDS,]
+# problems 
+# 
+# realproblems <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %in% problems$value,]
+# realproblems
 
-problems <- countries_not_in_new_data_set[countries_not_in_new_data_set$value %notin% countrieswithcdsdata$COUNTRY5yrCDS,]
-problems 
-
-realproblems <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %in% problems$value,]
-realproblems
-
-countrieswithoutmobilitydata <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %notin% countriesinnewdataset$value,]
-countrieswithoutmobilitydata
+# countrieswithoutmobilitydata <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %notin% countriesinnewdataset$value,]
+# countrieswithoutmobilitydata
 
 # Now, I re-convert from long to wide format.
 mobility <- pivot_wider(mobility, id_cols = c("COUNTRY", "Date", "transportation_type"), names_from = "transportation_type", values_from = c("value"))
@@ -1284,21 +1303,21 @@ arrivals[179, "COUNTRY"] <- "New Zealand"
 arrivals[204, "COUNTRY"] <- "Saudi Arabia"
 arrivals[262, "COUNTRY"] <- "South Africa"
 
-# Checking for completeness of added data source
-countriesinnewdataset <- as_tibble(unique(arrivals$COUNTRY))
-countriesintemporaryset <- as_tibble(unique(Temporary_Data_Country$COUNTRY))
-countries_not_in_new_data_set <- countriesintemporaryset[countriesintemporaryset$value %notin% countriesinnewdataset$value,]
-countries_not_in_new_data_set
+# # Checking for completeness of added data source
+# countriesinnewdataset <- as_tibble(unique(arrivals$COUNTRY))
+# countriesintemporaryset <- as_tibble(unique(Temporary_Data_Country$COUNTRY))
+# countries_not_in_new_data_set <- countriesintemporaryset[countriesintemporaryset$value %notin% countriesinnewdataset$value,]
+# countries_not_in_new_data_set
+# 
+# problems <- countries_not_in_new_data_set[countries_not_in_new_data_set$value %notin% countrieswithcdsdata$COUNTRY5yrCDS,]
+# problems 
+# 
+# realproblems <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %in% problems$value,]
+# realproblems
 
-problems <- countries_not_in_new_data_set[countries_not_in_new_data_set$value %notin% countrieswithcdsdata$COUNTRY5yrCDS,]
-problems 
-
-realproblems <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %in% problems$value,]
-realproblems
-
-countrieswithoutarrivalsdata <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %notin% countriesinnewdataset$value,]
-countrieswithoutarrivalsdata
-# xxx but some countries have NA
+# countrieswithoutarrivalsdata <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %notin% countriesinnewdataset$value,]
+# countrieswithoutarrivalsdata
+# # xxx but some countries have NA
 
 arrivals <- subset(arrivals, COUNTRY %in% Final_Data_Country$COUNTRY)
 
@@ -1349,22 +1368,22 @@ departures[179, "COUNTRY"] <- "New Zealand"
 departures[204, "COUNTRY"] <- "Saudi Arabia"
 departures[262, "COUNTRY"] <- "South Africa"
 
-# Checking for completeness of added data source
-countriesinnewdataset <- as_tibble(unique(departures$COUNTRY))
-countriesintemporaryset <- as_tibble(unique(Temporary_Data_Country$COUNTRY))
-countries_not_in_new_data_set <- countriesintemporaryset[countriesintemporaryset$value %notin% countriesinnewdataset$value,]
-countries_not_in_new_data_set
-
-problems <- countries_not_in_new_data_set[countries_not_in_new_data_set$value %notin% countrieswithcdsdata$COUNTRY5yrCDS,]
-problems 
-
-realproblems <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %in% problems$value,]
-realproblems
-
-countrieswithoutdeparturesdata <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %notin% countriesinnewdataset$value,]
-countrieswithoutdeparturesdata
-# Some countries have NAs
-
+# # Checking for completeness of added data source
+# countriesinnewdataset <- as_tibble(unique(departures$COUNTRY))
+# countriesintemporaryset <- as_tibble(unique(Temporary_Data_Country$COUNTRY))
+# countries_not_in_new_data_set <- countriesintemporaryset[countriesintemporaryset$value %notin% countriesinnewdataset$value,]
+# countries_not_in_new_data_set
+# 
+# problems <- countries_not_in_new_data_set[countries_not_in_new_data_set$value %notin% countrieswithcdsdata$COUNTRY5yrCDS,]
+# problems 
+# 
+# realproblems <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %in% problems$value,]
+# realproblems
+# 
+# countrieswithoutdeparturesdata <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %notin% countriesinnewdataset$value,]
+# countrieswithoutdeparturesdata
+# # Some countries have NAs
+# 
 departures <- subset(departures, COUNTRY %in% Final_Data_Country$COUNTRY)
 
 # I only keep the columns I care about.
@@ -1415,21 +1434,21 @@ vulnerable_employment[179, "COUNTRY"] <- "New Zealand"
 vulnerable_employment[204, "COUNTRY"] <- "Saudi Arabia"
 vulnerable_employment[262, "COUNTRY"] <- "South Africa"
 
-# Checking for completeness of added data source
-countriesinnewdataset <- as_tibble(unique(vulnerable_employment$COUNTRY))
-countriesintemporaryset <- as_tibble(unique(Temporary_Data_Country$COUNTRY))
-countries_not_in_new_data_set <- countriesintemporaryset[countriesintemporaryset$value %notin% countriesinnewdataset$value,]
-countries_not_in_new_data_set
-
-problems <- countries_not_in_new_data_set[countries_not_in_new_data_set$value %notin% countrieswithcdsdata$COUNTRY5yrCDS,]
-problems 
-
-realproblems <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %in% problems$value,]
-realproblems
-
-countrieswithoutvulnerableemploymentdata <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %notin% countriesinnewdataset$value,]
-countrieswithoutvulnerableemploymentdata
-# Some countries have NAs
+# # Checking for completeness of added data source
+# countriesinnewdataset <- as_tibble(unique(vulnerable_employment$COUNTRY))
+# countriesintemporaryset <- as_tibble(unique(Temporary_Data_Country$COUNTRY))
+# countries_not_in_new_data_set <- countriesintemporaryset[countriesintemporaryset$value %notin% countriesinnewdataset$value,]
+# countries_not_in_new_data_set
+# 
+# problems <- countries_not_in_new_data_set[countries_not_in_new_data_set$value %notin% countrieswithcdsdata$COUNTRY5yrCDS,]
+# problems 
+# 
+# realproblems <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %in% problems$value,]
+# realproblems
+# 
+# countrieswithoutvulnerableemploymentdata <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %notin% countriesinnewdataset$value,]
+# countrieswithoutvulnerableemploymentdata
+# # Some countries have NAs
 
 vulnerable_employment <- subset(vulnerable_employment, COUNTRY %in% Final_Data_Country$COUNTRY)
 
@@ -1478,21 +1497,21 @@ GNI[179, "COUNTRY"] <- "New Zealand"
 GNI[204, "COUNTRY"] <- "Saudi Arabia"
 GNI[262, "COUNTRY"] <- "South Africa"
 
-# Checking for completeness of added data source
-countriesinnewdataset <- as_tibble(unique(GNI$COUNTRY))
-countriesintemporaryset <- as_tibble(unique(Temporary_Data_Country$COUNTRY))
-countries_not_in_new_data_set <- countriesintemporaryset[countriesintemporaryset$value %notin% countriesinnewdataset$value,]
-countries_not_in_new_data_set
-
-problems <- countries_not_in_new_data_set[countries_not_in_new_data_set$value %notin% countrieswithcdsdata$COUNTRY5yrCDS,]
-problems 
-
-realproblems <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %in% problems$value,]
-realproblems
-
-countrieswithoutGNIdata <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %notin% countriesinnewdataset$value,]
-countrieswithoutGNIdata
-# Some countries have NAs
+# # Checking for completeness of added data source
+# countriesinnewdataset <- as_tibble(unique(GNI$COUNTRY))
+# countriesintemporaryset <- as_tibble(unique(Temporary_Data_Country$COUNTRY))
+# countries_not_in_new_data_set <- countriesintemporaryset[countriesintemporaryset$value %notin% countriesinnewdataset$value,]
+# countries_not_in_new_data_set
+# 
+# problems <- countries_not_in_new_data_set[countries_not_in_new_data_set$value %notin% countrieswithcdsdata$COUNTRY5yrCDS,]
+# problems 
+# 
+# realproblems <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %in% problems$value,]
+# realproblems
+# 
+# countrieswithoutGNIdata <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %notin% countriesinnewdataset$value,]
+# countrieswithoutGNIdata
+# # Some countries have NAs
 
 GNI <- subset(GNI, COUNTRY %in% Final_Data_Country$COUNTRY)
 
@@ -1541,21 +1560,21 @@ health_pc[179, "COUNTRY"] <- "New Zealand"
 health_pc[204, "COUNTRY"] <- "Saudi Arabia"
 health_pc[262, "COUNTRY"] <- "South Africa"
 
-# Checking for completeness of added data source
-countriesinnewdataset <- as_tibble(unique(health_pc$COUNTRY))
-countriesintemporaryset <- as_tibble(unique(Temporary_Data_Country$COUNTRY))
-countries_not_in_new_data_set <- countriesintemporaryset[countriesintemporaryset$value %notin% countriesinnewdataset$value,]
-countries_not_in_new_data_set
-
-problems <- countries_not_in_new_data_set[countries_not_in_new_data_set$value %notin% countrieswithcdsdata$COUNTRY5yrCDS,]
-problems 
-
-realproblems <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %in% problems$value,]
-realproblems
-
-countrieswithouthealth_ocdata <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %notin% countriesinnewdataset$value,]
-countrieswithouthealth_ocdata
-# Some countries have NAs
+# # Checking for completeness of added data source
+# countriesinnewdataset <- as_tibble(unique(health_pc$COUNTRY))
+# countriesintemporaryset <- as_tibble(unique(Temporary_Data_Country$COUNTRY))
+# countries_not_in_new_data_set <- countriesintemporaryset[countriesintemporaryset$value %notin% countriesinnewdataset$value,]
+# countries_not_in_new_data_set
+# 
+# problems <- countries_not_in_new_data_set[countries_not_in_new_data_set$value %notin% countrieswithcdsdata$COUNTRY5yrCDS,]
+# problems 
+# 
+# realproblems <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %in% problems$value,]
+# realproblems
+# 
+# countrieswithouthealth_ocdata <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %notin% countriesinnewdataset$value,]
+# countrieswithouthealth_ocdata
+# # Some countries have NAs
 
 health_pc <- subset(health_pc, COUNTRY %in% Final_Data_Country$COUNTRY)
 
@@ -1604,21 +1623,21 @@ pollution[179, "COUNTRY"] <- "New Zealand"
 pollution[204, "COUNTRY"] <- "Saudi Arabia"
 pollution[262, "COUNTRY"] <- "South Africa"
 
-# Checking for completeness of added data source
-countriesinnewdataset <- as_tibble(unique(pollution$COUNTRY))
-countriesintemporaryset <- as_tibble(unique(Temporary_Data_Country$COUNTRY))
-countries_not_in_new_data_set <- countriesintemporaryset[countriesintemporaryset$value %notin% countriesinnewdataset$value,]
-countries_not_in_new_data_set
-
-problems <- countries_not_in_new_data_set[countries_not_in_new_data_set$value %notin% countrieswithcdsdata$COUNTRY5yrCDS,]
-problems 
-
-realproblems <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %in% problems$value,]
-realproblems
-
-countrieswithouthealth_ocdata <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %notin% countriesinnewdataset$value,]
-countrieswithouthealth_ocdata
-# Some countries have NAs
+# # Checking for completeness of added data source
+# countriesinnewdataset <- as_tibble(unique(pollution$COUNTRY))
+# countriesintemporaryset <- as_tibble(unique(Temporary_Data_Country$COUNTRY))
+# countries_not_in_new_data_set <- countriesintemporaryset[countriesintemporaryset$value %notin% countriesinnewdataset$value,]
+# countries_not_in_new_data_set
+# 
+# problems <- countries_not_in_new_data_set[countries_not_in_new_data_set$value %notin% countrieswithcdsdata$COUNTRY5yrCDS,]
+# problems 
+# 
+# realproblems <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %in% problems$value,]
+# realproblems
+# 
+# countrieswithouthealth_ocdata <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %notin% countriesinnewdataset$value,]
+# countrieswithouthealth_ocdata
+# # Some countries have NAs
 
 pollution <- subset(pollution, COUNTRY %in% Final_Data_Country$COUNTRY)
 
@@ -1637,20 +1656,20 @@ Final_Data_Country <- merge(Final_Data_Country, pollution, by = c("COUNTRY"), al
 # Here, I add democracy indicators from Freedom House: https://freedomhouse.org/countries/freedom-world/scores and the Economist: https://www.eiu.com/topic/democracy-index?&zid=democracyindex2019&utm_source=blog&utm_medium=blog&utm_name=democracyindex2019&utm_term=democracyindex2019&utm_content=top_link. 
 democracy <- read.csv("Data/democracy.csv")
 
-# Checking for completeness of added data source
-countriesinnewdataset <- as_tibble(unique(democracy$COUNTRY))
-countriesintemporaryset <- as_tibble(unique(Temporary_Data_Country$COUNTRY))
-countries_not_in_new_data_set <- countriesintemporaryset[countriesintemporaryset$value %notin% countriesinnewdataset$value,]
-countries_not_in_new_data_set
-
-problems <- countries_not_in_new_data_set[countries_not_in_new_data_set$value %notin% countrieswithcdsdata$COUNTRY5yrCDS,]
-problems 
-
-realproblems <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %in% problems$value,]
-realproblems
-
-countrieswithoutdemocracydata<- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %notin% countriesinnewdataset$value,]
-countrieswithoutdemocracydata
+# # Checking for completeness of added data source
+# countriesinnewdataset <- as_tibble(unique(democracy$COUNTRY))
+# countriesintemporaryset <- as_tibble(unique(Temporary_Data_Country$COUNTRY))
+# countries_not_in_new_data_set <- countriesintemporaryset[countriesintemporaryset$value %notin% countriesinnewdataset$value,]
+# countries_not_in_new_data_set
+# 
+# problems <- countries_not_in_new_data_set[countries_not_in_new_data_set$value %notin% countrieswithcdsdata$COUNTRY5yrCDS,]
+# problems 
+# 
+# realproblems <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %in% problems$value,]
+# realproblems
+# 
+# countrieswithoutdemocracydata<- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %notin% countriesinnewdataset$value,]
+# countrieswithoutdemocracydata
 
 democracy <- subset(democracy, COUNTRY %in% Final_Data_Country$COUNTRY)
 
@@ -1669,20 +1688,20 @@ Final_Data_Country <- merge(Final_Data_Country, democracy, by = c("COUNTRY"), al
 # Here, I add data on the number of cellular subscriptions by nation from: https://data.worldbank.org/indicator/IT.CEL.SETS.P2?start=196.
 cellular <- read.csv("Data/cellular.csv")
 
-# Checking for completeness of added data source
-countriesinnewdataset <- as_tibble(unique(cellular$COUNTRY))
-countriesintemporaryset <- as_tibble(unique(Temporary_Data_Country$COUNTRY))
-countries_not_in_new_data_set <- countriesintemporaryset[countriesintemporaryset$value %notin% countriesinnewdataset$value,]
-countries_not_in_new_data_set
-
-problems <- countries_not_in_new_data_set[countries_not_in_new_data_set$value %notin% countrieswithcdsdata$COUNTRY5yrCDS,]
-problems 
-
-realproblems <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %in% problems$value,]
-realproblems
-
-countrieswithoutcellulardata<- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %notin% countriesinnewdataset$value,]
-countrieswithoutcellulardata
+# # Checking for completeness of added data source
+# countriesinnewdataset <- as_tibble(unique(cellular$COUNTRY))
+# countriesintemporaryset <- as_tibble(unique(Temporary_Data_Country$COUNTRY))
+# countries_not_in_new_data_set <- countriesintemporaryset[countriesintemporaryset$value %notin% countriesinnewdataset$value,]
+# countries_not_in_new_data_set
+# 
+# problems <- countries_not_in_new_data_set[countries_not_in_new_data_set$value %notin% countrieswithcdsdata$COUNTRY5yrCDS,]
+# problems 
+# 
+# realproblems <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %in% problems$value,]
+# realproblems
+# 
+# countrieswithoutcellulardata<- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %notin% countriesinnewdataset$value,]
+# countrieswithoutcellulardata
 
 cellular <- subset(cellular, COUNTRY %in% Final_Data_Country$COUNTRY)
 
@@ -1701,20 +1720,20 @@ Final_Data_Country <- merge(Final_Data_Country, cellular, by = c("COUNTRY"), all
 # Now, I add military data from: https://correlatesofwar.org/data-sets/national-material-capabilities. Note the l.y.a. is 2012.
 military <- read.csv("Data/military.csv")
 
-# Checking for completeness of added data source
-countriesinnewdataset <- as_tibble(unique(military$COUNTRY))
-countriesintemporaryset <- as_tibble(unique(Temporary_Data_Country$COUNTRY))
-countries_not_in_new_data_set <- countriesintemporaryset[countriesintemporaryset$value %notin% countriesinnewdataset$value,]
-countries_not_in_new_data_set
-
-problems <- countries_not_in_new_data_set[countries_not_in_new_data_set$value %notin% countrieswithcdsdata$COUNTRY5yrCDS,]
-problems 
-
-realproblems <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %in% problems$value,]
-realproblems
-
-countrieswithoutmilitarydata<- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %notin% countriesinnewdataset$value,]
-countrieswithoutmilitarydata
+# # Checking for completeness of added data source
+# countriesinnewdataset <- as_tibble(unique(military$COUNTRY))
+# countriesintemporaryset <- as_tibble(unique(Temporary_Data_Country$COUNTRY))
+# countries_not_in_new_data_set <- countriesintemporaryset[countriesintemporaryset$value %notin% countriesinnewdataset$value,]
+# countries_not_in_new_data_set
+# 
+# problems <- countries_not_in_new_data_set[countries_not_in_new_data_set$value %notin% countrieswithcdsdata$COUNTRY5yrCDS,]
+# problems 
+# 
+# realproblems <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %in% problems$value,]
+# realproblems
+# 
+# countrieswithoutmilitarydata<- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %notin% countriesinnewdataset$value,]
+# countrieswithoutmilitarydata
 
 military <- subset(military, COUNTRY %in% Final_Data_Country$COUNTRY)
 
@@ -1735,20 +1754,20 @@ Final_Data_Country <- merge(Final_Data_Country, military, by = c("COUNTRY"), all
 # I now add data on diseases (aggregated from 2015-2018) from the WHO ICD10: https://www.who.int/classifications/icd/icdonlineversions/en/. 
 diseases <- read.csv("data/ICD_Deaths_Final.csv")
 
-# Checking for completeness of added data source
-countriesinnewdataset <- as_tibble(unique(diseases$COUNTRY))
-countriesintemporaryset <- as_tibble(unique(Temporary_Data_Country$COUNTRY))
-countries_not_in_new_data_set <- countriesintemporaryset[countriesintemporaryset$value %notin% countriesinnewdataset$value,]
-countries_not_in_new_data_set
-
-problems <- countries_not_in_new_data_set[countries_not_in_new_data_set$value %notin% countrieswithcdsdata$COUNTRY5yrCDS,]
-problems 
-
-realproblems <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %in% problems$value,]
-realproblems
-
-countrieswithoutdiseasesdata<- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %notin% countriesinnewdataset$value,]
-countrieswithoutdiseasesdata
+# # Checking for completeness of added data source
+# countriesinnewdataset <- as_tibble(unique(diseases$COUNTRY))
+# countriesintemporaryset <- as_tibble(unique(Temporary_Data_Country$COUNTRY))
+# countries_not_in_new_data_set <- countriesintemporaryset[countriesintemporaryset$value %notin% countriesinnewdataset$value,]
+# countries_not_in_new_data_set
+# 
+# problems <- countries_not_in_new_data_set[countries_not_in_new_data_set$value %notin% countrieswithcdsdata$COUNTRY5yrCDS,]
+# problems 
+# 
+# realproblems <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %in% problems$value,]
+# realproblems
+# 
+# countrieswithoutdiseasesdata<- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %notin% countriesinnewdataset$value,]
+# countrieswithoutdiseasesdata
 
 diseases <- subset(diseases, COUNTRY %in% Final_Data_Country$COUNTRY)
 
@@ -1819,7 +1838,7 @@ library(readxl)
 
 
 
-# define sample -----------------------------------------------------------
+# define sample of 30 EM countries ----------------------------------------
 # I restrict the analysis to Emerging Market countries, from a list pulled from here: https://www.ishares.com/us/products/239572/ishares-jp-morgan-usd-emerging-markets-bond-etf for EMBI (plus India and Thailand for EMBI+2) and here https://www.ishares.com/us/products/239528/ishares-emerging-markets-local-currency-bond-etf for LEMB
 EMBI <- read_excel("Data/SAMPLE_LISTS.xlsx", sheet = "EMBI")
 EMBI2 <- read_excel("Data/SAMPLE_LISTS.xlsx", sheet = "EMBI2")
@@ -1859,20 +1878,20 @@ Final_Data_Country <- subset(Final_Data_Country, COUNTRY %in% uniquecountries$Co
 # I now add data on government indicators from: https://info.worldbank.org/governance/wgi/Home/Documents. 
 govt <- read.csv("Data/govt.csv")
 
-# Checking for completeness of added data source
-countriesinnewdataset <- as_tibble(unique(govt$COUNTRY))
-countriesintemporaryset <- as_tibble(unique(Temporary_Data_Country$COUNTRY))
-countries_not_in_new_data_set <- countriesintemporaryset[countriesintemporaryset$value %notin% countriesinnewdataset$value,]
-countries_not_in_new_data_set
-
-problems <- countries_not_in_new_data_set[countries_not_in_new_data_set$value %notin% countrieswithcdsdata$COUNTRY5yrCDS,]
-problems 
-
-realproblems <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %in% problems$value,]
-realproblems
-
-countrieswithoutgovtdata <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %notin% countriesinnewdataset$value,]
-countrieswithoutgovtdata
+# # Checking for completeness of added data source
+# countriesinnewdataset <- as_tibble(unique(govt$COUNTRY))
+# countriesintemporaryset <- as_tibble(unique(Temporary_Data_Country$COUNTRY))
+# countries_not_in_new_data_set <- countriesintemporaryset[countriesintemporaryset$value %notin% countriesinnewdataset$value,]
+# countries_not_in_new_data_set
+# 
+# problems <- countries_not_in_new_data_set[countries_not_in_new_data_set$value %notin% countrieswithcdsdata$COUNTRY5yrCDS,]
+# problems 
+# 
+# realproblems <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %in% problems$value,]
+# realproblems
+# 
+# countrieswithoutgovtdata <- countrieswithcdsdata[countrieswithcdsdata$COUNTRY5yrCDS %notin% countriesinnewdataset$value,]
+# countrieswithoutgovtdata
 
 govt <- subset(govt, COUNTRY %in% Final_Data_Country$COUNTRY)
 
@@ -1887,7 +1906,7 @@ Final_Data_Country <- Final_Data_Country[order(Final_Data_Country$COUNTRY, Final
 
 # saving Oxford_V1  --------------------------------------------------------
 Oxford_V1 <- Final_Data_Country
-View(Oxford_V1)
+# View(Oxford_V1)
 # Once the dataset "Oxford_V1" is created, a few variables still have to be added. However, these variables are hand-coded. 
 # Thus, I first export/save the dataset "Oxford_V1" and then manually add the variable in the exported excel sheet. 
 # Upon hand-coding, I then re-import the augmented sheet. 
@@ -1902,9 +1921,9 @@ View(Oxford_V1)
 # 3. step: removing non-augmented dataframe from R
 # remove(Oxford_V1)
 # 4. step: importing additional dummy ts
-# Oxford_addition <- read_excel("Data/Oxford_V1_dummyts_additions.xlsx")
+Oxford_addition <- read_excel("Data/Oxford_V1_dummyts_additions.xlsx")
 # 5. step: merging Oxford_V1 with Oxford_addition and calling it mergedOxford
-# Oxford_V1 <- as_tibble(merge(Oxford_V1, oxford_addition, by=c("COUNTRY", "Date")))
+Oxford_V1 <- as_tibble(merge(Oxford_V1, Oxford_addition, by=c("COUNTRY", "Date")))
 # View(Oxford_V1)
 # =========================================================================.
 
@@ -1940,7 +1959,7 @@ Oxford_V1$Total_Deaths_Per_Million = (Oxford_V1$Total_Deceased_Country / Oxford_
 # =========================================================================.
 
 
-# load libraries ----------------------------------------------------------
+# load additional libraries ----------------------------------------------------------
 library(lubridate)
 library(zoo)
 library(quantmod)
@@ -2494,13 +2513,13 @@ print(Plot_78)
 
 
 
-# generate multi-factor model ---------------------------------------------
+# MULTI-FACTOR MODEL ---------------------------------------------
 # Generating the heterogenous multi-factor model.
 # =========================================================================.
 
 
 
-# loading libraries -------------------------------------------------------
+# loading additional libraries --------------------------------------------
 library(lubridate)
 library(zoo)
 library(quantmod)
@@ -2533,7 +2552,7 @@ cds_five <- read_excel("Data/CDS.xlsx", sheet = "5yrCDS")
 countries <- read_excel("Data/laender.xlsx", sheet = "EM")
 
 
-# define EM countries -----------------------------------------------------
+# define 30 EM countries ---------------------------------------------------
 # subsetting for only EM and non-EM countries and for between 2020-06-30 and 2014-01-01 
 em_countries <- countries[ which(countries$EM_dummy5yr ==1), "COUNTRY5yrCDS"   ]
 non_em_countries <- countries[ which(countries$EM_dummy5yr !=1), "COUNTRY5yrCDS"   ]
@@ -2542,7 +2561,7 @@ cds_five <- cds_five[which(cds_five$Date>="2014-01-01" & cds_five$Date<="2020-07
 
 
 
-# subset CES for EM and non EM --------------------------------------------
+# subset CDS for EM and non EM --------------------------------------------
 em_cds <- cds_five[, c("Date", em_countries$COUNTRY5yrCDS )]
 nonem_cds<-cds_five[, c("Date", non_em_countries$COUNTRY5yrCDS )]
 # =========================================================================.
@@ -2568,6 +2587,11 @@ for(i in 1:length(countriez)) {
 EMindividualspreadsroster <- do.call("grid.arrange", c(country_plots))
 EMindividualspreadsroster 
 
+# Saving the plot
+# jpeg("Plots/individualspreads_EM.jpg", width = 1920, height = 1080)
+# do.call("grid.arrange", c(country_plots))
+# dev.off()
+
 # plot individual spreads for non EM
 pdat<-melt(nonem_cds,id.vars="Date")
 countriez<-unique(pdat$variable)
@@ -2580,7 +2604,7 @@ nonEMindividualspreadsroster <- do.call("grid.arrange", c(country_plots))
 nonEMindividualspreadsroster
 
 # Saving the plot
-# jpeg("Plots/individualspreads.jpg", width = 1920, height = 1080)
+# jpeg("Plots/individualspreads_non_EM.jpg", width = 1920, height = 1080)
 # do.call("grid.arrange", c(country_plots))
 # dev.off()
 # =========================================================================.
@@ -2588,10 +2612,12 @@ nonEMindividualspreadsroster
 
 
 
-
-
-
 # prepare data for regression ---------------------------------------------
+# Importing GDP 2019 data for developed markets
+GDP2019USDMIL_D <- read_excel("Data/GDP.xlsx", sheet = "GLOBAL")
+total <- sum(GDP2019USDMIL_D$GDP2019MIL)
+GDP2019USDMIL_D <- GDP2019USDMIL_D %>% mutate(weight = GDP2019MIL/ total  )
+
 ###Prepare data for regression
 em_cds2<- em_cds
 # xxx nonem_cds2 <- nonem_cds
@@ -2610,7 +2636,7 @@ glo_cds<- as.data.frame(rowMeans(d_nemds) )# create a global CDS factor excludin
 # This is the new way when we start weighting things
 test <- as.data.frame(d_nemds[1,])
 weighted_matrix <- test*GDP2019USDMIL_D$weight
-glo_cds_weighted <- 
+# glo_cds_weighted <- 
 a <- as.data.frame(c("Germany", "France"), c(100,40) )
 countryexample <- c("Germany", "France")
 countrynumbers <- c(100,40)
@@ -2626,19 +2652,14 @@ for(i in 1:ncol(em_fac)){
 }
 
 
+# problem XXX
+
+# # Summing all GDP
+# for(i in 1:(nrow(Africa)) ) {
+#   Africa[i,"sumofothers"] <-  sum(Africa[-i,]$GDP2019MIL) 
+# }
 
 
-# Importing GDP 2019 data for developed markets
-GDP2019USDMIL_D <- read_excel("Data/GDP.xlsx", sheet = "GLOBAL")
-total <- sum(GDP2019USDMIL_D$GDP2019MIL)
-GDP2019USDMIL_D <- GDP2019USDMIL_D %>% mutate(weight = GDP2019MIL/ total  )
-
-
-
-# Summing all GDO
-for(i in 1:(nrow(Africa)) ) {
-  Africa[i,"sumofothers"] <-  sum(Africa[-i,]$GDP2019MIL) 
-}
 
 # Importing GDP 2019 data for all emerging markets
 GDP2019USDMIL <- read_excel("Data/GDP.xlsx", sheet = "EM")
@@ -2962,8 +2983,8 @@ em_fac_test <- matrix(NA, nrow=nrow(d_emcds), ncol = ncol(d_emcds) )
 pre.dat<-d_emcds[which(em_cds2$Date[-1]<"2019-06-30"),]
 post.dat<-d_emcds[which(em_cds2$Date[-1]>="2019-06-30"),]
 
-glo_cds_pre<-glo_cds[which(em_cds2$Date[-1]<"2019-06-30")]
-glo_cds_post<-glo_cds[which(em_cds2$Date[-1]>="2019-06-30")]
+glo_cds_pre<-glo_cds[which(em_cds2$Date[-1]<"2019-06-30"),]
+glo_cds_post<-glo_cds[which(em_cds2$Date[-1]>="2019-06-30"),]
 
 em_fac_pre<-em_fac[which(em_cds2$Date[-1]<"2019-06-30"),]
 em_fac_post<-em_fac[which(em_cds2$Date[-1]>="2019-06-30"),]
@@ -2972,8 +2993,8 @@ em_fac_post<-em_fac[which(em_cds2$Date[-1]>="2019-06-30"),]
 pre.dat.nonem <-d_nemds[which(nonem_cds$Date[-1]<"2019-06-30"),]
 post.dat.nonem<-d_nemds[which(nonem_cds$Date[-1]>="2019-06-30"),]
 
-glo_cds_pre.nonem<-glo_cds[which(nonem_cds$Date[-1]<"2019-06-30")]
-glo_cds_post.nonem<-glo_cds[which(nonem_cds$Date[-1]>="2019-06-30")]
+glo_cds_pre.nonem<-glo_cds[which(nonem_cds$Date[-1]<"2019-06-30"),]
+glo_cds_post.nonem<-glo_cds[which(nonem_cds$Date[-1]>="2019-06-30"),]
 
 nonem_fac_pre<-em_fac[which(nonem_cds$Date[-1]<"2019-06-30"),]
 nonem_fac_post<-em_fac[which(nonem_cds$Date[-1]>="2019-06-30"),]
@@ -3008,7 +3029,7 @@ for(i in 1:nrow(coefz)){
 colnames(predz)<-colnames(post.dat)
 
 # I made a date change here so that the code runs smoothly
-pdat<-data.frame(em_cds2$Date[which(em_cds2$Date>"2019-07-01")], # date
+pdat<-data.frame(em_cds2$Date[which(em_cds2$Date>="2019-06-30")], # date
                  rowMeans(post.dat), # EM_Avg
                  rowMeans(post.dat.nonem[,which(colnames(post.dat.nonem) %in%  non_em_countries$COUNTRY5yrCDS  )]), # Developed_Avg
                  rowMeans(post.dat[,which(colnames(post.dat) %in% Top5_Mortality_Countries$COUNTRY  )]), # EM_Avg_COVID
@@ -3056,7 +3077,7 @@ for(i in 1:ncol(post.dat)){
 }
 
 ###plot individual spreads. Here I had to change the date again
-pdat<-data.frame(em_cds2$Date[which(em_cds2$Date>"2019-07-01")],post.dat,predz)
+pdat<-data.frame(em_cds2$Date[which(em_cds2$Date>="2019-06-30")],post.dat,predz)
 colnames(pdat)[1]<-"date"
 countriez<-colnames(pdat)[-1]
 country_plots<-list()
@@ -3403,6 +3424,8 @@ stargazer(digits=4,new_res.mortality.2,new_res.mortality.3,new_res.mortality.4,
           notes.append=F, notes.align ="l",
           title="COVID-Sample Panel Analysis",add.lines = list(c("Fixed effects?", "Y","Y","Y","Y")))
 # =========================================================================.
+
+
 
 
 
