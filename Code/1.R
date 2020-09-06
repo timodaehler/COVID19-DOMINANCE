@@ -1906,6 +1906,7 @@ Final_Data_Country <- Final_Data_Country[order(Final_Data_Country$COUNTRY, Final
 
 # saving Oxford_V1  --------------------------------------------------------
 Oxford_V1 <- Final_Data_Country
+Oxford_V2 <- Final_Data_Country
 # View(Oxford_V1)
 # Once the dataset "Oxford_V1" is created, a few variables still have to be added. However, these variables are hand-coded. 
 # Thus, I first export/save the dataset "Oxford_V1" and then manually add the variable in the exported excel sheet. 
@@ -2136,7 +2137,7 @@ Plot_26 <- plot_ly(data = subset(Oxford_V1, Date < as.Date("2020-06-30") & Date 
   add_lines(linetype = ~COUNTRY) %>%
   layout(title="COVID-19 mortality rate curves, by country") # New Mortality Rate Across Countries
 Plot_26
-orca(Plot_26, "Plots/Other/Figure4a.pdf")
+orca(Plot_26, "Plots/Figure4a.pdf")
 # =========================================================================.
 
 
@@ -2184,7 +2185,7 @@ Plot_27A <- plot_ly(data  = subset(First_Death, Date < as.Date("2020-06-30") & D
   add_lines(linetype = ~COUNTRY) %>%
   layout(title="COVID-19 deaths per million, by country")
 Plot_27A
-orca(Plot_27A, "Plots/Other/Figure4b.pdf")
+orca(Plot_27A, "Plots/Figure4b.pdf")
 
 Plot_28 <- Plot_27A %>% layout(yaxis = list(type = "log"))
 Plot_28
@@ -2207,7 +2208,7 @@ Plot_28C <- ggplot(data = First_Death, aes(x = Date, y = new_rolling_average_mor
 Plot_28C
 
 
-### Generating Figures 1.1, 1.2 and 1.3. xxx
+### Generating Figures 1.1, 1.2 and 1.3. 
 library(gghighlight)
 
 Plot_28D <- ggplot(data = First_Death, aes(x = Date, y = new_rolling_average_mortality * 100, color = COUNTRY)) + geom_line() + theme_bw() + theme(axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("New Mortality Rate (%)")
@@ -2588,9 +2589,17 @@ EMindividualspreadsroster <- do.call("grid.arrange", c(country_plots))
 EMindividualspreadsroster 
 
 # Saving the plot
-# jpeg("Plots/individualspreads_EM.jpg", width = 1920, height = 1080)
-# do.call("grid.arrange", c(country_plots))
-# dev.off()
+jpeg("Plots/individualspreads_EM.jpg", width = 3840, height = 2160)
+do.call("grid.arrange", c(country_plots))
+dev.off()
+
+pdf(file = "Plots/individualspreads_EM.pdf", width = 9) # The height of the plot in inches
+do.call("grid.arrange", c(country_plots))
+dev.off()
+
+
+
+
 
 # plot individual spreads for non EM
 pdat<-melt(nonem_cds,id.vars="Date")
@@ -2604,9 +2613,13 @@ nonEMindividualspreadsroster <- do.call("grid.arrange", c(country_plots))
 nonEMindividualspreadsroster
 
 # Saving the plot
-# jpeg("Plots/individualspreads_non_EM.jpg", width = 1920, height = 1080)
-# do.call("grid.arrange", c(country_plots))
-# dev.off()
+jpeg("Plots/individualspreads_non_EM.jpg", width = 1920, height = 1080)
+do.call("grid.arrange", c(country_plots))
+dev.off()
+
+pdf(file = "Plots/individualspreads_non_EM.pdf") # The height of the plot in inches
+do.call("grid.arrange", c(country_plots))
+dev.off()
 # =========================================================================.
 
 
@@ -2631,7 +2644,7 @@ d_emcds<-apply(log(em_cds2[,-1]),2,diff) #log differences of EM spreads
 d_nemds<-apply(log(nonem_cds[,-1]),2,diff) # log differences of non-EM spreads
 
 # This was the old way before we starting weighting things
-glo_cds<- as.data.frame(rowMeans(d_nemds) )# create a global CDS factor excluding EM
+glo_cds <- as.data.frame(rowMeans(d_nemds) )# create a global CDS factor excluding EM
 
 # This is the new way when we start weighting things
 test <- as.data.frame(d_nemds[1,])
@@ -3047,29 +3060,37 @@ p2<-ggplot(data=pdat[-1,],aes(x=date,y=EM_SD))+geom_line()+theme_bw()+xlab("")+y
 p2
 p4a<-ggplot(data=pdat[-1,],aes(x=date,y=cumsum(EM_Avg_COVID)))+geom_line()+geom_line(aes(y=cumsum(EM_Avg_nCOVID)),size=1)+theme_bw()+xlab("")+ylab("Cumulative Change (Log CDS)")+ggtitle("High Vs. Low COVID Moralities: Actual")  + annotate(geom ="text", x = c(as.POSIXct("2020-01-25"),as.POSIXct("2020-01-25")  ), y = c(.4,.1), label = c("Low Mortality", "High Mortality") , fontface=c("bold","plain"))
 p4a
-p4b<-ggplot(data=pdat[-1,],aes(x=date,y=cumsum(EM_Avg_COVID-EM_Pred_COVID)))+geom_line()+geom_line(aes(y=cumsum(EM_Avg_nCOVID-EM_Pred_nCOVID)),size=1)+theme_bw()+xlab("")+ylab("Cumulative Residuals")+labs(title="High Vs. Low COVID Moralities: Actual-Fitted")+geom_vline(xintercept=c(as.numeric(as.Date("2020-03-18")),as.numeric(as.Date("2020-06-04"))),alpha=.5)+annotate("text", x = c(as.POSIXct("2020-02-01"),as.POSIXct("2020-02-10")), y = c(.0,-.35), label = c("Low Mortality", "High Mortality") , fontface=c("bold","plain"))
+p4b<-ggplot(data=pdat[-1,],aes(x=date,y=cumsum(EM_Avg_COVID-EM_Pred_COVID)))+geom_line()+geom_line(aes(y=cumsum(EM_Avg_nCOVID-EM_Pred_nCOVID)),size=1)+theme_bw()+xlab("")+ylab("Cumulative Residuals")+labs(title="High Vs. Low COVID Moralities: Actual-Fitted")+geom_vline(xintercept=c(as.numeric(as.Date("2020-03-18")),as.numeric(as.Date("2020-06-04"))),alpha=.5)+annotate("text", x = c(as.POSIXct("2020-02-01"),as.POSIXct("2020-02-10")), y = c(.0,-.2), label = c("Low Mortality", "High Mortality") , fontface=c("bold","plain"))
 p4b
 grid.arrange(p,p2,p4a,p4b,nrow=2) #1000x700
 
-# jpeg("Plots/pp2p4ap4b.jpg", width = 1920, height = 1080)
-# grid.arrange(p,p2,p4a,p4b,nrow=2)
-# dev.off()
+# Save plots
+jpeg("Plots/Figure8.jpg", width = 1920, height = 1080)
+grid.arrange(p,p2,p4a,p4b,nrow=2)
+dev.off()
+pdf(file = "Plots/Figure8.pdf", width = 10) 
+grid.arrange(p,p2,p4a,p4b,nrow=2)
+dev.off()
 
-p5a<-ggplot(data=pdat[-1,],aes(x=date,y=cumsum(EM_Avg)))+geom_line()+geom_line(aes(y=cumsum(Developed_Avg)),size=1)+theme_bw()+xlab("")+ylab("Cumulative Change (Log CDS)")+ggtitle("Emerging markets Vs. Developed countries: Actual")+annotate("text", x = c(as.POSIXct("2020-01-25"),as.POSIXct("2020-01-05")), y = c(.1,-.5), label = c("Developed", "EM") , fontface=c("bold","plain")) # geom_vline(xintercept=c(c(as.POSIXct("2020-03-18")),as.POSIXct(as.Date("2020-06-04"))),alpha=.5)+ylim(c(-.6,1))+
+
+p5a<-ggplot(data=pdat[-1,],aes(x=date,y=cumsum(EM_Avg)))+geom_line()+geom_line(aes(y=cumsum(Developed_Avg)),size=1)+theme_bw()+xlab("")+ylab("Cumulative Change (Log CDS)")+ggtitle("Emerging markets Vs. Developed countries: Actual")+annotate("text", x = c(as.POSIXct("2020-01-25"),as.POSIXct("2020-01-05")), y = c(.1,-.3), label = c("Developed", "EM") , fontface=c("bold","plain")) # geom_vline(xintercept=c(c(as.POSIXct("2020-03-18")),as.POSIXct(as.Date("2020-06-04"))),alpha=.5)+ylim(c(-.6,1))+
 p5a
 
-p5b<-ggplot(data=pdat[-1,],aes(x=date,y=cumsum(EM_Avg-EM_Pred)))+geom_line()+geom_line(aes(y=cumsum(Developed_Avg-Developed_Pred)),size=1)+theme_bw()+xlab("")+ylab("Cumulative Residuals")+labs(title="Emerging Markets Vs. Developed countries: Actual-Fitted")+annotate("text", x = c(as.POSIXct("2020-01-25"),as.POSIXct("2020-02-10")), y = c(.05,-.1), label = c("Developed", "EM") , fontface=c("bold","plain")) # geom_vline(xintercept=c(as.numeric(as.POSIXct("2020-03-18")),as.numeric(as.POSIXct("2020-06-04"))),alpha=.5)+
+p5b<-ggplot(data=pdat[-1,],aes(x=date,y=cumsum(EM_Avg-EM_Pred)))+geom_line()+geom_line(aes(y=cumsum(Developed_Avg-Developed_Pred)),size=1)+theme_bw()+xlab("")+ylab("Cumulative Residuals")+labs(title="Emerging Markets Vs. Developed countries: Actual-Fitted")+annotate("text", x = c(as.POSIXct("2020-01-25"),as.POSIXct("2020-02-10")), y = c(.05,-.04), label = c("Developed", "EM") , fontface=c("bold","plain")) # geom_vline(xintercept=c(as.numeric(as.POSIXct("2020-03-18")),as.numeric(as.POSIXct("2020-06-04"))),alpha=.5)+
 p5b
 grid.arrange(p5a,p5b,nrow=1)
-# p5b<-ggplot(data=pdat[-1,],aes(x=date,y=cumsum(EZ_Avg_PIIGS-EZ_Pred_PIIGS)))+geom_line()+geom_line(aes(y=cumsum(EZ_Avg_Core-EZ_Pred_Core)),size=1)+theme_bw()+xlab("")+ylab("Cumulative Residuals")+labs(title="GIIPS Vs. Core: Actual-Fitted")+geom_vline(xintercept=c(as.numeric(as.Date("2020-03-18")),as.numeric(as.Date("2020-06-04"))),alpha=.5)+annotate("text", x = c(as.Date("2020-01-25"),as.Date("2020-02-10")), y = c(.1,-.1), label = c("Core", "GIIPS") , fontface=c("bold","plain"))
 
-# jpeg("Plots/p5ap5b.jpg", width = 1920, height = 1080)
-# grid.arrange(p5a,p5b,nrow=1)
-# dev.off()
+# Save plots
+jpeg("Plots/Figure9.jpg", width = 1920, height = 1080)
+grid.arrange(p5a,p5b,nrow=1)
+dev.off()
+pdf(file = "Plots/Figure9.pdf", width = 10) 
+grid.arrange(p5a,p5b,nrow=1)
+dev.off()
 
-# XXX writing these?
-# write.csv(data.frame(pdat$date,post.dat),"Data/covid_ez_spreads.csv")
-# write.csv(data.frame(pdat$date,predz),"Data/covid_ez_prediction.csv")
+
+write.csv(data.frame(pdat$date,post.dat),"Data/covid_ez_spreads_weighted.csv")
+write.csv(data.frame(pdat$date,predz),"Data/covid_ez_prediction_weighted.csv")
 
 corz<-c(0)
 for(i in 1:ncol(post.dat)){
@@ -3083,22 +3104,986 @@ countriez<-colnames(pdat)[-1]
 country_plots<-list()
 
 for(i in 1:(length(countriez)/2)) {
-  plotdat<-pdat[-1,c(1,i+1,i+18)]
+  plotdat<-pdat[-1,c(1,i+1,i+31)]
   plotdat[,-1]<-apply(plotdat[,-1],2,cumsum)
   country_plots[[i]] <- ggplot(data=(plotdat), aes_string(x="date",y=colnames(plotdat)[2]))+geom_line()+theme_bw()+ylab("")+xlab(countriez[i])+geom_line(aes_string(x="date",y=colnames(plotdat)[3]),linetype=2)
 }
 do.call("grid.arrange", c(country_plots)) 
 
-# jpeg("Plots/individualpredvsactual.jpg", width = 1920, height = 1080)
-# do.call("grid.arrange", c(country_plots)) 
-# dev.off()
+# Save plots
+jpeg("Plots/individual_predict_vs_actual.jpg", width = 1920, height = 1080)
+do.call("grid.arrange", c(country_plots)) 
+dev.off()
+pdf(file = "Plots/individual_predict_vs_actual.pdf", width = 16) 
+do.call("grid.arrange", c(country_plots)) 
+dev.off()
+# =========================================================================.
+
+
+
+
+# SENSITIVITY ANALYSIS ----------------------------------------------------
+
+# load additional libraries -----------------------------------------------
+options(scipen = 999)
+library(cowplot)
+# =========================================================================.
+
+
+
+# Data import of GDP and International reserves ----------------------------
+# Import data on international reserves and GDP of emerging markets
+InternationalReserves <- read_excel("Data/InternationalReserves.xlsx", sheet = "ReserveRatio")
+
+# Create the reserve to GDP ratios
+InternationalReserves <- InternationalReserves %>%
+  mutate(IR_GDP_ratio_Start_2019 = IR_12_2018 / GDP2018, IR_GDP_ratio_February_2020 = IR_2_2020 / GDP2019, IR_GDP_ratio_March_2020 = IR_3_2020 / GDP2019, IR_GDP_ratio_April_2020 = IR_4_2020 / GDP2019 )
+
+# Create the change in ratios between April and February
+InternationalReserves <- InternationalReserves %>%
+  mutate(Reserve_ratio_change_February_April_2020 = (IR_GDP_ratio_April_2020 - IR_GDP_ratio_February_2020) * 100, 
+         Reserve_ratio_change_March_2020 = (IR_GDP_ratio_March_2020 - IR_GDP_ratio_February_2020 ) *100, 
+         Reserve_ratio_change_February_April_2020_percent = (IR_GDP_ratio_April_2020 - IR_GDP_ratio_February_2020)/IR_GDP_ratio_February_2020 * 100, 
+         Reserve_ratio_change_March_2020_percent = (IR_GDP_ratio_March_2020 - IR_GDP_ratio_February_2020)/IR_GDP_ratio_February_2020 *100 )
+# =========================================================================.
+
+
+
+# Histogram with 20 bins --------------------------------------------------
+h1 <- ggplot(InternationalReserves, aes(IR_GDP_ratio_Start_2019)) + 
+  geom_histogram(bins = 20) + 
+  xlab("") + 
+  ggtitle("Start of January 2019") 
+
+h2 <- ggplot(InternationalReserves, aes(IR_GDP_ratio_February_2020)) + 
+  geom_histogram(bins = 20) + 
+  xlab("") + 
+  ggtitle("End of February 2020") 
+
+h3 <- ggplot(InternationalReserves, aes(IR_GDP_ratio_March_2020)) + 
+  geom_histogram(bins = 20) + 
+  xlab("") + 
+  ggtitle("End of March 2020") 
+
+h4 <- ggplot(InternationalReserves, aes(IR_GDP_ratio_April_2020)) + 
+  geom_histogram(bins = 20) + 
+  xlab("") + 
+  ggtitle("End of April 2020") 
+
+# Output
+title <- ggdraw() + 
+  draw_label(
+    "International reserves to GDP ratio, 20 bins",
+    fontface = 'bold',
+    x = 0,
+    hjust = 0
+  ) +
+  theme(
+    # add margin on the left of the drawing canvas,
+    # so title is aligned with left edge of first plot
+    plot.margin = margin(0, 0, 0, 7)
+  )
+
+plot_row <- plot_grid(h1, h2, h3, h4)
+plot_grid(title, plot_row)
+plot_grid(
+  title, plot_row,
+  ncol = 1,
+  # rel_heights values control vertical title margins
+  rel_heights = c(0.1, 1)
+)
+
+pdf("Plots/forexreserveshistograms20bins.pdf", width = 11.69, height = 8.27 )
+# grid.arrange(h1, h2, h3, h4,nrow=2)
+plot_grid(
+  title, plot_row,
+  ncol = 1,
+  # rel_heights values control vertical title margins
+  rel_heights = c(0.1, 1)
+)
+dev.off()
+# grid.arrange(h1, h2, h3, h4,nrow=2)
+# =========================================================================.
+
+
+
+# Histogram with 3 bins --------------------------------------------------
+h1 <- ggplot(InternationalReserves, aes(IR_GDP_ratio_Start_2019)) + 
+  geom_histogram(bins = 3) + 
+  xlab("") + 
+  ggtitle("Start of January 2019") 
+
+h2 <- ggplot(InternationalReserves, aes(IR_GDP_ratio_February_2020)) + 
+  geom_histogram(bins = 3) + 
+  xlab("") + 
+  ggtitle("End of February 2020") 
+
+h3 <- ggplot(InternationalReserves, aes(IR_GDP_ratio_March_2020)) + 
+  geom_histogram(bins = 3) + 
+  xlab("") + 
+  ggtitle("End of March 2020") 
+
+h4 <- ggplot(InternationalReserves, aes(IR_GDP_ratio_April_2020)) + 
+  geom_histogram(bins = 3) + 
+  xlab("") + 
+  ggtitle("End of April 2020") 
+
+# Output
+title <- ggdraw() + 
+  draw_label(
+    "International reserves to GDP ratio, 3 bins",
+    fontface = 'bold',
+    x = 0,
+    hjust = 0
+  ) +
+  theme(
+    # add margin on the left of the drawing canvas,
+    # so title is aligned with left edge of first plot
+    plot.margin = margin(0, 0, 0, 7)
+  )
+
+plot_row <- plot_grid(h1, h2, h3, h4)
+plot_grid(title, plot_row)
+plot_grid(
+  title, plot_row,
+  ncol = 1,
+  # rel_heights values control vertical title margins
+  rel_heights = c(0.1, 1)
+)
+
+pdf("Plots/forexreserveshistograms3bins.pdf", width = 11.69, height = 8.27 )
+# grid.arrange(h1, h2, h3, h4,nrow=2)
+plot_grid(
+  title, plot_row,
+  ncol = 1,
+  # rel_heights values control vertical title margins
+  rel_heights = c(0.1, 1)
+)
+dev.off()
+# grid.arrange(h1, h2, h3, h4,nrow=2)
+# =========================================================================.
+
+
+
+
+
+# Manual bin width --------------------------------------------------------
+h1 <- ggplot(InternationalReserves, aes(IR_GDP_ratio_Start_2019)) + 
+  geom_histogram(binwidth=0.1) + 
+  xlab("") + 
+  ggtitle("Start of January 2019") 
+
+h2 <- ggplot(InternationalReserves, aes(IR_GDP_ratio_February_2020)) + 
+  geom_histogram(binwidth=0.1) + 
+  xlab("") + 
+  ggtitle("End of February 2020") 
+
+h3 <- ggplot(InternationalReserves, aes(IR_GDP_ratio_March_2020)) + 
+  geom_histogram(binwidth=0.1) + 
+  xlab("") + 
+  ggtitle("End of March 2020") 
+
+h4 <- ggplot(InternationalReserves, aes(IR_GDP_ratio_April_2020)) + 
+  geom_histogram(binwidth=0.1) + 
+  xlab("") + 
+  ggtitle("End of April 2020") 
+
+# Output
+title <- ggdraw() + 
+  draw_label(
+    "International reserves to GDP ratio, bin width = 0.1",
+    fontface = 'bold',
+    x = 0,
+    hjust = 0
+  ) +
+  theme(
+    # add margin on the left of the drawing canvas,
+    # so title is aligned with left edge of first plot
+    plot.margin = margin(0, 0, 0, 7)
+  )
+
+plot_row <- plot_grid(h1, h2, h3, h4)
+plot_grid(title, plot_row)
+plot_grid(
+  title, plot_row,
+  ncol = 1,
+  # rel_heights values control vertical title margins
+  rel_heights = c(0.1, 1)
+)
+
+pdf("Plots/forexreserveshistogramssetbinwidth.pdf", width = 11.69, height = 8.27 )
+# grid.arrange(h1, h2, h3, h4,nrow=2)
+plot_grid(
+  title, plot_row,
+  ncol = 1,
+  # rel_heights values control vertical title margins
+  rel_heights = c(0.1, 1)
+)
+dev.off()
+# =========================================================================.
+
+
+# Barplots of IR to GDP ratios --------------------------------------------
+p1 <- arrange(InternationalReserves, IR_GDP_ratio_Start_2019 ) %>%
+  mutate(COUNTRY = fct_reorder(COUNTRY, desc(IR_GDP_ratio_Start_2019))) %>%
+  ggplot( aes(COUNTRY , IR_GDP_ratio_Start_2019, label = IR_GDP_ratio_Start_2019)) + 
+  coord_flip() +
+  geom_bar(stat="identity", width=.90) + 
+  xlab("") + # Set axis labels
+  ylab("Start of January 2019, share of 2018 GDP") 
+guides(fill=FALSE) +
+  theme_minimal() 
+
+p2 <- arrange(InternationalReserves, IR_GDP_ratio_February_2020 ) %>%
+  mutate(COUNTRY = fct_reorder(COUNTRY, desc(IR_GDP_ratio_February_2020))) %>%
+  ggplot( aes(COUNTRY , IR_GDP_ratio_February_2020, label = IR_GDP_ratio_February_2020)) + 
+  coord_flip() +
+  geom_bar(stat="identity", width=.90) + 
+  xlab("") + # Set axis labels
+  ylab("End of February 2020, share of 2019 GDP") 
+guides(fill=FALSE) +
+  theme_minimal() 
+
+p3 <- arrange(InternationalReserves, IR_GDP_ratio_March_2020 ) %>%
+  mutate(COUNTRY = fct_reorder(COUNTRY, desc(IR_GDP_ratio_March_2020))) %>%
+  ggplot( aes(COUNTRY , IR_GDP_ratio_March_2020, label = IR_GDP_ratio_March_2020)) + 
+  coord_flip() +    
+  geom_bar(stat="identity", width=.90) + 
+  xlab("") + # Set axis labels
+  ylab("End of March 2020, share of 2019 GDP") 
+guides(fill=FALSE) +
+  theme_minimal() 
+
+p4 <- arrange(InternationalReserves, IR_GDP_ratio_April_2020 ) %>%
+  mutate(COUNTRY = fct_reorder(COUNTRY, desc(IR_GDP_ratio_April_2020))) %>%
+  ggplot( aes(COUNTRY , IR_GDP_ratio_April_2020, label = IR_GDP_ratio_April_2020)) + 
+  coord_flip() +
+  geom_bar(stat="identity", width=.90) + 
+  xlab("") + # Set axis labels
+  ylab("End of April 2020, share of 2019 GDP") 
+guides(fill=FALSE) +
+  theme_minimal() 
+
+# Output
+title <- ggdraw() + 
+  draw_label(
+    "International reserve to GDP ratios",
+    fontface = 'bold',
+    x = 0,
+    hjust = 0
+  ) +
+  theme(
+    # add margin on the left of the drawing canvas,
+    # so title is aligned with left edge of first plot
+    plot.margin = margin(0, 0, 0, 7)
+  )
+
+plot_row <- plot_grid(p1,p2,p3, p4)
+plot_grid(title, plot_row)
+plot_grid(
+  title, plot_row,
+  ncol = 1,
+  # rel_heights values control vertical title margins
+  rel_heights = c(0.1, 1)
+)
+
+pdf("Plots/reserveratioacrosstime.pdf", width = 11.69, height = 8.27 )
+plot_grid(
+  title, plot_row,
+  ncol = 1,
+  # rel_heights values control vertical title margins
+  rel_heights = c(0.1, 1)
+)
+dev.off()
+# grid.arrange(p1,p2,p3,nrow=1)
+# =========================================================================.
+
+
+
+
+
+
+# Absolute change in reserve ratio across time ----------------------------
+p4 <- arrange(InternationalReserves, Reserve_ratio_change_March_2020 ) %>%
+  mutate(COUNTRY = fct_reorder(COUNTRY, desc(Reserve_ratio_change_March_2020))) %>%
+  ggplot( aes(COUNTRY , Reserve_ratio_change_March_2020, label = Reserve_ratio_change_March_2020)) + 
+  coord_flip() +
+  geom_bar(stat="identity", width=.90) + 
+  xlab("") + # Set axis labels
+  ylab("% of 2019 GDP") + 
+  guides(fill=FALSE) +
+  ggtitle("Change in March 2020") + 
+  theme_minimal() 
+
+p5 <- arrange(InternationalReserves, Reserve_ratio_change_February_April_2020 ) %>%
+  mutate(COUNTRY = fct_reorder(COUNTRY, desc(Reserve_ratio_change_February_April_2020))) %>%
+  ggplot( aes(COUNTRY , Reserve_ratio_change_February_April_2020, label = Reserve_ratio_change_February_April_2020)) + 
+  coord_flip() +
+  geom_bar(stat="identity", width=.90) + 
+  xlab("") + # Set axis labels
+  ylab("% of 2019 GDP") + 
+  guides(fill=FALSE) +
+  ggtitle("Change in March/April 2020") + 
+  theme_minimal() 
+
+# Output
+title <- ggdraw() + 
+  draw_label(
+    "Absolute change in international reserve to GDP ratio",
+    fontface = 'bold',
+    x = 0,
+    hjust = 0
+  ) +
+  theme(
+    # add margin on the left of the drawing canvas,
+    # so title is aligned with left edge of first plot
+    plot.margin = margin(0, 0, 0, 7)
+  )
+
+plot_row <- plot_grid(p4, p5)
+plot_grid(title, plot_row)
+plot_grid(
+  title, plot_row,
+  ncol = 1,
+  # rel_heights values control vertical title margins
+  rel_heights = c(0.1, 1)
+)
+
+pdf("Plots/absolutechange.pdf", width = 11.69, height = 8.27 )
+plot_grid(
+  title, plot_row,
+  ncol = 1,
+  # rel_heights values control vertical title margins
+  rel_heights = c(0.1, 1)
+)
+dev.off()
+# grid.arrange(p4,p5,nrow=1)
+# =========================================================================.
+
+
+
+
+
+# Relative change in reserve ratio across time ----------------------------
+p6 <- arrange(InternationalReserves, Reserve_ratio_change_March_2020_percent ) %>%
+  mutate(COUNTRY = fct_reorder(COUNTRY, desc(Reserve_ratio_change_March_2020_percent))) %>%
+  ggplot( aes(COUNTRY , Reserve_ratio_change_March_2020_percent, label = Reserve_ratio_change_March_2020_percent)) + 
+  coord_flip() +
+  geom_bar(stat="identity", width=.90) + 
+  xlab("") + # Set axis labels
+  ylab("%") + 
+  guides(fill=FALSE) +
+  ggtitle("Change in March 2020") + 
+  theme_minimal() 
+
+p7 <- arrange(InternationalReserves, Reserve_ratio_change_February_April_2020_percent ) %>%
+  mutate(COUNTRY = fct_reorder(COUNTRY, desc(Reserve_ratio_change_February_April_2020_percent))) %>%
+  ggplot( aes(COUNTRY , Reserve_ratio_change_February_April_2020_percent, label = Reserve_ratio_change_February_April_2020_percent)) + 
+  coord_flip() +
+  geom_bar(stat="identity", width=.90) + 
+  xlab("") + # Set axis labels
+  ylab("%") + 
+  guides(fill=FALSE) +
+  ggtitle("Change in March/April 2020") + 
+  theme_minimal() 
+
+# Output
+title <- ggdraw() + 
+  draw_label(
+    "Relative change in international reserve to GDP ratio",
+    fontface = 'bold',
+    x = 0,
+    hjust = 0
+  ) +
+  theme(
+    # add margin on the left of the drawing canvas,
+    # so title is aligned with left edge of first plot
+    plot.margin = margin(0, 0, 0, 7)
+  )
+
+plot_row <- plot_grid(p6, p7)
+plot_grid(title, plot_row)
+plot_grid(
+  title, plot_row,
+  ncol = 1,
+  # rel_heights values control vertical title margins
+  rel_heights = c(0.1, 1)
+)
+
+pdf("Plots/relativechange.pdf", width = 11.69, height = 8.27 )
+plot_grid(
+  title, plot_row,
+  ncol = 1,
+  # rel_heights values control vertical title margins
+  rel_heights = c(0.1, 1)
+)
+dev.off()
+# grid.arrange(p4,p5,nrow=1)
+# =========================================================================.
+
+
+
+# Corr. coefficients between actual vs fitted values, entire period --------
+# Create the individual figures of actual vs fitted of entire period
+pdat<-data.frame(em_cds2$Date[which(em_cds2$Date>"2019-06-30")],post.dat,predz)
+colnames(pdat)[1]<-"date"
+countriez<-colnames(pdat)[-1]
+country_lists<-list()
+for(i in 1:(length(countriez)/2)) {
+plotdat<-pdat[-1,c(1,i+1,i+31)]
+plotdat[,-1]<-apply(plotdat[,-1],2,cumsum)
+country_plots[[i]] <- ggplot(data=(plotdat), aes_string(x="date",y=colnames(plotdat)[2]))+geom_line()+theme_bw()+ylab("")+xlab(countriez[i])+geom_line(aes_string(x="date",y=colnames(plotdat)[3]),linetype=2)
+}
+
+# Save output
+pdf("Plots/actualvsfitted_including_COVID_period.pdf", width = 16)
+do.call("grid.arrange", c(country_plots)) 
+dev.off()
+
+q1 <- do.call("grid.arrange", c(country_plots)) 
+
+# Correlation coefficients of actual vs fitted of entire period
+for(i in 1:(length(countriez)/2)) {
+  plotdat<-pdat[-1,c(1,i+1,i+31)]
+  CountryName <- colnames(plotdat)[2]
+  CorrelationCoefficient <- cor(plotdat[,2], plotdat[,3] ) 
+  country_lists[[i]] <- c(CountryName, CorrelationCoefficient) }
+CountryCorrelationCoefficients <- data.frame(matrix(unlist(country_lists), nrow=30, byrow=T))
+colnames(CountryCorrelationCoefficients) <- c("COUNTRY", "Correlation_Coefficient")
+arrange(CountryCorrelationCoefficients, Correlation_Coefficient )
+
+p8 <- arrange(CountryCorrelationCoefficients, Correlation_Coefficient ) %>%
+  mutate(COUNTRY = fct_reorder(COUNTRY, desc(Correlation_Coefficient))) %>%
+  ggplot( aes(COUNTRY , Correlation_Coefficient, label = Correlation_Coefficient)) + 
+  # coord_flip() +
+  geom_bar(stat="identity", width=.90) + 
+  xlab("") + # Set axis labels
+  ylab("") + 
+  guides(fill=FALSE) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))  
+# scale_y_continuous(labels = scales::number_format(accuracy = 0.01))
+p8
+
+# Save output
+pdf("Plots/correlationcoefficients_actual_vs_fited_entire_period.pdf", width = 11.69, height = 8.27 )
+p8
+dev.off()
+
+
+
+# Set threshold for correlation coefficients
+threshold <- 0.25
+
+# Find countries above threshold
+CountriesAboveThreshold_EntirePeriod <- CountryCorrelationCoefficients[which(CountryCorrelationCoefficients$Correlation_Coefficient>threshold), ]
+CountriesBelowThreshold_EntirePeriod <- CountryCorrelationCoefficients[which(CountryCorrelationCoefficients$Correlation_Coefficient<=threshold), ]
+nrow(CountriesAboveThreshold_EntirePeriod)
+nrow(CountriesBelowThreshold_EntirePeriod)
+# View(CountriesBelowThreshold_EntirePeriod)
+
+# not needed
+# countriesnotoverlapping <- CountriesBelowThreshold_EntirePeriod[CountriesBelowThreshold_EntirePeriod$COUNTRY %notin% CountriesBelowThreshold_BeforeCovid$COUNTRY,]
+# View(countriesnotoverlapping$COUNTRY)
+# countriesnotoverlapping2 <- CountriesBelowThreshold_BeforeCovid[CountriesBelowThreshold_BeforeCovid$COUNTRY %notin% CountriesBelowThreshold_EntirePeriod$COUNTRY,]
+# View(countriesnotoverlapping2$COUNTRY)
+
+# Corr. coefficients between actual vs fitted values, pre-COVID pe --------
+# Create the individual figures of actual vs fitted of period before COVID
+colnames(pdat)[1] <- "date"
+pdat_before_COVID<-pdat[which(pdat$date < "2020-03-01"),]
+countriez<-colnames(pdat_before_COVID)[-1]
+country_lists2<-list()
+for(i in 1:(length(countriez)/2)) {
+  plotdat<-pdat_before_COVID[-1,c(1,i+1,i+31)]
+  plotdat[,-1]<-apply(plotdat[,-1],2,cumsum)
+  country_lists2[[i]] <- ggplot(data=(plotdat), aes_string(x="date",y=colnames(plotdat)[2]))+geom_line()+theme_bw()+ylab("")+xlab(countriez[i])+geom_line(aes_string(x="date",y=colnames(plotdat)[3]),linetype=2)
+}
+
+# Save output
+pdf("Plots/actualvsfitted_before_COVID_period.pdf", width = 16 )
+do.call("grid.arrange", c(country_lists2)) 
+dev.off()
+
+# Correlation coefficients of actual vs fitted of period before COVID
+countriez<-colnames(pdat_before_COVID)[-1]
+country_lists2<-list()
+for(i in 1:(length(countriez)/2)) {
+  plotdat<-pdat_before_COVID[-1,c(1,i+1,i+31)]
+  CountryName <- colnames(plotdat)[2]
+  CorrelationCoefficient <- cor(plotdat[,2], plotdat[,3] ) 
+  country_lists2[[i]] <- c(CountryName, CorrelationCoefficient) }
+CountryCorrelationCoefficients_before_COVID <- data.frame(matrix(unlist(country_lists2), nrow=30, byrow=T))
+colnames(CountryCorrelationCoefficients_before_COVID) <- c("COUNTRY", "Correlation_Coefficient")
+arrange(CountryCorrelationCoefficients_before_COVID, Correlation_Coefficient )
+
+p9 <- arrange(CountryCorrelationCoefficients_before_COVID, Correlation_Coefficient ) %>%
+  mutate(COUNTRY = fct_reorder(COUNTRY, desc(Correlation_Coefficient))) %>%
+  ggplot( aes(COUNTRY , Correlation_Coefficient, label = Correlation_Coefficient)) + 
+  #coord_flip() +
+  geom_bar(stat="identity", width=.90) + 
+  xlab("") + # Set axis labels
+  ylab("") + 
+  guides(fill=FALSE) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))  
+p9
+
+# Save output
+pdf("Plots/correlationcoefficients_actual_vs_fited_before_COVID_period.pdf", width = 11.69, height = 8.27 )
+p9
+dev.off()
+
+
+# Set threshold for correlation coefficients
+threshold <- 0.25
+
+CountriesAboveThreshold_BeforeCovid <- CountryCorrelationCoefficients_before_COVID[which(CountryCorrelationCoefficients_before_COVID$Correlation_Coefficient>threshold), ]
+CountriesBelowThreshold_BeforeCovid <- CountryCorrelationCoefficients_before_COVID[which(CountryCorrelationCoefficients_before_COVID$Correlation_Coefficient<threshold), ]
+# View(CountriesAboveThreshold_BeforeCovid$COUNTRY)
+# View(CountriesBelowThreshold_BeforeCovid$COUNTRY)
+nrow(CountriesAboveThreshold_BeforeCovid)
+# =========================================================================.
+
+
+
+# Countries to drop -------------------------------------------------------
+# From the previous analysis, it appears that 10 of the 30 countries would drop 
+# from the sample as they had a correlation coefficient between actual vs fitted
+# values in the pre-COVID period of below 0.25. These ten countries are: 
+# View(CountriesBelowThreshold_BeforeCovid$COUNTRY)
+CountriesToDrop <- CountriesBelowThreshold_BeforeCovid$COUNTRY
+
+# The remaning 20 countries for the reduced sample all have a correlation 
+# coefficient above 0.25. These countries are 
+# View(CountriesAboveThreshold_BeforeCovid$COUNTRY)
+CountriesToRemain <- CountriesAboveThreshold_BeforeCovid$COUNTRY
+# =========================================================================.
+
+
+# NEXT STEP ---------------------------------------------------------------
+# Now that we know which countries to drop, the next step is to add the three
+# missing explanatory variables to the large panel so that we can run the second
+# stage regression. 
+# =========================================================================.
+
+
+
+
+# IR panel ----------------------------------------------------------------
+
+# Importing Data on monthly international reserves across time and deleting unnecessary columns
+InternationalReservesTS <- read_excel("Data/InternationalReserves.xlsx", sheet = "ReserveTS")
+InternationalReservesTS <- InternationalReservesTS[, -c(1,2)]
+InternationalReservesTS
+
+# Making dataframe into time seris object
+InternationalReservesTS <- xts(InternationalReservesTS, order.by=InternationalReservesTS$DateBeginOfMonth)
+# str(InternationalReservesTS)
+# View(InternationalReservesTS)
+
+# Deleting redundant date column 
+InternationalReservesTS <- InternationalReservesTS[, -c(1) ]
+
+# Converting monthly data to daily. For example: I use the (end of) February values to create the daily values for 1-31 of March etc.
+InternationalReservesTS <- na.locf(merge(InternationalReservesTS, foo=zoo(NA, order.by=seq(start(InternationalReservesTS), end(InternationalReservesTS),
+                                                                                           "day",drop=F)))[, ])
+
+# Deleting unnecessary column 
+InternationalReservesTS <- InternationalReservesTS[, -c(31) ]
+
+# View if the data is correct
+# View(InternationalReservesTS)
+# dim(InternationalReservesTS)
+
+# Here I add an id variable so that I can then later reshape the wide data into a long panel
+InternationalReservesTS$id <- seq(from = 1, to = 548, by = 1 )
+
+# Now I make it a dataframe such as to keep the index part of the data
+InternationalReservesTS <- data.frame(Date=index(InternationalReservesTS), coredata(InternationalReservesTS))
+
+# Now I melt the data into long form
+InternationalReservesTS_long <- reshape2::melt(InternationalReservesTS, id.vars=c("Date", "id"))
+
+# Renaming the variables
+colnames(InternationalReservesTS_long) <- c("Date", "id", "COUNTRY", "IR")
+
+# Removing the id variable which is no longer needed
+InternationalReservesTS_long <- InternationalReservesTS_long[,  c("Date", "COUNTRY", "IR")]
+
+# Subsetting such as to have the same time frame as the object "panel"
+InternationalReservesTS_long <- InternationalReservesTS_long[which(InternationalReservesTS_long$Date < '2020-07-01'),]
+InternationalReservesTS_long <- InternationalReservesTS_long[which(InternationalReservesTS_long$Date >= '2019-07-02'),]
+dim(InternationalReservesTS_long)
+
+# View(InternationalReservesTS_long)
+# dim(InternationalReservesTS_long)
+# str(InternationalReservesTS_long)
+# 
+# merged_test <- merge(panel, InternationalReservesTS_long, by.x=c("Country", "Date"), by.y=c("COUNTRY", "Date"), all.x=TRUE)
+# # xxx here I have to specify the by variable more clearly
+# =========================================================================.
+
+
+
+# IR/GDP ratio panel ------------------------------------------------------
+
+# Importing data on monthly international reserve to GDP ratio and deleting unnecessary columns
+InternationalReserveRatioTS <- read_excel("Data/InternationalReserves.xlsx", sheet = "ReserveRatioTS")
+InternationalReserveRatioTS <- InternationalReserveRatioTS [, -c(1,2)]
+InternationalReserveRatioTS
+
+# Making dataframe into time seris object
+InternationalReserveRatioTS <- xts(InternationalReserveRatioTS, order.by=InternationalReserveRatioTS$DateBeginOfMonth)
+# str(InternationalReserveRatioTS)
+# View(InternationalReserveRatioTS)
+
+# Deleting redundant column 
+InternationalReserveRatioTS <- InternationalReserveRatioTS[, -c(1) ]
+
+# Converting monthly data to daily. For example: I use the (end of) February values to create the daily values for 1-31 of March etc.
+InternationalReserveRatioTS <- na.locf(merge(InternationalReserveRatioTS, foo=zoo(NA, order.by=seq(start(InternationalReserveRatioTS), end(InternationalReserveRatioTS),
+                                                                                                   "day",drop=F)))[, ])
+# Deleting unnecessary column 
+InternationalReserveRatioTS <- InternationalReserveRatioTS[, -c(31) ]
+
+# # View if the data is correct
+# View(InternationalReserveRatioTS)
+# dim(InternationalReserveRatioTS)
+
+# Here I add an id variable so that I can then later reshape the wide data into a long panel
+InternationalReserveRatioTS$id <- seq(from = 1, to = 548, by = 1 )
+
+# Now I make it a dataframe such as to keep the index part of the data
+InternationalReserveRatioTS <- data.frame(Date=index(InternationalReserveRatioTS), coredata(InternationalReserveRatioTS))
+
+# Now I melt the data into long form
+InternationalReserveRatioTS_long <- reshape2::melt(InternationalReserveRatioTS, id.vars=c("Date", "id"))
+
+# Renaming the variables
+colnames(InternationalReserveRatioTS_long) <- c("Date", "id", "COUNTRY", "IR_GDP_ratio")
+
+# Removing the id variable which is no longer needed
+InternationalReserveRatioTS_long <- InternationalReserveRatioTS_long[,  c("Date", "COUNTRY", "IR_GDP_ratio")]
+
+# Subsetting such as to have the same time frame as the object "panel"
+InternationalReserveRatioTS_long <- InternationalReserveRatioTS_long[which(InternationalReserveRatioTS_long$Date < '2020-07-01'),]
+InternationalReserveRatioTS_long <- InternationalReserveRatioTS_long[which(InternationalReserveRatioTS_long$Date >= '2019-07-02'),]
+dim(InternationalReserveRatioTS_long)
+
+# View(InternationalReserveRatioTS_long)
+# dim(InternationalReserveRatioTS_long)
+# str(InternationalReserveRatioTS_long)
+# 
+# merged_test <- merge(panel, InternationalReserveRatioTS_long, by.x=c("Country", "Date"), by.y=c("COUNTRY", "Date"), all.x=TRUE)
+# =========================================================================.
+
+
+
+
+# SWF data ----------------------------------------------------------------
+# Importing data on SWF
+SWF <- read_excel("Data/SWF.xlsx", sheet = "R")
+# View(SWF)
+
+# Replace funds with NA in AuM with zero
+SWF$AuM_bn[SWF$AuM_bn == "NA"]  <- 0
+
+# Changing AuM to numeric
+SWF$AuM_bn <- as.numeric(SWF$AuM_bn)
+
+# Changin AuM from billion to USD
+SWF <- SWF %>% mutate(AuM = AuM_bn * 10^9)
+
+# Drop Funds which aren't SWF, i.e. PPF
+SWF <- subset(SWF, Type=="SWF" )
+
+# Defining sample countries so that I can subset the SWF dataset 
+countries <- read_excel("Data/laender.xlsx", sheet = "EM")
+allCountriesSWF <- countries[ which(countries$EM_dummy5yr ==1), "COUNTRY5yrCDS"]
+colnames(allCountriesSWF) <- "COUNTRY"
+
+# Subsetting countries with SWF that are in sample
+SWF <- SWF[SWF$COUNTRY %in% allCountriesSWF$COUNTRY,  ]
+
+# Summing funds per country to get country total SWF
+SWF_Countryaggregates <- aggregate(SWF$AuM, by=list(Category=SWF$COUNTRY), FUN=sum)
+colnames(SWF_Countryaggregates) <- c("COUNTRY", "AuM")
+SWF_Countryaggregates
+
+# Here I would do the same but with Aum in bn
+# SWF_Countryaggregates_bn <- aggregate(SWF$AuM_bn, by=list(Category=SWF$COUNTRY), FUN=sum)
+# colnames(SWF_Countryaggregates_bn) <- c("COUNTRY", "AuM_bn")
+# SWF_Countryaggregates_bn
+
+# Merging all countries in sample with countries that have SWF
+SWF <- merge(allCountriesSWF, SWF_Countryaggregates, by =  c("COUNTRY"), all=TRUE ) 
+
+# Countries without SWF are NA, so I set them to zero
+SWF$AuM[is.na(SWF$AuM)] <- 0
+
+# Import GDP data for 2019
+GDP <- read_excel("Data/GDP.xlsx", sheet = "EM_GDP")
+
+# Merging GDP and SWF data
+SWF <- merge(SWF, GDP, by =  c("COUNTRY"), all=TRUE ) 
+
+# Creating SWF/GDP ratio
+SWF <- SWF %>% mutate(SWF_GDP_RATIO = AuM / GDP)
+
+# Drop intermediate data on GDP and AuM 
+SWF <- SWF[, c("COUNTRY", "SWF_GDP_RATIO")]
+
+# Get the data into wide format
+SWF_transpose <- as.data.frame(t(as.matrix(SWF)))
+
+# Renaming the columns with the country names
+colnames(SWF_transpose) <- SWF_transpose["COUNTRY",]
+
+# Subsetting to obtain only the relevant data
+SWF <- SWF_transpose["SWF_GDP_RATIO",]
+
+# Adding a date column
+SWF <- SWF %>% mutate(DateBeginOfMonth = "2019-01-01")
+
+# Changeing format to date column
+SWF$DateBeginOfMonth <- as.Date(SWF$DateBeginOfMonth)
+
+# Duplicate row
+SWF <- rbind(SWF, SWF[rep(1), ]) 
+
+# Changing 
+SWF["SWF_GDP_RATIO1", "DateBeginOfMonth"] <- "2020-07-01"
+
+# Making dataframe into time seris object
+SWF_TS <- xts(SWF, order.by=SWF$DateBeginOfMonth)
+str(SWF_TS)
+# View(SWF_TS)
+
+# Deleting redudant date column as we have a ts object now
+SWF_TS <- SWF_TS[, -31]
+
+# Converting monthly data to daily. For example: I use the (end of) February values to create the daily values for 1-31 of March etc.
+SWF_TS <- na.locf(merge(SWF_TS, foo=zoo(NA, order.by=seq(start(SWF_TS), end(SWF_TS),
+                                                         "day",drop=F)))[, ])
+
+# Deleting unnecessary column 
+SWF_TS <- SWF_TS[, ! colnames(SWF_TS) %in% c("foo")]
+
+# # View if the data is correct
+# View(SWF_TS)
+# dim(SWF_TS)
+
+# Here I add an id variable so that I can then later resphape the wide data into a long panel
+SWF_TS$id <- seq(from = 1, to = 548, by = 1 )
+
+# Now I make it a dataframe such as to keep the index part of the data
+SWF_TS <- data.frame(Date=index(SWF_TS), coredata(SWF_TS))
+
+# Now I melt the data into long form
+SWF_TS_long <- reshape2::melt(SWF_TS, id.vars=c("Date", "id"))
+
+# Renaming the variables
+colnames(SWF_TS_long) <- c("Date", "id", "Country", "SWF_GDP_ratio")
+
+# Removing the id variable which is no longer needed
+SWF_TS_long <- SWF_TS_long[,  c("Date", "Country", "SWF_GDP_ratio")]
+
+# Subsetting such as to have the same time frame as the object "panel"
+SWF_TS_long <- SWF_TS_long[which(SWF_TS_long$Date < '2020-07-01'),]
+SWF_TS_long <- SWF_TS_long[which(SWF_TS_long$Date >= '2019-07-02'),]
+dim(SWF_TS_long)
+
+# View(SWF_TS_long)
+# dim(SWF_TS_long)
+# str(SWF_TS_long)
+# 
+# merged_test_3 <- merge(panel, SWF_TS_long, by=c("Country", "Date"), all.x=TRUE)
+# View(merged_test_3)
+# =========================================================================.
+
+
+
+
+# SWF and PPF data ----------------------------------------------------------
+# Importing data on SWF and PPF
+SWFandPPF <- read_excel("Data/SWF.xlsx", sheet = "R")
+# View(SWFandPPF)
+
+# Replace funds with NA in AuM with zero
+SWFandPPF$AuM_bn[SWFandPPF$AuM_bn == "NA"]  <- 0
+
+# Changing AuM to numeric
+SWFandPPF$AuM_bn <- as.numeric(SWFandPPF$AuM_bn)
+
+# Changin AuM from billion to USD
+SWFandPPF <- SWFandPPF %>% mutate(AuM = AuM_bn * 10^9)
+
+# # Drop Funds which aren't SWF, i.e. PPF
+# SWF <- subset(SWF, Type=="SWF" )
+
+# Defining sample countries so that I can subset the SWF dataset 
+countries <- read_excel("Data/laender.xlsx", sheet = "EM")
+allCountriesSWFandPPF <- countries[ which(countries$EM_dummy5yr ==1), "COUNTRY5yrCDS"]
+colnames(allCountriesSWFandPPF) <- "COUNTRY"
+
+# Subsetting countries with SWF that are in sample
+SWFandPPF <- SWFandPPF[SWFandPPF$COUNTRY %in% allCountriesSWFandPPF$COUNTRY,  ]
+
+# Summing funds per country to get country total SWF
+SWFandPPF_Countryaggregates <- aggregate(SWFandPPF$AuM, by=list(Category=SWFandPPF$COUNTRY), FUN=sum)
+colnames(SWFandPPF_Countryaggregates) <- c("COUNTRY", "AuM")
+SWFandPPF_Countryaggregates
+
+# Here I would do the same but with Aum in bn
+# SWF_Countryaggregates_bn <- aggregate(SWF$AuM_bn, by=list(Category=SWF$COUNTRY), FUN=sum)
+# colnames(SWF_Countryaggregates_bn) <- c("COUNTRY", "AuM_bn")
+# SWF_Countryaggregates_bn
+
+# Merging all countries in sample with countries that have SWF and or PPF
+SWFandPPF <- merge(allCountriesSWFandPPF, SWFandPPF_Countryaggregates, by =  c("COUNTRY"), all=TRUE ) 
+
+# Countries without SWF are NA, so I set them to zero
+SWFandPPF$AuM[is.na(SWFandPPF$AuM)] <- 0
+
+# Import GDP data for 2019
+GDP <- read_excel("Data/GDP.xlsx", sheet = "EM_GDP")
+
+# Merging GDP and SWF data
+SWFandPPF <- merge(SWFandPPF, GDP, by =  c("COUNTRY"), all=TRUE ) 
+
+# Creating SWF and PPF /GDP ratio
+SWFandPPF <- SWFandPPF %>% mutate(SWFandPPF_GDP_RATIO = AuM / GDP)
+
+# Drop intermediate data on GDP and AuM 
+SWFandPPF <- SWFandPPF[, c("COUNTRY", "SWFandPPF_GDP_RATIO")]
+
+# Get the data into wide format
+SWFandPPF_transpose <- as.data.frame(t(as.matrix(SWFandPPF)))
+
+# Renaming the columns with the country names
+colnames(SWFandPPF_transpose) <- SWFandPPF_transpose["COUNTRY",]
+
+# Subsetting to obtain only the relevant data
+SWFandPPF <- SWFandPPF_transpose["SWFandPPF_GDP_RATIO",]
+
+# Adding a date column
+SWFandPPF <- SWFandPPF %>% mutate(DateBeginOfMonth = "2019-01-01")
+
+# Changeing format to date column
+SWFandPPF$DateBeginOfMonth <- as.Date(SWFandPPF$DateBeginOfMonth)
+
+# Duplicate row
+SWFandPPF <- rbind(SWFandPPF, SWFandPPF[rep(1), ]) 
+
+# Changing 
+SWFandPPF["SWFandPPF_GDP_RATIO1", "DateBeginOfMonth"] <- "2020-07-01"
+
+# Making dataframe into time series object
+SWFandPPF_TS <- xts(SWFandPPF, order.by=SWFandPPF$DateBeginOfMonth)
+str(SWFandPPF_TS)
+# View(SWFandPPF_TS)
+
+# Deleting redudant date column as we have a ts object now
+SWFandPPF_TS <- SWFandPPF_TS[, -31]
+
+# Converting monthly data to daily. For example: I use the (end of) February values to create the daily values for 1-31 of March etc.
+SWFandPPF_TS <- na.locf(merge(SWFandPPF_TS, foo=zoo(NA, order.by=seq(start(SWFandPPF_TS), end(SWFandPPF_TS),
+                                                                     "day",drop=F)))[, ])
+
+# Deleting unnecessary column 
+SWFandPPF_TS <- SWFandPPF_TS[, ! colnames(SWFandPPF_TS) %in% c("foo")]
+
+# # View if the data is correct
+# View(SWFandPPF_TS)
+# dim(SWFandPPF_TS)
+
+# Here I add an id variable so that I can then later resphape the wide data into a long panel
+SWFandPPF_TS$id <- seq(from = 1, to = 548, by = 1 )
+
+# Now I make it a dataframe such as to keep the index part of the data
+SWFandPPF_TS <- data.frame(Date=index(SWFandPPF_TS), coredata(SWFandPPF_TS))
+
+# Now I melt the data into long form
+SWFandPPF_TS_long <- reshape2::melt(SWFandPPF_TS, id.vars=c("Date", "id"))
+
+# Renaming the variables
+colnames(SWFandPPF_TS_long) <- c("Date", "id", "Country", "SWFandPPF_GDP_ratio")
+
+# Removing the id variable which is no longer needed
+SWFandPPF_TS_long <- SWFandPPF_TS_long[,  c("Date", "Country", "SWFandPPF_GDP_ratio")]
+
+# Subsetting such as to have the same time frame as the object "panel"
+SWFandPPF_TS_long <- SWFandPPF_TS_long[which(SWFandPPF_TS_long$Date < '2020-07-01'),]
+SWFandPPF_TS_long <- SWFandPPF_TS_long[which(SWFandPPF_TS_long$Date >= '2019-07-02'),]
+dim(SWFandPPF_TS_long)
+
+# View(SWFandPPF_TS_long)
+# dim(SWFandPPF_TS_long)
+# str(SWFandPPF_TS_long)
+# 
+# merged_test_3 <- merge(panel, SWFandPPF_TS_long, by=c("Country", "Date"), all.x=TRUE)
+# View(merged_test_3)
+
+SWF1 <- ggplot(SWF, aes(COUNTRY, SWF_GDP_RATIO, label = SWF_GDP_RATIO)) +
+  coord_flip() +
+  geom_bar(stat="identity", width=.90) + 
+  xlab("") + # Set axis labels
+  ylab("Share of 2019 GDP") + # geom_text(aes(label=SWF_GDP_RATIO),  vjust=-0.5)
+  guides(fill=FALSE) +
+  theme_minimal() 
+SWF1 <- SWF1  + ggtitle("Sovereign Wealth Fund / GDP ratio")
+SWF1
+
+SWFandPPF1 <- ggplot(SWFandPPF, aes(COUNTRY, SWFandPPF_GDP_RATIO, label = SWFandPPF_GDP_RATIO)) +
+  coord_flip() +
+  geom_bar(stat="identity", width=.90) + 
+  xlab("") + # Set axis labels
+  ylab("Share of 2019 GDP") +
+  guides(fill=FALSE) +
+  theme_minimal() 
+SWFandPPF1 <- SWFandPPF1  + ggtitle("Sovereign Wealth Fund and Public Pension Funds / GDP ratio")
+SWFandPPF1
+
+# Output
+title <- ggdraw() + 
+  draw_label(
+    "Sovereign Weatlh Fund volumes",
+    fontface = 'bold',
+    x = 0,
+    hjust = 0
+  ) +
+  theme(
+    # add margin on the left of the drawing canvas,
+    # so title is aligned with left edge of first plot
+    plot.margin = margin(0, 0, 0, 7)
+  )
+
+plot_row <- plot_grid(SWF1, SWFandPPF1)
+plot_grid(title, plot_row)
+plot_grid(
+  title, plot_row,
+  ncol = 1,
+  # rel_heights values control vertical title margins
+  rel_heights = c(0.1, 1)
+)
+
+pdf("Plots/SWF.pdf", width = 16, height = 8.27 )
+# grid.arrange(h1, h2, h3, h4,nrow=2)
+plot_grid(
+  title, plot_row,
+  ncol = 1,
+  # rel_heights values control vertical title margins
+  rel_heights = c(0.1, 1)
+)
+dev.off()
 # =========================================================================.
 
 
 
 # plots vs fundamentals ---------------------------------------------------
 fstim<-read.csv("Data/CESI_7.csv",header=T,sep=',')
-###keep EU 
+###keep EM 
 em_countries<-em_countries
 em_countries
 #eu_countries2<-c("Austria","Belgium","Cyprus","Estonia","Finland","France","Germany","Greece","Ireland","Italy","Latvia","Lithuania","Luxembourg","Malta","Netherlands","Portugal","Slovakia","Slovenia","Spain")
@@ -3139,22 +4124,36 @@ colnames(pdat)<-c("PD","Intercept","AR","Global","EM","countries")
 # pdat<-data.frame(pd3,rmg,p.cds.coefs.pd)   xxx
 # colnames(pdat)<-c("PD","RMG","Intercept","AR","Global","Euro","countries")
 
+
 p<-ggplot(data=pdat,aes(x=PD,y=Global))+geom_point(shape=21,fill="grey",size=3)+theme_bw()+geom_text(aes(label=countries),hjust="inward", vjust="inward")+xlab("Public Debt/GDP (%)")+ylab("Global Beta")+stat_cor(method = "pearson", label.x = 50, label.y = .5)+geom_smooth(method="lm",se=F,color="red",linetype=2,size=.5)
 p
+# # Save plot
 # jpeg("Plots/Figure6a.jpg", width = 1920, height = 1080)
+# p
+# dev.off()
+# pdf("Plots/Figure6a.pdf")
 # p
 # dev.off()
 
 p2<-ggplot(data=pdat,aes(x=PD,y=EM))+geom_point(shape=21,fill="grey",size=3)+theme_bw()+geom_text(aes(label=countries),hjust="inward", vjust="inward")+xlab("Public Debt/GDP (%)")+ylab("Regional Beta")+stat_cor(method = "pearson", label.x = 45, label.y = 1.9)+geom_smooth(method="lm",se=F,color="red",linetype=2,size=.5)
 p2
+# # Save plot
 # jpeg("Plots/Figure6b.jpg", width = 1920, height = 1080)
 # p2
 # dev.off()
-
-grid.arrange(p,p2,nrow=1)## 1000x400
-# jpeg("Plots/Figure6.jpg", width = 1920, height = 1080)
-# grid.arrange(p,p2,nrow=1)## 1000x400
+# pdf("Plots/Figure6b.pdf")
+# p2
 # dev.off()
+
+grid.arrange(p,p2,nrow=1)
+# Save plot
+jpeg("Plots/Figure6.jpg", width = 1920, height = 1080)
+grid.arrange(p,p2,nrow=1)
+dev.off()
+pdf("Plots/Figure6.pdf", width = 16)
+grid.arrange(p,p2,nrow=1)
+dev.off()
+
 
 pdat2<-data.frame(p.cds.coefs.stim)
 colnames(pdat2)<-c("Country","Intercept","AR","Global","EM","Fiscal")
@@ -3166,10 +4165,14 @@ p5
 p7<-ggplot(data=pdat2,aes(x=Country,y=Fiscal))+geom_bar(stat="identity")+theme_bw()+theme(axis.text.x=element_text(angle = 60))+xlab("")+ylab("Fiscal Stimulus Announced (% of GDP)")
 p7
 
-grid.arrange(p7,p4,p5,nrow=1)## 1000x400
-# jpeg("Plots/Figure7.jpg", width = 1920, height = 1080)
-# grid.arrange(p7,p4,p5,nrow=1)## 1000x400
-# dev.off()
+grid.arrange(p7,p4,p5,nrow=1)
+jpeg("Plots/Figure7.jpg", width = 1920, height = 1080)
+grid.arrange(p7,p4,p5,nrow=1)
+dev.off()
+pdf("Plots/Figure7.pdf", width = 18)
+grid.arrange(p7,p4,p5,nrow=1)
+dev.off()
+
 
 pdat3<-data.frame(names(pd3),pd3,colSums(post.dat[1:197,],na.rm=T),colSums(post.dat[1:197,]-predz[1:197,],na.rm=T))
 colnames(pdat3)<-c("country","pd","post","covidresid")
@@ -3203,7 +4206,7 @@ postminuspredz <- postminuspredz[,1]
 
 
 pdat4<-data.frame(fstim,post.dat.without,postminuspredz )
-colSums(post.dat.without[1:197,],na.rm=T)
+# colSums(post.dat.without[1:197,],na.rm=T) I made this a comment on 31.8.2020 to make sure the code runs
 colnames(pdat4)<-c("country","fstim","post","covidresid")
 p10<-ggplot(data=pdat4,aes(y=post,x=fstim))+geom_point(shape=21,fill="grey",size=3)+theme_bw()+stat_cor(method = "pearson", label.x =15, label.y = -.5)+geom_text(aes(label=country),hjust="inward",check_overlap = T)+ylab("Realized log CDS Change (2020)")+xlab("COVID Stimulus/GDP (%)")
 p10
@@ -3256,11 +4259,12 @@ library(stargazer)
 
 
 
-# import prediction and actual data ---------------------------------------
-cds_5yr_prediction <- read.csv("data/covid_ez_prediction.csv", header = T, sep=',')
-cds_5yr_actual <- read.csv("data/covid_ez_spreads.csv", header = T, sep = ',')
 
-oxford <- read_excel("Data/Oxford_V1.xlsx")
+# import prediction and actual data ---------------------------------------
+cds_5yr_prediction <- read.csv("data/covid_ez_prediction_weighted.csv", header = T, sep=',')
+cds_5yr_actual <- read.csv("data/covid_ez_spreads_weighted.csv", header = T, sep = ',')
+
+oxford <- Oxford_V1
 oxford <- oxford %>% dplyr::select(-contains("Flag"))
 oxford <- oxford %>% dplyr::select(-contains("Lagged"))
 colnames(oxford)[which(colnames(oxford) == "Total_Cases_Country")] <- "Total_Case"
@@ -3361,20 +4365,63 @@ p_EM_Mar <- ggplot(dat = cds_5yr_EM_Mar,aes(x=Date,y=CDS_5y_Actual,linetype="Act
 p_EM_Mar
 
 p_EM <- grid.arrange(p_EM_preMar, p_EM_Mar, p_EM_postMar, ncol=3,nrow=1)
-jpeg("Plots/figure10.jpg", width = 1920, height = 1080)
+# Save plot
+jpeg("Plots/Figure10.jpg", width = 1920, height = 1080)
+p_EM <- grid.arrange(p_EM_preMar, p_EM_Mar, p_EM_postMar, ncol=3,nrow=1)
+dev.off()
+pdf("Plots/Figure10.pdf", width = 18)
 p_EM <- grid.arrange(p_EM_preMar, p_EM_Mar, p_EM_postMar, ncol=3,nrow=1)
 dev.off()
 # =========================================================================.
 
 
 
-# create panel ------------------------------------------------------------
+# create panel for entire period -------------------------------------------
 panel <- merge(cds_5yr_merged, oxford, by = c("Country", "Date"), all.x = TRUE)
 panel$Dummy_Fiscal_Country <- as.numeric(panel$Fiscal_Response_Dummy > 0)
 # panel$Dummy_Fiscal_EU <- as.numeric(panel$EU_Fiscal_Response_Dummy > 0)
 panel$Dummy_Monetary_ECB <- as.numeric(panel$ECB_Announcement > 0)
 panel$Dummy_Monetary_Fed <- as.numeric(panel$Fed_Announcement > 0)
 
+# panel_safety_copy <- panel
+# panel <- panel_safety_copy
+
+# Add International Reserve time series to panel
+panel <- merge(panel, InternationalReservesTS_long, by.x=c("Country", "Date"), by.y=c("COUNTRY", "Date"), all.x=TRUE )
+
+# Add International Reserve to GDP ratio to panel
+panel <- merge(panel, InternationalReserveRatioTS_long, by.x=c("Country", "Date"), by.y=c("COUNTRY", "Date"), all.x=TRUE )
+
+# Add SWF data to panel
+panel <- merge(panel, SWF_TS_long, by.x=c("Country", "Date"), by.y=c("Country", "Date"), all.x=TRUE )
+
+# Add SWF and PPF data to panel
+panel <- merge(panel, SWFandPPF_TS_long, by.x=c("Country", "Date"), by.y=c("Country", "Date"), all.x=TRUE )
+
+# Add Oil, IMF support, RFI, China debt stock, etc. 
+paneladdition <- read_excel("Data/paneladdition.xlsx") # adding variables such as the oil, IMF suppot dummy, remittances, RFI, etc.
+panel <- merge(panel, paneladdition, by = c("Country", "Date"), all.x = TRUE )
+
+# Safe panel just in case
+# write_xlsx(panel,"Data/Panel_31_8_2020.xlsx")
+# write_xlsx(panel,"Data/Panel_31_8_2020_after_adding_China_data_etc.xlsx")
+# =========================================================================.
+
+
+
+# Subset 2nd stage data for the reduced sample ------------------------------
+
+# Define the countries in the sample here: 
+# I choose the 20 countries that had a pre-covid actual vs fitted correlation
+# coefficient above 0.25. These 20 countries were found earlier and saved as
+# the object CountriesToRemain
+panel <- panel[panel$Country %in% CountriesToRemain, ]
+# View(unique(panel$Country))
+# =========================================================================.
+
+
+
+# subset panel for correct time frame----------------------------------------
 panel <- panel[which(panel$Date > '2019-07-01'),]
 panel <- panel %>%
   dplyr::group_by(Country) %>%
@@ -3394,8 +4441,10 @@ panel_inCOVID <- panel_inCOVID[order(panel_inCOVID$Country),]
 
 
 
-# panel analysis of COVID residuals ---------------------------------------
+
+# 1) panel analysis of COVID residuals ---------------------------------------
 ### Panel analysis: COVID residuals
+
 new_res.mortality.2 <- plm(CDS_5y_Residual ~ Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth),
                            method="pooling", effect="twoways",
                            data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
@@ -3427,9 +4476,7 @@ stargazer(digits=4,new_res.mortality.2,new_res.mortality.3,new_res.mortality.4,
 
 
 
-
-
-# panel analysis of COVID spreads changes in march 2020 -------------------
+# 2) panel analysis of COVID spreads changes in march 2020 -------------------
 ### Panel analysis: CDS spreads changes in 2020 March
 
 new_CDS.mortality.0 <- plm(CDS_5y_Actual ~ CDS_5y_Prediction,
@@ -3468,7 +4515,7 @@ stargazer(digits=4,new_CDS.mortality.0,new_CDS.mortality.2,new_CDS.mortality.3,n
 
 
 
-# panel analysis of subsample with mortality data -------------------------
+# 3) panel analysis of subsample with mortality data -------------------------
 ### Panel analayis: subsample with observations for which mortality data is available
 new_CDS.mortality.2.small <- plm(CDS_5y_Actual ~ CDS_5y_Prediction + Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth),
                                  method="pooling", effect="twoways",
@@ -3507,8 +4554,6 @@ stargazer(digits=4,new_CDS.mortality.0.small,new_CDS.mortality.2.small,new_CDS.m
 # =========================================================================.
 
 
-
-
 # EM aggregate: realized values vs model-implied values -------------------
 # EM aggregate: realized values versus model-implied values
 panel_inCOVID_CDS_5y_Prediction_New <- cbind(as.vector(new_CDS.mortality.4$model[[1]]-new_CDS.mortality.4$residuals), attr(new_CDS.mortality.4$model[[1]], "index"))
@@ -3533,6 +4578,123 @@ p_EM_Mar_New
 # jpeg("Plots/Figure11.jpg", width = 1920, height = 1080)
 # p_EM_Mar_New
 # dev.off()
+# =========================================================================.
+
+
+
+
+# 4) COPIED OVER FROM script "WEIGHTEDCDS.R": panel analysis of COVID residuals with additional controls --------------
+### Panel analysis: COVID residuals
+new_res.mortality.2 <- plm(CDS_5y_Residual ~ Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth),
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+
+se.new_res.mortality.2 <- coeftest(new_res.mortality.2, vcov = vcovHC(new_res.mortality.2, type = "HC1"))
+
+new_res.mortality.3 <- plm(CDS_5y_Residual ~ Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth) + driving + SI_Growth,
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+
+se.new_res.mortality.3 <- coeftest(new_res.mortality.3, vcov = vcovHC(new_res.mortality.3, type = "HC1"))
+
+new_res.mortality.4 <- plm(CDS_5y_Residual ~ Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth) + driving + SI_Growth + Lag(Dummy_Fiscal_Country) + Lag(Dummy_Monetary_ECB) + Lag(Dummy_Monetary_Fed),
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+se.new_res.mortality.4 <- coeftest(new_res.mortality.4, vcov = vcovHC(new_res.mortality.4, type = "HC1"))
+
+new_res.mortality.5 <- plm(CDS_5y_Residual ~ Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth) + driving + SI_Growth  + Lag(Dummy_Monetary_ECB) + Lag(Dummy_Monetary_Fed) + Lag(China_debt_stock_GDP) + Lag(Dummy_Fiscal_Country_weighted_extdebt) + Lag(RFI_GDP) + Lag(Oil_effect) + Lag(IR_GDP_ratio) + Lag(SWF_GDP_ratio) ,
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+se.new_res.mortality.5 <- coeftest(new_res.mortality.5, vcov = vcovHC(new_res.mortality.5, type = "HC1"))
+
+stargazer(digits=4,new_res.mortality.2,new_res.mortality.3,new_res.mortality.4, new_res.mortality.5,
+          type="latex",se=list(se.new_res.mortality.2[,2],se.new_res.mortality.3[,2],se.new_res.mortality.4[,2], se.new_res.mortality.5[,2]), out=file.path("Table_inCOVID_panel_output_newRES_mortality.htm"),
+          dep.var.labels=c("COVID Residual"), 
+          covariate.labels=c("New Mortality Rate", "New Mortality Rate Growth", 
+                             "Total Mortality Rate", "Total Mortality Rate Growth",
+                             "Mobility", "SI Growth",
+                             "Country Fiscal Policy Dummy", "ECB Policy Dummy", "Fed Policy Dummy", 
+                             "China debt stock", "Fiscal dummy X ext. debtGDP", "Oil effect", "IR GDP ratio", "SWF GDP ratio"),
+          df = FALSE, omit.stat="adj.rsq", 
+          notes = c("*,**,*** correspond to 10%, 5% and 1% significance, respectively.","HAC robust standard errors, clustered by country. Time and Country FEs."),
+          notes.append=F, notes.align ="l",
+          title="COVID-Sample Panel Analysis",add.lines = list(c("Fixed effects?", "Y","Y","Y","Y")))
+# =========================================================================.
+
+
+
+# 5) COPIED OVER FROM script "WEIGHTEDCDS.R": panel analysis of COVID spreads changes in march 2020 with additional controls--------
+### Panel analysis: CDS spreads changes in 2020 March
+new_CDS.mortality.1 <- plm(CDS_5y_Actual ~ CDS_5y_Prediction,
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID, na.action="na.exclude")
+se.new_CDS.mortality.1 <- coeftest(new_CDS.mortality.0, vcov = vcovHC(new_CDS.mortality.0, type = "HC1"))
+
+new_CDS.mortality.2 <- plm(CDS_5y_Actual ~ CDS_5y_Prediction + Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth),
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+se.new_CDS.mortality.2 <- coeftest(new_CDS.mortality.2, vcov = vcovHC(new_CDS.mortality.2, type = "HC1"))
+
+new_CDS.mortality.3 <- plm(CDS_5y_Actual ~ CDS_5y_Prediction + Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth) + driving + SI_Growth,
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+se.new_CDS.mortality.3 <- coeftest(new_CDS.mortality.3, vcov = vcovHC(new_CDS.mortality.3, type = "HC1"))
+
+new_CDS.mortality.4 <- plm(CDS_5y_Actual ~ CDS_5y_Prediction + Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth) + driving + SI_Growth + Lag(Dummy_Fiscal_Country) + Lag(Dummy_Monetary_ECB) + Lag(Dummy_Monetary_Fed),
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+se.new_CDS.mortality.4 <- coeftest(new_CDS.mortality.4, vcov = vcovHC(new_CDS.mortality.4, type = "HC1"))
+
+new_CDS.mortality.5 <- plm(CDS_5y_Actual ~ CDS_5y_Prediction + Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth) + driving + SI_Growth  + Lag(Dummy_Monetary_ECB) + Lag(Dummy_Monetary_Fed) + Lag(China_debt_stock_GDP) + Lag(Dummy_Fiscal_Country_weighted_extdebt) + Lag(RFI_GDP) + Lag(Oil_effect)+ Lag(IR_GDP_ratio) + Lag(SWF_GDP_ratio) ,
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+se.new_CDS.mortality.5 <- coeftest(new_CDS.mortality.5, vcov = vcovHC(new_CDS.mortality.5, type = "HC1"))
+
+
+stargazer(digits=4,new_CDS.mortality.1,new_CDS.mortality.2,new_CDS.mortality.3,new_CDS.mortality.4, new_CDS.mortality.5,
+          type="latex",se=list(se.new_CDS.mortality.1[,2],se.new_CDS.mortality.2[,2],se.new_CDS.mortality.3[,2],se.new_CDS.mortality.4[,2], se.new_CDS.mortality.5[,2]),out=file.path("Table_inCOVID_panel_output_newCDS_mortality.htm"),
+          dep.var.labels=c("Daily CDS Spread Change"),
+          covariate.labels=c("Fitted Daily CDS Spread Change", "New Mortality Rate", "New Mortality Rate Growth", 
+                             "Total Mortality Rate", "Total Mortality Rate Growth",
+                             "Mobility", "SI Growth",
+                             "Country Fiscal Policy Dummy", "ECB Policy Dummy", "Fed Policy Dummy",
+                             "China debt stock", "Fiscal dummy X ext. debtGDP", "Oil effect", "IR GDP ratio", "SWF GDP ratio"),
+          df = FALSE, omit.stat="adj.rsq", 
+          notes = c("*,**,*** correspond to 10%, 5% and 1% significance, respectively.","HAC robust standard errors, clustered by country. Time and Country FEs."),
+          notes.append=F, notes.align ="l",
+          title="COVID-Sample Panel Analysis",add.lines = list(c("Fixed effects?","Y","Y","Y","Y","Y")))
+# =========================================================================.
+
+
+
+# EM aggregate: realized values vs model-implied values -------------------
+# EM aggregate: realized values versus model-implied values
+panel_inCOVID_CDS_5y_Prediction_New <- cbind(as.vector(new_CDS.mortality.5$model[[1]]-new_CDS.mortality.5$residuals), attr(new_CDS.mortality.5$model[[1]], "index"))
+colnames(panel_inCOVID_CDS_5y_Prediction_New)[1] <- c("CDS_5y_Prediction_New")
+
+panel_inCOVID_CDS_5y_Prediction_New$Date <- as.Date(panel_inCOVID_CDS_5y_Prediction_New$Date,"%Y-%m-%d")
+panel_inCOVID_small <- merge(panel_inCOVID_CDS_5y_Prediction_New, panel_inCOVID, by = c("Country", "Date"), all.x = TRUE)
+
+panel_inCOVID_EM_prediction <- aggregate(CDS_5y_Prediction ~ Date, panel_inCOVID_small, mean)
+panel_inCOVID_EM_actual <- aggregate(CDS_5y_Actual ~ Date, panel_inCOVID_small, mean)
+panel_inCOVID_EM_prediction_new <- aggregate(CDS_5y_Prediction_New ~ Date, panel_inCOVID_small, mean)
+
+panel_inCOVID_EM <- merge(panel_inCOVID_EM_prediction_new, panel_inCOVID_EM_prediction, by = c("Date"), all.x = TRUE)
+panel_inCOVID_EM <- merge(panel_inCOVID_EM, panel_inCOVID_EM_actual, by = c("Date"), all.x = TRUE)
+
+p_EM_Mar_New2 <- ggplot(dat = panel_inCOVID_EM,aes(x=Date,y=CDS_5y_Actual,linetype = "Actual"))+geom_line()+geom_line(aes(y=CDS_5y_Prediction, linetype="Fitted by model [1]"))+
+  geom_line()+geom_line(aes(y=CDS_5y_Prediction_New,linetype="Fitted by model [5]"))+theme_bw()+xlab("")+ylab("Daily Change (Log CDS)")+
+  ggtitle("Emerging markets Average CDS Spreads, March 2020")+
+  theme(axis.title.y = element_text(size = 12), axis.text = element_text(size = 10), legend.title = element_blank(),legend.position = c(0.8, 0.8))
+
+p_EM_Mar_New2
+jpeg("Plots/Figure11.jpg", width = 1920, height = 1080)
+p_EM_Mar_New2
+dev.off()
+
+pdf(file = "Plots/Figure11.pdf", width = 9) # The height of the plot in inches
+p_EM_Mar_New2
+dev.off()
 # =========================================================================.
 
 
