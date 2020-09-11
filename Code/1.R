@@ -2204,7 +2204,7 @@ Plot_28B <- ggplot(data = First_Death, aes(Date, log(total_rolling_average_morta
                                                                                                                                                                                strip.background = element_rect(color="white", fill="white"))
 Plot_28B
 
-Plot_28C <- ggplot(data = First_Death, aes(x = Date, y = new_rolling_average_mortality, group = COUNTRY)) + geom_line() + theme_bw() + theme(legend.title = element_blank(), axis.text.y=element_blank(), axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("Rolling Average New Mortality")
+Plot_28C <- ggplot(data = First_Death, aes(x = Date, y = new_rolling_average_mortality, color = COUNTRY)) + geom_line() + theme_bw() + theme(legend.title = element_blank(), axis.text.y=element_blank(), axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("Rolling Average New Mortality")
 Plot_28C
 
 
@@ -2213,7 +2213,13 @@ library(gghighlight)
 
 Plot_28D <- ggplot(data = First_Death, aes(x = Date, y = new_rolling_average_mortality * 100, color = COUNTRY)) + geom_line() + theme_bw() + theme(axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("New Mortality Rate (%)")
 Plot_28D
-# ggsave("Plots/Figure4a.pdf")
+# ggsave("Plots/Figure4a.pdf") 
+jpeg("Plots/Figure4a.jpg", width = 1920, height = 1080)
+Plot_28D
+dev.off()
+pdf(file = "Plots/Figure4a.pdf", width = 9) # The height of the plot in inches
+Plot_28D
+dev.off()
 
 # Here I am subsetting for the top and bottom 5 mortality countries per the end of April 
 First_Death_April30 <- subset(First_Death, Date == as.Date("2020-04-30"))
@@ -2264,6 +2270,12 @@ Oxford_Death <- Oxford_V1 %>%
 Plot_28G <- ggplot(data = Oxford_Death, aes(x = Date, y = Total_Deaths_Per_Million, color = COUNTRY)) + geom_line() + theme_bw() + theme( axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("Total Deaths Per Million")
 Plot_28G
 # ggsave("Plots/Figure4b.pdf")
+jpeg("Plots/Figure4b.jpg", width = 1920, height = 1080)
+Plot_28G
+dev.off()
+pdf(file = "Plots/Figure4b.pdf", width = 9) # The height of the plot in inches
+Plot_28G
+dev.off()
 
 Plot_28G.1 <- plot_ly(Oxford_Death, x=~Date, y=~Total_Deaths_Per_Million) %>%
   add_lines(linetype = ~COUNTRY) %>%
@@ -2644,11 +2656,16 @@ d_emcds<-apply(log(em_cds2[,-1]),2,diff) #log differences of EM spreads
 d_nemds<-apply(log(nonem_cds[,-1]),2,diff) # log differences of non-EM spreads
 
 # This was the old way before we starting weighting things
-glo_cds <- as.data.frame(rowMeans(d_nemds) )# create a global CDS factor excluding EM
+# glo_cds <- as.data.frame(rowMeans(d_nemds) )# create a global CDS factor excluding EM
+# I changed this on 11. September 2020 as I realized I had not weighted the global factor accordingly. 
+
+
 
 # This is the new way when we start weighting things
-test <- as.data.frame(d_nemds[1,])
+test <- as.data.frame(d_nemds[,])
 weighted_matrix <- test*GDP2019USDMIL_D$weight
+glo_cds <- as.data.frame(rowMeans(weighted_matrix) )
+
 # glo_cds_weighted <- 
 a <- as.data.frame(c("Germany", "France"), c(100,40) )
 countryexample <- c("Germany", "France")
@@ -4421,6 +4438,20 @@ panel <- panel[panel$Country %in% CountriesToRemain, ]
 
 
 
+# Variable creation -------------------------------------------------------
+View(panel)
+
+# View(panel$External_debt_GDP)
+panel <- mutate(panel, Ext_debt_ratio_interact_dummy_fiscal_country = External_debt_GDP * Dummy_Fiscal_Country)
+
+# View(panel$China_debt_stock_GDP)
+panel <- mutate(panel, China_debt_ratio_interact_dummy_fiscal_country = China_debt_stock_GDP * Dummy_Fiscal_Country)
+# View(panel)
+
+# =========================================================================.
+
+
+
 # subset panel for correct time frame----------------------------------------
 panel <- panel[which(panel$Date > '2019-07-01'),]
 panel <- panel %>%
@@ -4687,7 +4718,274 @@ p_EM_Mar_New2 <- ggplot(dat = panel_inCOVID_EM,aes(x=Date,y=CDS_5y_Actual,linety
   ggtitle("Emerging markets Average CDS Spreads, March 2020")+
   theme(axis.title.y = element_text(size = 12), axis.text = element_text(size = 10), legend.title = element_blank(),legend.position = c(0.8, 0.8))
 
+# p_EM_Mar_New2
+# jpeg("Plots/Figure11.jpg", width = 1920, height = 1080)
+# p_EM_Mar_New2
+# dev.off()
+# 
+# pdf(file = "Plots/Figure11.pdf", width = 9) # The height of the plot in inches
+# p_EM_Mar_New2
+# dev.off()
+# =========================================================================.
+
+
+
+# 6) COVID residual regressions. Done on 7.8.2020 with additional controls, i.e. interaction terms and individual variables-------------
+### Panel analysis: COVID residuals
+new_res.mortality.1 <- plm(CDS_5y_Residual ~ 
+                             Lag(New_Mortality_Rate) + 
+                             Lag(New_Mortality_Rate_Growth) + 
+                             Lag(Total_Mortality_Rate) + 
+                             Lag(Total_Mortality_Rate_Growth),
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+
+se.new_res.mortality.1 <- coeftest(new_res.mortality.1, vcov = vcovHC(new_res.mortality.1, type = "HC1"))
+
+new_res.mortality.2 <- plm(CDS_5y_Residual ~ 
+                             Lag(New_Mortality_Rate) + 
+                             Lag(New_Mortality_Rate_Growth) + 
+                             Lag(Total_Mortality_Rate) + 
+                             Lag(Total_Mortality_Rate_Growth) + 
+                             driving + 
+                             SI_Growth,
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+se.new_res.mortality.2 <- coeftest(new_res.mortality.2, vcov = vcovHC(new_res.mortality.2, type = "HC1"))
+
+new_res.mortality.3 <- plm(CDS_5y_Residual ~ 
+                             Lag(New_Mortality_Rate) + 
+                             Lag(New_Mortality_Rate_Growth) + 
+                             Lag(Total_Mortality_Rate) + 
+                             Lag(Total_Mortality_Rate_Growth) + 
+                             driving + 
+                             SI_Growth + 
+                             Lag(Dummy_Monetary_ECB) + 
+                             Lag(Dummy_Monetary_Fed) + 
+                             Lag(External_debt_GDP) + 
+                             Lag(Ext_debt_ratio_interact_dummy_fiscal_country) + 
+                             Lag(China_debt_stock_GDP) + 
+                             Lag(China_debt_ratio_interact_dummy_fiscal_country) + 
+                             Lag(RFI_GDP) + 
+                             Lag(Oil_effect) + 
+                             Lag(IR_GDP_ratio) + 
+                             Lag(SWF_GDP_ratio),
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+se.new_res.mortality.3 <- coeftest(new_res.mortality.3, vcov = vcovHC(new_res.mortality.3, type = "HC1"))
+
+new_res.mortality.4 <- plm(CDS_5y_Residual ~ 
+                             Lag(New_Mortality_Rate) + 
+                             Lag(New_Mortality_Rate_Growth) + 
+                             Lag(Total_Mortality_Rate) + 
+                             Lag(Total_Mortality_Rate_Growth) + 
+                             driving + 
+                             Lag(Dummy_Monetary_ECB) + 
+                             Lag(Dummy_Monetary_Fed) + 
+                             Lag(External_debt_GDP) + 
+                             Lag(Ext_debt_ratio_interact_dummy_fiscal_country) + 
+                             Lag(China_debt_stock_GDP) + 
+                             Lag(China_debt_ratio_interact_dummy_fiscal_country) + 
+                             Lag(RFI_GDP) + 
+                             Lag(Oil_effect) + 
+                             Lag(IR_GDP_ratio) + 
+                             Lag(SWF_GDP_ratio),
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+se.new_res.mortality.4 <- coeftest(new_res.mortality.4, vcov = vcovHC(new_res.mortality.4, type = "HC1"))
+
+new_res.mortality.5 <- plm(CDS_5y_Residual ~ 
+                             Lag(New_Mortality_Rate) + 
+                             Lag(New_Mortality_Rate_Growth) + 
+                             Lag(Total_Mortality_Rate) + 
+                             Lag(Total_Mortality_Rate_Growth) + 
+                             SI_Growth + 
+                             Lag(Dummy_Monetary_ECB) + 
+                             Lag(Dummy_Monetary_Fed) + 
+                             Lag(External_debt_GDP) + 
+                             Lag(Ext_debt_ratio_interact_dummy_fiscal_country) + 
+                             Lag(China_debt_stock_GDP) + 
+                             Lag(China_debt_ratio_interact_dummy_fiscal_country) + 
+                             Lag(RFI_GDP) + 
+                             Lag(Oil_effect) + 
+                             Lag(IR_GDP_ratio) + 
+                             Lag(SWF_GDP_ratio),
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+se.new_res.mortality.5 <- coeftest(new_res.mortality.5, vcov = vcovHC(new_res.mortality.5, type = "HC1"))
+
+
+
+stargazer(digits=4,
+          new_res.mortality.1,new_res.mortality.2,new_res.mortality.3, new_res.mortality.4, new_res.mortality.5, 
+          type="latex",
+          se=list(se.new_res.mortality.1[,2],se.new_res.mortality.2[,2],se.new_res.mortality.3[,2], se.new_res.mortality.4[,2], se.new_res.mortality.5[,2]), out=file.path("Table_inCOVID_panel_output_newRES_mortality.htm"),
+          dep.var.labels=c("CDS spread COVID Residual"), 
+          covariate.labels=c("New Mortality Rate", 
+                             "New Mortality Rate Growth", 
+                             "Total Mortality Rate", 
+                             "Total Mortality Rate Growth",
+                             "Mobility", 
+                             "SI Growth",
+                             "ECB Policy Dummy", 
+                             "Fed Policy Dummy", 
+                             "Ext. Debt/GDP", 
+                             "Ext. Debt/GDP x Fiscal Policy Dummy ", 
+                             "Debt owed to China/GDP", 
+                             "Debt owed to China/GDP x Fiscal Policy Dummy", 
+                             "Rapid Financing Instrument/GDP", 
+                             "Oil income effect", 
+                             "International Reserves/GDP", 
+                             "Sowereign Wealth Fund volume/GDP"),
+          df = FALSE, omit.stat="adj.rsq", 
+          notes = c("*,**,*** correspond to 10%, 5% and 1% significance, respectively.","HAC robust standard errors, clustered by country. Time and Country FEs."),
+          notes.append=F, notes.align ="l",
+          title="COVID-Sample Panel Analysis",add.lines = list(c("Fixed effects?", "Y","Y","Y","Y","Y")))
+# =========================================================================.
+
+
+# 7) CDS spreads changes regressions --------------------------------------
+# Done on 7.8.2020 with additional controls, i.e. interaction terms and individual variables-------------
+### Panel analysis: CDS spreads changes in 2020 March
+new_CDS.mortality.1 <- plm(CDS_5y_Actual ~ 
+                             CDS_5y_Prediction,
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID, na.action="na.exclude")
+se.new_CDS.mortality.1 <- coeftest(new_CDS.mortality.1, vcov = vcovHC(new_CDS.mortality.1, type = "HC1"))
+
+
+new_CDS.mortality.2 <- plm(CDS_5y_Actual ~ 
+                             CDS_5y_Prediction + 
+                             Lag(New_Mortality_Rate) + 
+                             Lag(New_Mortality_Rate_Growth) + 
+                             Lag(Total_Mortality_Rate) + 
+                             Lag(Total_Mortality_Rate_Growth),
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+se.new_CDS.mortality.2 <- coeftest(new_CDS.mortality.2, vcov = vcovHC(new_CDS.mortality.2, type = "HC1"))
+
+new_CDS.mortality.3 <- plm(CDS_5y_Actual ~ 
+                             CDS_5y_Prediction + 
+                             Lag(New_Mortality_Rate) + 
+                             Lag(New_Mortality_Rate_Growth) + 
+                             Lag(Total_Mortality_Rate) + 
+                             Lag(Total_Mortality_Rate_Growth) + 
+                             driving + 
+                             SI_Growth + 
+                             Lag(Dummy_Monetary_ECB) + 
+                             Lag(Dummy_Monetary_Fed) + 
+                             Lag(External_debt_GDP) + 
+                             Lag(Ext_debt_ratio_interact_dummy_fiscal_country) + 
+                             Lag(China_debt_stock_GDP) + 
+                             Lag(China_debt_ratio_interact_dummy_fiscal_country) + 
+                             Lag(RFI_GDP) + 
+                             Lag(Oil_effect) + 
+                             Lag(IR_GDP_ratio) + 
+                             Lag(SWF_GDP_ratio),
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+se.new_CDS.mortality.3 <- coeftest(new_CDS.mortality.3, vcov = vcovHC(new_CDS.mortality.3, type = "HC1"))
+
+new_CDS.mortality.4 <- plm(CDS_5y_Actual ~ 
+                             CDS_5y_Prediction + 
+                             Lag(New_Mortality_Rate) + 
+                             Lag(New_Mortality_Rate_Growth) + 
+                             Lag(Total_Mortality_Rate) + 
+                             Lag(Total_Mortality_Rate_Growth) + 
+                             driving + 
+                             Lag(Dummy_Monetary_ECB) + 
+                             Lag(Dummy_Monetary_Fed) + 
+                             Lag(External_debt_GDP) + 
+                             Lag(Ext_debt_ratio_interact_dummy_fiscal_country) + 
+                             Lag(China_debt_stock_GDP) + 
+                             Lag(China_debt_ratio_interact_dummy_fiscal_country) + 
+                             Lag(RFI_GDP) + 
+                             Lag(Oil_effect) + 
+                             Lag(IR_GDP_ratio) + 
+                             Lag(SWF_GDP_ratio),
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+se.new_CDS.mortality.4 <- coeftest(new_CDS.mortality.4, vcov = vcovHC(new_CDS.mortality.4, type = "HC1"))
+
+new_CDS.mortality.5 <- plm(CDS_5y_Actual ~ 
+                             CDS_5y_Prediction + 
+                             Lag(New_Mortality_Rate) + 
+                             Lag(New_Mortality_Rate_Growth) + 
+                             Lag(Total_Mortality_Rate) + 
+                             Lag(Total_Mortality_Rate_Growth) + 
+                             SI_Growth + 
+                             Lag(Dummy_Monetary_ECB) + 
+                             Lag(Dummy_Monetary_Fed) + 
+                             Lag(External_debt_GDP) + 
+                             Lag(Ext_debt_ratio_interact_dummy_fiscal_country) + 
+                             Lag(China_debt_stock_GDP) + 
+                             Lag(China_debt_ratio_interact_dummy_fiscal_country) + 
+                             Lag(RFI_GDP) + 
+                             Lag(Oil_effect) + 
+                             Lag(IR_GDP_ratio) + 
+                             Lag(SWF_GDP_ratio),
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+se.new_CDS.mortality.5 <- coeftest(new_CDS.mortality.5, vcov = vcovHC(new_CDS.mortality.5, type = "HC1"))
+
+
+stargazer(digits=4,new_CDS.mortality.1,new_CDS.mortality.2,new_CDS.mortality.3,new_CDS.mortality.4, new_CDS.mortality.5,
+          type="latex",se=list(se.new_CDS.mortality.1[,2],se.new_CDS.mortality.2[,2],se.new_CDS.mortality.3[,2],se.new_CDS.mortality.4[,2], se.new_CDS.mortality.5[,2]),out=file.path("Table_inCOVID_panel_output_newCDS_mortality.htm"),
+          dep.var.labels=c("Daily CDS Spread Change"),
+          covariate.labels=c("Fitted Daily CDS Spread Change",
+                             "New Mortality Rate", 
+                             "New Mortality Rate Growth", 
+                             "Total Mortality Rate", 
+                             "Total Mortality Rate Growth",
+                             "Mobility", 
+                             "SI Growth",
+                             "ECB Policy Dummy", 
+                             "Fed Policy Dummy", 
+                             "Ext. Debt/GDP", 
+                             "Ext. Debt/GDP x Fiscal Policy Dummy ", 
+                             "Debt owed to China/GDP", 
+                             "Debt owed to China/GDP x Fiscal Policy Dummy", 
+                             "Rapid Financing Instrument/GDP", 
+                             "Oil income effect", 
+                             "International Reserves/GDP", 
+                             "Sowereign Wealth Fund volume/GDP"),
+          df = FALSE, omit.stat="adj.rsq", 
+          notes = c("*,**,*** correspond to 10%, 5% and 1% significance, respectively.","HAC robust standard errors, clustered by country. Time and Country FEs."),
+          notes.append=F, notes.align ="l",
+          title="COVID-Sample Panel Analysis",add.lines = list(c("Fixed effects?","Y","Y","Y","Y","Y")))
+# =========================================================================.
+
+
+
+# EM aggregate: realized values vs model-implied values -------------------
+# EM aggregate: realized values versus model-implied values
+panel_inCOVID_CDS_5y_Prediction_New <- cbind(as.vector(new_CDS.mortality.5$model[[1]]-new_CDS.mortality.5$residuals), attr(new_CDS.mortality.5$model[[1]], "index"))
+colnames(panel_inCOVID_CDS_5y_Prediction_New)[1] <- c("CDS_5y_Prediction_New")
+
+panel_inCOVID_CDS_5y_Prediction_New$Date <- as.Date(panel_inCOVID_CDS_5y_Prediction_New$Date,"%Y-%m-%d")
+panel_inCOVID_small <- merge(panel_inCOVID_CDS_5y_Prediction_New, panel_inCOVID, by = c("Country", "Date"), all.x = TRUE)
+
+panel_inCOVID_EM_prediction <- aggregate(CDS_5y_Prediction ~ Date, panel_inCOVID_small, mean)
+panel_inCOVID_EM_actual <- aggregate(CDS_5y_Actual ~ Date, panel_inCOVID_small, mean)
+panel_inCOVID_EM_prediction_new <- aggregate(CDS_5y_Prediction_New ~ Date, panel_inCOVID_small, mean)
+
+panel_inCOVID_EM <- merge(panel_inCOVID_EM_prediction_new, panel_inCOVID_EM_prediction, by = c("Date"), all.x = TRUE)
+panel_inCOVID_EM <- merge(panel_inCOVID_EM, panel_inCOVID_EM_actual, by = c("Date"), all.x = TRUE)
+
+# p_EM_Mar_New2 <- ggplot(dat = panel_inCOVID_EM,aes(x=Date,y=CDS_5y_Actual,linetype = "Actual"))+geom_line()+geom_line(aes(y=CDS_5y_Prediction, linetype="Fitted by model [1]"))+
+#   geom_line()+geom_line(aes(y=CDS_5y_Prediction_New,linetype="Fitted by model [5]"))+theme_bw()+xlab("")+ylab("Daily Change (Log CDS)")+
+#   ggtitle("Emerging markets Average CDS Spreads, March 2020")+
+#   theme(axis.title.y = element_text(size = 12), axis.text = element_text(size = 10), legend.title = element_blank(),legend.position = c(0.8, 0.8))
+# 
+# p_EM_Mar_New2
+
+# I'm not sure it uses the right data from Model 5 to create the graph. Plese check this still one more time.
+p_EM_Mar_New2 <- ggplot(dat = panel_inCOVID_EM,aes(x=Date,y=CDS_5y_Actual,linetype = "Actual"))+geom_line()+geom_line(aes(y=CDS_5y_Prediction, linetype="Fitted by model [5]"))+theme_bw()+xlab("")+ylab("Daily Change (Log CDS)")+
+  ggtitle("Emerging markets Average CDS Spreads, March 2020")+
+  theme(axis.title.y = element_text(size = 12), axis.text = element_text(size = 10), legend.title = element_blank(),legend.position = c(0.8, 0.8))
+
 p_EM_Mar_New2
+
 jpeg("Plots/Figure11.jpg", width = 1920, height = 1080)
 p_EM_Mar_New2
 dev.off()
@@ -4696,6 +4994,8 @@ pdf(file = "Plots/Figure11.pdf", width = 9) # The height of the plot in inches
 p_EM_Mar_New2
 dev.off()
 # =========================================================================.
+
+
 
 
 

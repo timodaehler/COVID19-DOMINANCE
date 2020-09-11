@@ -3748,7 +3748,7 @@ p
 p2<-ggplot(data=pdat,aes(x=PD,y=EM))+geom_point(shape=21,fill="grey",size=3)+theme_bw()+geom_text(aes(label=countries),hjust="inward", vjust="inward")+xlab("Public Debt/GDP (%)")+ylab("Regional Beta")+stat_cor(method = "pearson", label.x = 45, label.y = 1.9) + geom_smooth(method="lm",se=F,color="red",linetype=2,size=.5)
 p2
 # jpeg("Plots/Figure6b.jpg", width = 1920, height = 1080)
-# p2
+# p2 
 # dev.off()
 
 grid.arrange(p,p2,nrow=1)## 1000x400
