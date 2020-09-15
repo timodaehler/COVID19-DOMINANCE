@@ -3660,6 +3660,7 @@ CountriesBelowThreshold_BeforeCovid <- CountryCorrelationCoefficients_before_COV
 # View(CountriesAboveThreshold_BeforeCovid$COUNTRY)
 # View(CountriesBelowThreshold_BeforeCovid$COUNTRY)
 nrow(CountriesAboveThreshold_BeforeCovid)
+nrow(CountriesBelowThreshold_BeforeCovid)
 # =========================================================================.
 
 
@@ -4142,7 +4143,7 @@ colnames(pdat)<-c("PD","Intercept","AR","Global","EM","countries")
 # colnames(pdat)<-c("PD","RMG","Intercept","AR","Global","Euro","countries")
 
 
-p<-ggplot(data=pdat,aes(x=PD,y=Global))+geom_point(shape=21,fill="grey",size=3)+theme_bw()+geom_text(aes(label=countries),hjust="inward", vjust="inward")+xlab("Public Debt/GDP (%)")+ylab("Global Beta")+stat_cor(method = "pearson", label.x = 50, label.y = .5)+geom_smooth(method="lm",se=F,color="red",linetype=2,size=.5)
+p<-ggplot(data=pdat,aes(x=PD,y=Global))+geom_point(shape=21,fill="grey",size=3)+theme_bw()+geom_text(aes(label=countries),hjust="inward", vjust="inward")+xlab("Public Debt/GDP (%)")+ylab("Global Beta")+stat_cor(method = "pearson", label.x = 40, label.y = -3)+geom_smooth(method="lm",se=F,color="red",linetype=2,size=.5)
 p
 # # Save plot
 # jpeg("Plots/Figure6a.jpg", width = 1920, height = 1080)
@@ -4372,7 +4373,7 @@ cds_5yr_EM_Mar <- cds_5yr_EM[which(cds_5yr_EM$Date >= '2020-03-01' & cds_5yr_EM$
 cds_5yr_EM_Mar$residual2 <- (cds_5yr_EM_Mar$CDS_5y_Actual - cds_5yr_EM_Mar$CDS_5y_Predictio)^2  
 eval[3] <- mean(cds_5yr_EM_Mar$residual2, na.rm = TRUE)
 
-p_EM_preMar <- ggplot(dat = cds_5yr_EM_preMar,aes(x=Date,y=CDS_5y_Actual,linetype="Actual"))+geom_line()+geom_line(aes(y=CDS_5y_Prediction,linetype="Fitted"))+theme_bw()+xlab("")+ylab("Daily Change (Log CDS)")+ggtitle("Emerging Markets Average CDS Spreads, Mid Dec 2019 - Feb 2020")+theme(axis.title.y = element_text(size = 10),axis.text = element_text(size = 10),legend.title = element_blank(),plot.title = element_text(size=12),legend.position = c(0.8, 0.8))+ylim(-0.15,0.2)
+p_EM_preMar <- ggplot(dat = cds_5yr_EM_preMar,aes(x=Date,y=CDS_5y_Actual,linetype="Actual"))+geom_line()+geom_line(aes(y=CDS_5y_Prediction,linetype="Fitted"))+theme_bw()+xlab("")+ylab("Daily Change (Log CDS)")+ggtitle("Emerging Markets Average CDS Spreads, Jan 2020 - Feb 2020")+theme(axis.title.y = element_text(size = 10),axis.text = element_text(size = 10),legend.title = element_blank(),plot.title = element_text(size=12),legend.position = c(0.8, 0.8))+ylim(-0.15,0.2)
 p_EM_preMar
 
 p_EM_postMar <- ggplot(dat = cds_5yr_EM_postMar,aes(x=Date,y=CDS_5y_Actual,linetype="Actual"))+geom_line()+geom_line(aes(y=CDS_5y_Prediction,linetype="Fitted"))+theme_bw()+xlab("")+ylab("Daily Change (Log CDS)")+ggtitle("Emerging Markets Average CDS Spreads, Apr 2020 - June 2020")+theme(axis.title.y = element_text(size = 10),axis.text = element_text(size = 10),legend.title = element_blank(),plot.title = element_text(size=12),legend.position = c(0.8, 0.8))+ylim(-0.15,0.2)
@@ -4439,7 +4440,7 @@ panel <- panel[panel$Country %in% CountriesToRemain, ]
 
 
 # Variable creation -------------------------------------------------------
-View(panel)
+# View(panel)
 
 # View(panel$External_debt_GDP)
 panel <- mutate(panel, Ext_debt_ratio_interact_dummy_fiscal_country = External_debt_GDP * Dummy_Fiscal_Country)
@@ -4832,11 +4833,10 @@ stargazer(digits=4,
                              "Ext. Debt/GDP", 
                              "Ext. Debt/GDP x Fiscal Policy Dummy ", 
                              "Debt owed to China/GDP", 
-                             "Debt owed to China/GDP x Fiscal Policy Dummy", 
-                             "Rapid Financing Instrument/GDP", 
+                             "Debt owed to China/GDP x Fiscal Policy Dummy",
                              "Oil income effect", 
                              "International Reserves/GDP", 
-                             "Sowereign Wealth Fund volume/GDP"),
+                             "Sovereign Wealth Fund volume/GDP"),
           df = FALSE, omit.stat="adj.rsq", 
           notes = c("*,**,*** correspond to 10%, 5% and 1% significance, respectively.","HAC robust standard errors, clustered by country. Time and Country FEs."),
           notes.append=F, notes.align ="l",
@@ -4878,7 +4878,7 @@ new_CDS.mortality.3 <- plm(CDS_5y_Actual ~
                              Lag(Ext_debt_ratio_interact_dummy_fiscal_country) + 
                              Lag(China_debt_stock_GDP) + 
                              Lag(China_debt_ratio_interact_dummy_fiscal_country) + 
-                             Lag(RFI_GDP) + 
+                             # Lag(RFI_GDP) + 
                              Lag(Oil_effect) + 
                              Lag(IR_GDP_ratio) + 
                              Lag(SWF_GDP_ratio),
@@ -4945,10 +4945,10 @@ stargazer(digits=4,new_CDS.mortality.1,new_CDS.mortality.2,new_CDS.mortality.3,n
                              "Ext. Debt/GDP x Fiscal Policy Dummy ", 
                              "Debt owed to China/GDP", 
                              "Debt owed to China/GDP x Fiscal Policy Dummy", 
-                             "Rapid Financing Instrument/GDP", 
+                             # "Rapid Financing Instrument/GDP", 
                              "Oil income effect", 
                              "International Reserves/GDP", 
-                             "Sowereign Wealth Fund volume/GDP"),
+                             "Sovereign Wealth Fund volume/GDP"),
           df = FALSE, omit.stat="adj.rsq", 
           notes = c("*,**,*** correspond to 10%, 5% and 1% significance, respectively.","HAC robust standard errors, clustered by country. Time and Country FEs."),
           notes.append=F, notes.align ="l",
