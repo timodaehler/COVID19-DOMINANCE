@@ -1214,7 +1214,7 @@ Final_Data_Country <- Final_Data_Country[order(Final_Data_Country$COUNTRY, Final
 Final_Data_Country <- Final_Data_Country[order(Final_Data_Country$COUNTRY, Final_Data_Country$Date),]
 
 # Here, I integrate the Apple Mobility data. 
-mobility <- read.csv("https://covid19-static.cdn-apple.com/covid19-mobility-data/2012HotfixDev11/v3/en-us/applemobilitytrends-2020-07-12.csv")
+mobility <- read.csv("https://covid19-static.cdn-apple.com/covid19-mobility-data/2017HotfixDev14/v3/en-us/applemobilitytrends-2020-09-23.csv")
 # You can also download it from online by changing the date in the following command
 # mobility <- read.csv("Data/applemobilitytrends.csv")
 # mobility <- read.csv("https://covid19-static.cdn-apple.com/covid19-mobility-data/2012HotfixDev11/v3/en-us/applemobilitytrends-2020-07-12.csv")
@@ -2214,10 +2214,10 @@ library(gghighlight)
 Plot_28D <- ggplot(data = First_Death, aes(x = Date, y = new_rolling_average_mortality * 100, color = COUNTRY)) + geom_line() + theme_bw() + theme(axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("New Mortality Rate (%)")
 Plot_28D
 # ggsave("Plots/Figure4a.pdf") 
-jpeg("Plots/Figure4a.jpg", width = 1920, height = 1080)
+jpeg("Plots/mortalitiesacrosstime.jpg", width = 1920, height = 1080)
 Plot_28D
 dev.off()
-pdf(file = "Plots/Figure4a.pdf", width = 9) # The height of the plot in inches
+pdf(file = "Plots/mortalitiesacrosstime.pdf", height = 4, width = 9) # The height of the plot in inches
 Plot_28D
 dev.off()
 
@@ -2273,7 +2273,7 @@ Plot_28G
 jpeg("Plots/Figure4b.jpg", width = 1920, height = 1080)
 Plot_28G
 dev.off()
-pdf(file = "Plots/Figure4b.pdf", width = 9) # The height of the plot in inches
+pdf(file = "Plots/Figure4b.pdf", height = 4, width = 9) # The height of the plot in inches
 Plot_28G
 dev.off()
 
@@ -2281,11 +2281,14 @@ Plot_28G.1 <- plot_ly(Oxford_Death, x=~Date, y=~Total_Deaths_Per_Million) %>%
   add_lines(linetype = ~COUNTRY) %>%
   layout(title="Total Total_Deaths_Per_Million")
 Plot_28G.1
+
+
+
 # =========================================================================.
 
 
 
-# subset top and bottom 5 countries ---------------------------------------
+# subset top and bottom 5 countries based on total deaths -----------------
 # Here I am subsetting for the top and bottom 5 mortality countries per the end of April 
 Oxford_Death_April30 <- subset(Oxford_Death, Date == as.Date("2020-04-30"))
 
@@ -2296,25 +2299,62 @@ Oxford_Death_April30increasing <- arrange(Oxford_Death_April30, Total_Deaths_Per
 Bottom5_Oxford_Death_Countries <- First_Death_April30increasing[1:5, "COUNTRY"]
 # =========================================================================.
 
+
+
 First_Death_High <- First_Death %>%
   dplyr::filter(COUNTRY %in% Top5_Mortality_Countries$COUNTRY)
-Plot_28D.1 <- ggplot(data = First_Death_High, aes(x = Date, y = new_rolling_average_mortality * 100, color = COUNTRY)) + geom_line() + theme_bw() + theme(axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("New Mortality Rate (%)")
+Plot_28D.1 <- ggplot(data = subset(First_Death_High, Date < as.Date("2020-06-30") & Date >= as.Date("2020-01-01") ), aes(x = Date, y = new_rolling_average_mortality * 100, color = COUNTRY, linetype = COUNTRY)) + geom_line() + theme_bw() + theme(axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("New Mortality Rate (%)") + theme(legend.title = element_blank()) + scale_x_date(date_labels = "%m-%Y")
+Plot_28D.1 
+pdf(file = "Plots/top5mortalities_at_end_of_april.pdf", height = 4, width = 9)
 Plot_28D.1
+dev.off()
+
+First_Death_Low <- First_Death %>%
+  dplyr::filter(COUNTRY %in% Bottom5_Mortality_Countries$COUNTRY)
+Plot_28D.2 <- ggplot(data = subset(First_Death_Low, Date < as.Date("2020-06-30") & Date >= as.Date("2020-01-01") ), aes(x = Date, y = new_rolling_average_mortality * 100, color = COUNTRY, linetype = COUNTRY)) + geom_line() + theme_bw() + theme(axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("New Mortality Rate (%)") + theme(legend.title = element_blank()) + scale_x_date(date_labels = "%m-%Y")
+Plot_28D.2 
+pdf(file = "Plots/bottom5mortalities_at_end_of_april.pdf", height = 4, width = 9)
+Plot_28D.2
+dev.off()
+
+First_Death_High_And_Low <- First_Death %>%
+  dplyr::filter(  (COUNTRY %in% Top5_Mortality_Countries$COUNTRY) |  (COUNTRY %in% Bottom5_Mortality_Countries$COUNTRY)   )
+Plot_28D.A <- ggplot(data = subset(First_Death_High_And_Low, Date < as.Date("2020-06-30") & Date >= as.Date("2020-01-01") ), aes(x = Date, y = new_rolling_average_mortality * 100, color = COUNTRY, linetype = COUNTRY)) + geom_line() + theme_bw() + theme(axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("New Mortality Rate (%)") + theme(legend.title = element_blank()) + scale_x_date(date_labels = "%m-%Y")
+Plot_28D.A 
+pdf(file = "Plots/top_and_bottom_5mortalities_at_end_of_april.pdf", height = 4, width = 9)
+Plot_28D.A
+dev.off()
+
 
 Oxford_Death_High <- Oxford_V1 %>%
   dplyr::filter(COUNTRY %in% Top5_Oxford_Death_Countries$COUNTRY)
-Plot_28H <- ggplot(data = Oxford_Death_High, aes(x = Date, y = Total_Deaths_Per_Million, color = COUNTRY)) + geom_line() + theme_bw() + theme( axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("Total Deaths Per Million")
+Plot_28H <- ggplot(data = subset(Oxford_Death_High, Date < as.Date("2020-06-30") & Date >= as.Date("2020-01-01") ), aes(x = Date, y = Total_Deaths_Per_Million, color = COUNTRY, linetype = COUNTRY)) + geom_line() + theme_bw() + theme( axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("Total Deaths Per Million") + theme(legend.title = element_blank()) + scale_x_date(date_labels = "%m-%Y")
 Plot_28H
+pdf(file = "Plots/top5deathspermillion_at_end_of_april.pdf", height = 4, width = 9)
+Plot_28H
+dev.off()
+
+Oxford_Death_Low <- Oxford_V1 %>%
+  dplyr::filter( COUNTRY %in% Bottom5_Oxford_Death_Countries$COUNTRY  )
+Plot_28J <- ggplot(data = subset(Oxford_Death_Low, Date < as.Date("2020-06-30") & Date >= as.Date("2020-01-01") ), aes(x = Date, y = Total_Deaths_Per_Million, color = COUNTRY, linetype = COUNTRY)) + geom_line() + theme_bw() + theme( axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("Total Deaths Per Million") + theme(legend.title = element_blank()) + scale_x_date(date_labels = "%m-%Y")
+Plot_28J
+pdf(file = "Plots/bottom5deathspermillion_at_end_of_april.pdf", height = 4, width = 9)
+Plot_28J
+dev.off()
 
 Oxford_Death_Medium <- Oxford_V1 %>%
   dplyr::filter( !(     (COUNTRY %in% Top5_Oxford_Death_Countries$COUNTRY)  | (COUNTRY %in% Bottom5_Oxford_Death_Countries$COUNTRY)  )        )
-Plot_28I <- ggplot(data = Oxford_Death_Medium, aes(x = Date, y = Total_Deaths_Per_Million, color = COUNTRY)) + geom_line() + theme_bw() + theme( axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("Total Deaths Per Million")
+Plot_28I <- ggplot(data = Oxford_Death_Medium, aes(x = Date, y = Total_Deaths_Per_Million, color = COUNTRY, linetype = COUNTRY)) + geom_line() + theme_bw() + theme( axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("Total Deaths Per Million") + scale_x_date(date_labels = "%m-%Y")
 Plot_28I
 
-Oxford_Death_Low <- Oxford_V1 %>%
-  dplyr::filter(COUNTRY %in% Bottom5_Oxford_Death_Countries$COUNTRY)
-Plot_28J <- ggplot(data = Oxford_Death_Low, aes(x = Date, y = Total_Deaths_Per_Million, color = COUNTRY)) + geom_line() + theme_bw() + theme( axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("Total Deaths Per Million")
-Plot_28J
+Oxford_Death_High_And_Low <- Oxford_V1 %>%
+  dplyr::filter( (COUNTRY %in% Bottom5_Oxford_Death_Countries$COUNTRY) | (COUNTRY %in% Top5_Oxford_Death_Countries$COUNTRY) )
+Plot_28K <- ggplot(data = subset(Oxford_Death_High_And_Low, Date < as.Date("2020-06-30") & Date >= as.Date("2020-01-01") ), aes(x = Date, y = Total_Deaths_Per_Million, color = COUNTRY, linetype = COUNTRY)) + geom_line() + theme_bw() + theme( axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("Total Deaths Per Million") + theme(legend.title = element_blank()) + scale_x_date(date_labels = "%m-%Y")
+Plot_28K
+pdf(file = "Plots/top_and_bottom5deathspermillion_at_end_of_april.pdf", height = 4, width = 9)
+Plot_28K
+dev.off()
+
 
 # Next, I create initial visualizations of the mortality growth rates by country.
 Plot_29 <- plot_ly(First_Death, x=~Date, y=~total_mortality_growth) %>%
@@ -2595,7 +2635,7 @@ countriez<-unique(pdat$variable)
 country_plots<-list()
 
 for(i in 1:length(countriez)) {
-  country_plots[[i]] <- ggplot(data=subset(pdat,variable==countriez[i]), aes_string(x="Date",y="value"))+geom_line(size=1)+theme_bw()+ylab("")+xlab(countriez[i])
+  country_plots[[i]] <- ggplot(data=subset(pdat,variable==countriez[i]), aes_string(x="Date",y="value"))+geom_line(size=0.2)+theme_bw()+ylab("")+xlab(countriez[i])
 }
 EMindividualspreadsroster <- do.call("grid.arrange", c(country_plots))
 EMindividualspreadsroster 
@@ -2611,26 +2651,76 @@ dev.off()
 
 
 
-
-
-# plot individual spreads for non EM
-pdat<-melt(nonem_cds,id.vars="Date")
+# Here I quickly subset the pdat dataframe so that I can create a CDS spread chart of emerging markets during COVID
+pdat<-melt(em_cds,id.vars="Date")
+pdat <- pdat[which(pdat$Date > "2020-01-01" & pdat$Date < "2020-04-30"),]
 countriez<-unique(pdat$variable)
 country_plots<-list()
 
 for(i in 1:length(countriez)) {
-  country_plots[[i]] <- ggplot(data=subset(pdat,variable==countriez[i]), aes_string(x="Date",y="value"))+geom_line(size=1)+theme_bw()+ylab("")+xlab(countriez[i])
+  country_plots[[i]] <- ggplot(data=subset(pdat,variable==countriez[i]), aes_string(x="Date",y="value"))+geom_line(size=0.2)+theme_bw()+ylab("")+xlab(countriez[i])
+}
+EMindividualspreadsroster <- do.call("grid.arrange", c(country_plots))
+EMindividualspreadsroster 
+
+# Saving the plot
+jpeg("Plots/individualspreads_EM_during_COVID.jpg", width = 3840, height = 2160)
+do.call("grid.arrange", c(country_plots))
+dev.off()
+
+pdf(file = "Plots/individualspreads_EM_during_COVID.pdf", width = 9) # The height of the plot in inches
+do.call("grid.arrange", c(country_plots))
+dev.off()
+
+# Creating A CDS spreads plot with all series in one graph
+# pdat <- pdat[which(pdat$variable != "Argentina"),]
+px <- ggplot(pdat, aes(x = Date, y = value,  color = variable, linetype = variable)) + 
+  geom_line( ) + theme(legend.position="bottom") + ylim(0, 1200) + theme(legend.title = element_blank()) + ylab("CDS spread") + xlab("")
+px 
+
+# Saving the plot
+jpeg("Plots/individualspreads_EM_onegraph.jpg", width = 1920, height = 1080)
+px
+dev.off()
+
+pdf(file = "Plots/individualspreads_EM_onegraph.pdf", height = 4, width = 9) # The height of the plot in inches
+px
+dev.off()
+
+
+# plot individual spreads for non EM
+pdat<-melt(nonem_cds,id.vars="Date")
+pdat <- pdat[which(pdat$Date > "2020-01-01" & pdat$Date < "2020-04-30"),]
+countriez<-unique(pdat$variable)
+country_plots<-list()
+
+for(i in 1:length(countriez)) {
+  country_plots[[i]] <- ggplot(data=subset(pdat,variable==countriez[i]), aes_string(x="Date",y="value"))+geom_line(size=0.2)+theme_bw()+ylab("")+xlab(countriez[i])
 }
 nonEMindividualspreadsroster <- do.call("grid.arrange", c(country_plots))
 nonEMindividualspreadsroster
 
 # Saving the plot
-jpeg("Plots/individualspreads_non_EM.jpg", width = 1920, height = 1080)
+jpeg("Plots/individualspreads_non_EM_during_COVID.jpg", width = 1920, height = 1080)
 do.call("grid.arrange", c(country_plots))
 dev.off()
 
-pdf(file = "Plots/individualspreads_non_EM.pdf") # The height of the plot in inches
+pdf(file = "Plots/individualspreads_non_EM_during_COVID.pdf", width = 9) # The height of the plot in inches
 do.call("grid.arrange", c(country_plots))
+dev.off()
+
+# Creating A CDS spreads plot with all series in one graph for developed markets
+px2 <- ggplot(pdat, aes(x = Date, y = value)) + 
+  geom_line(aes(color = variable, linetype = variable)) + theme(legend.position="bottom") + ylim(0, 300) + theme(legend.title = element_blank()) + ylab("CDS spread") + xlab("")
+px2
+
+# Saving the plot
+jpeg("Plots/individualspreads_non_EM_onegraph.jpg", width = 1920, height = 1080)
+px2
+dev.off()
+
+pdf(file = "Plots/individualspreads_non_EM_onegraph.pdf", height = 4, width = 9) # The height of the plot in inches
+px2
 dev.off()
 # =========================================================================.
 
@@ -2662,9 +2752,21 @@ d_nemds<-apply(log(nonem_cds[,-1]),2,diff) # log differences of non-EM spreads
 
 
 # This is the new way when we start weighting things
-test <- as.data.frame(d_nemds[,])
-weighted_matrix <- test*GDP2019USDMIL_D$weight
+d_nemds <- as.data.frame(d_nemds[,])
+weighted_matrix <- d_nemds*GDP2019USDMIL_D$weight
 glo_cds <- as.data.frame(rowMeans(weighted_matrix) )
+
+# Weight of US in global factor
+GDP2019USDMIL_D[which(GDP2019USDMIL_D$COUNTRY == "US"), ]
+US_Weight <- GDP2019USDMIL_D[which(GDP2019USDMIL_D$COUNTRY == "US"), ]
+
+# Weight of Japan in global factor
+GDP2019USDMIL_D[which(GDP2019USDMIL_D$COUNTRY == "Japan"), ]
+Japan_Weight <- GDP2019USDMIL_D[which(GDP2019USDMIL_D$COUNTRY == "Japan"), ]
+
+# Weight of Eurozone in global factor
+1-(US_Weight$weight + Japan_Weight$weight)
+EZ_Weight <- 1-(US_Weight$weight + Japan_Weight$weight)
 
 # glo_cds_weighted <- 
 a <- as.data.frame(c("Germany", "France"), c(100,40) )
@@ -3008,7 +3110,7 @@ em_fac_test <- matrix(NA, nrow=nrow(d_emcds), ncol = ncol(d_emcds) )
 
 
 
-# train test sample split -------------------------------------------------
+# train test sample split, full sample of 30 countries --------------------------
 ###training - test sample split
 pre.dat<-d_emcds[which(em_cds2$Date[-1]<"2019-06-30"),]
 post.dat<-d_emcds[which(em_cds2$Date[-1]>="2019-06-30"),]
@@ -3079,7 +3181,11 @@ p4a<-ggplot(data=pdat[-1,],aes(x=date,y=cumsum(EM_Avg_COVID)))+geom_line()+geom_
 p4a
 p4b<-ggplot(data=pdat[-1,],aes(x=date,y=cumsum(EM_Avg_COVID-EM_Pred_COVID)))+geom_line()+geom_line(aes(y=cumsum(EM_Avg_nCOVID-EM_Pred_nCOVID)),size=1)+theme_bw()+xlab("")+ylab("Cumulative Residuals")+labs(title="High Vs. Low COVID Moralities: Actual-Fitted")+geom_vline(xintercept=c(as.numeric(as.Date("2020-03-18")),as.numeric(as.Date("2020-06-04"))),alpha=.5)+annotate("text", x = c(as.POSIXct("2020-02-01"),as.POSIXct("2020-02-10")), y = c(.0,-.2), label = c("Low Mortality", "High Mortality") , fontface=c("bold","plain"))
 p4b
-grid.arrange(p,p2,p4a,p4b,nrow=2) #1000x700
+grid.arrange(p,p2,p4a,p4b,nrow=2)
+
+
+
+
 
 # Save plots
 jpeg("Plots/Figure8.jpg", width = 1920, height = 1080)
@@ -3475,6 +3581,25 @@ plot_grid(
 )
 dev.off()
 # grid.arrange(p4,p5,nrow=1)
+
+
+p5 <- arrange(InternationalReserves, Reserve_ratio_change_February_April_2020 ) %>%
+  mutate(COUNTRY = fct_reorder(COUNTRY, desc(Reserve_ratio_change_February_April_2020))) %>%
+  ggplot( aes(COUNTRY , Reserve_ratio_change_February_April_2020, label = Reserve_ratio_change_February_April_2020)) + 
+  # coord_flip() +
+  geom_bar(stat="identity", width=.90) + 
+  xlab("") + # Set axis labels
+  ylab("Change in int. reserves \n in March/April 2020 \n % of 2019 GDP") + 
+  guides(fill=FALSE) +
+  # ggtitle("Change in March/April 2020") + 
+  theme_minimal() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) 
+
+
+p5 
+pdf("Plots/absolutechange_reserves_march_april.pdf", width = 9, height = 4 )
+p5
+dev.off()
+
 # =========================================================================.
 
 
@@ -3587,8 +3712,6 @@ pdf("Plots/correlationcoefficients_actual_vs_fited_entire_period.pdf", width = 1
 p8
 dev.off()
 
-
-
 # Set threshold for correlation coefficients
 threshold <- 0.25
 
@@ -3606,7 +3729,7 @@ nrow(CountriesBelowThreshold_EntirePeriod)
 # View(countriesnotoverlapping2$COUNTRY)
 
 # Corr. coefficients between actual vs fitted values, pre-COVID pe --------
-# Create the individual figures of actual vs fitted of period before COVID
+# Create the individual figures of actual vs fitted of period before COVID for large sample of 30 countries
 colnames(pdat)[1] <- "date"
 pdat_before_COVID<-pdat[which(pdat$date < "2020-03-01"),]
 countriez<-colnames(pdat_before_COVID)[-1]
@@ -3616,9 +3739,10 @@ for(i in 1:(length(countriez)/2)) {
   plotdat[,-1]<-apply(plotdat[,-1],2,cumsum)
   country_lists2[[i]] <- ggplot(data=(plotdat), aes_string(x="date",y=colnames(plotdat)[2]))+geom_line()+theme_bw()+ylab("")+xlab(countriez[i])+geom_line(aes_string(x="date",y=colnames(plotdat)[3]),linetype=2)
 }
+do.call("grid.arrange", c(country_lists2)) 
 
 # Save output
-pdf("Plots/actualvsfitted_before_COVID_period.pdf", width = 16 )
+pdf("Plots/actualvsfitted_before_COVID_period_large_sample.pdf", width = 16 )
 do.call("grid.arrange", c(country_lists2)) 
 dev.off()
 
@@ -3647,7 +3771,7 @@ p9 <- arrange(CountryCorrelationCoefficients_before_COVID, Correlation_Coefficie
 p9
 
 # Save output
-pdf("Plots/correlationcoefficients_actual_vs_fited_before_COVID_period.pdf", width = 11.69, height = 8.27 )
+pdf("Plots/correlationcoefficients_actual_vs_fited_before_COVID_period_large_sample.pdf", width = 11.69, height = 8.27 )
 p9
 dev.off()
 
@@ -3657,15 +3781,87 @@ threshold <- 0.25
 
 CountriesAboveThreshold_BeforeCovid <- CountryCorrelationCoefficients_before_COVID[which(CountryCorrelationCoefficients_before_COVID$Correlation_Coefficient>threshold), ]
 CountriesBelowThreshold_BeforeCovid <- CountryCorrelationCoefficients_before_COVID[which(CountryCorrelationCoefficients_before_COVID$Correlation_Coefficient<threshold), ]
-# View(CountriesAboveThreshold_BeforeCovid$COUNTRY)
-# View(CountriesBelowThreshold_BeforeCovid$COUNTRY)
+CountriesAboveThreshold_BeforeCovid
+CountriesBelowThreshold_BeforeCovid
 nrow(CountriesAboveThreshold_BeforeCovid)
 nrow(CountriesBelowThreshold_BeforeCovid)
+
+
+# Corr. coefficients between actual vs fitted values, pre-COVID, for the reduced sample --------
+colnames(pdat)[1] <- "date"
+pdat_before_COVID<-pdat[which(pdat$date < "2020-03-01"),]
+dim(pdat_before_COVID)
+
+# countries to be removed or the graph of the reduced sample: 
+CountriesToDrop <- CountriesBelowThreshold_BeforeCovid$COUNTRY
+CountriesToRemain <- CountriesAboveThreshold_BeforeCovid$COUNTRY
+
+# making sure that date column is also maintained
+CountriesToRemain <- c("date", CountriesToRemain)
+n <- length(CountriesToRemain)
+
+library(data.table)
+vectortokeep <- (colnames(pdat_before_COVID) %like% paste(CountriesToRemain, collapse="|") )
+reducedsample_pdat_before_COVID <- pdat_before_COVID[, (vectortokeep) ] 
+dim(reducedsample_pdat_before_COVID)
+reducedsample_pdat_before_COVID
+
+# Create the individual figures of actual vs fitted of period before COVID for reduced sample of 20 countries
+countriez<-colnames(reducedsample_pdat_before_COVID)[-1]
+country_lists2<-list()
+for(i in 1:(length(countriez)/2)) {
+  plotdat<-reducedsample_pdat_before_COVID[-1,c(1,i+1,i+n)]
+  plotdat[,-1]<-apply(plotdat[,-1],2,cumsum)
+  country_lists2[[i]] <- ggplot(data=(plotdat), aes_string(x="date",y=colnames(plotdat)[2]))+geom_line()+theme_bw()+ylab("")+xlab(countriez[i])+geom_line(aes_string(x="date",y=colnames(plotdat)[3]),linetype=2)
+}
+do.call("grid.arrange", c(country_lists2)) 
+
+# Save output
+pdf("Plots/actualvsfitted_before_COVID_period_small_sample.pdf", width = 16 )
+do.call("grid.arrange", c(country_lists2)) 
+dev.off()
+
+
+colnames(pdat)[1] <- "date"
+pdat_before_COVID<-pdat[which(pdat$date < "2020-03-01"),]
+dim(pdat_before_COVID)
+
+# countries to be removed or the graph of the reduced sample: 
+CountriesToDrop <- CountriesBelowThreshold_BeforeCovid$COUNTRY
+CountriesToRemain <- CountriesAboveThreshold_BeforeCovid$COUNTRY
+
+# making sure that date column is also maintained
+CountriesToDrop <- c("date", CountriesToDrop)
+n <- length(CountriesToDrop)
+
+library(data.table)
+vectortokeep <- (colnames(pdat_before_COVID) %like% paste(CountriesToDrop, collapse="|") )
+reducedsample_pdat_before_COVID <- pdat_before_COVID[, (vectortokeep) ] 
+dim(reducedsample_pdat_before_COVID)
+reducedsample_pdat_before_COVID
+
+# Create the individual figures of actual vs fitted of period before COVID for reduced sample of 20 countries
+countriez<-colnames(reducedsample_pdat_before_COVID)[-1]
+country_lists2<-list()
+for(i in 1:(length(countriez)/2)) {
+  plotdat<-reducedsample_pdat_before_COVID[-1,c(1,i+1,i+n)]
+  plotdat[,-1]<-apply(plotdat[,-1],2,cumsum)
+  country_lists2[[i]] <- ggplot(data=(plotdat), aes_string(x="date",y=colnames(plotdat)[2]))+geom_line()+theme_bw()+ylab("")+xlab(countriez[i])+geom_line(aes_string(x="date",y=colnames(plotdat)[3]),linetype=2)
+}
+do.call("grid.arrange", c(country_lists2)) 
+
+# Save output
+pdf("Plots/actualvsfitted_before_COVID_period_deleted_countries.pdf", width = 16 )
+do.call("grid.arrange", c(country_lists2)) 
+dev.off()
+
+
+
 # =========================================================================.
 
 
 
-# Countries to drop -------------------------------------------------------
+# REDUCED SAMPLE: Countries to drop --------------------------------------------
 # From the previous analysis, it appears that 10 of the 30 countries would drop 
 # from the sample as they had a correlation coefficient between actual vs fitted
 # values in the pre-COVID period of below 0.25. These ten countries are: 
@@ -4180,7 +4376,7 @@ p4<-ggplot(data=pdat2,aes(x=Global,y=Fiscal))+geom_point(shape=21,size=3,fill="g
 p4
 p5<-ggplot(data=pdat2,aes(x=EM,y=Fiscal))+geom_point(shape=21,size=3,fill="grey")+theme_bw()+geom_text(aes(label=Country),hjust="inward", vjust="inward")+ylab("COVID Stimulus/GDP (%)")+xlab("Regional Beta")+stat_cor(method = "pearson", label.x = 1, label.y = 20)+geom_smooth(method="lm",se=F,color="red",linetype=2,size=.5)
 p5
-p7<-ggplot(data=pdat2,aes(x=Country,y=Fiscal))+geom_bar(stat="identity")+theme_bw()+theme(axis.text.x=element_text(angle = 60))+xlab("")+ylab("Fiscal Stimulus Announced (% of GDP)")
+p7<-ggplot(data=pdat2,aes(x=Country,y=Fiscal))+geom_bar(stat="identity")+theme_bw()+theme(axis.text.x=element_text(angle = 90))+xlab("")+ylab("Fiscal Stimulus Announced \n (% of GDP)")
 p7
 
 grid.arrange(p7,p4,p5,nrow=1)
@@ -4191,6 +4387,13 @@ pdf("Plots/Figure7.pdf", width = 18)
 grid.arrange(p7,p4,p5,nrow=1)
 dev.off()
 
+
+p7<-ggplot(data=pdat2,aes(x=reorder(Country, -Fiscal),y=Fiscal))+geom_bar(stat="identity")+theme_bw()+theme(axis.text.x=element_text(angle = 90))+xlab("")+ylab("Fiscal Stimulus Announced \n (% of GDP)")
+p7
+
+pdf("Plots/Figure7_only_fiscal.pdf", height =4, width = 9)
+p7
+dev.off()
 
 pdat3<-data.frame(names(pd3),pd3,colSums(post.dat[1:197,],na.rm=T),colSums(post.dat[1:197,]-predz[1:197,],na.rm=T))
 colnames(pdat3)<-c("country","pd","post","covidresid")
