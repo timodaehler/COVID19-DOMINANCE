@@ -46,6 +46,7 @@ h4 <- ggplot(InternationalReserves, aes(IR_GDP_ratio_April_2020)) +
   xlab("") + 
   ggtitle("End of April 2020") 
 
+library(cowplot)
 # Output
 title <- ggdraw() + 
   draw_label(
@@ -768,7 +769,7 @@ View(SWF_TS)
 dim(SWF_TS)
 
 # Here I add an id variable so that I can then later resphape the wide data into a long panel
-SWF_TS$id <- seq(from = 1, to = 548, by = 1 )
+SWF_TS$id <- seq(from = 1, to = 549, by = 1 )
 
 # Now I make it a dataframe such as to keep the index part of the data
 SWF_TS <- data.frame(Date=index(SWF_TS), coredata(SWF_TS))
@@ -891,7 +892,7 @@ View(SWFandPPF_TS)
 dim(SWFandPPF_TS)
 
 # Here I add an id variable so that I can then later resphape the wide data into a long panel
-SWFandPPF_TS$id <- seq(from = 1, to = 548, by = 1 )
+SWFandPPF_TS$id <- seq(from = 1, to = 549, by = 1 )
 
 # Now I make it a dataframe such as to keep the index part of the data
 SWFandPPF_TS <- data.frame(Date=index(SWFandPPF_TS), coredata(SWFandPPF_TS))

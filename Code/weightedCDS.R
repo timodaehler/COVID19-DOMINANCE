@@ -203,7 +203,8 @@ Temporary_Data_Country <- Temporary_Data_Country[myvarstemporary]
 # Temporary_Data_Country <- Sicherheitskopie 
 
 Temporary_Data_Country <- Temporary_Data_Country %>%
-  group_by(COUNTRY, Date) %>% summarise(Total_Cases_Country = sum(Confirmed_Cases), Total_Deceased_Country = sum(Deceased))
+  group_by(COUNTRY, Date) %>% mutate(Total_Cases_Country = sum(Confirmed_Cases), Total_Deceased_Country = sum(Deceased))
+
 
 # I next want to calculate the increase in deaths and confirmed cases per day.
 Temporary_Data_Country %>%
@@ -969,7 +970,10 @@ Final_Data_Country <- Final_Data_Country %>%
         = TRUE, reminder = FALSE)
 # =========================================================================.
 
-
+# Safetycopy.of.Final_Data_Country <- Final_Data_Country
+# Final_Data_Country <- Safetycopy.of.Final_Data_Country
+# library(writexl)
+# write_xlsx(Safetycopy.of.Final_Data_Country,"Data/Safetycopy.of.Final_Data_Country_3.1.2021.xlsx")
 
 # add coordinates data ----------------------------------------------------
 # Here, I add coordinates for each nation in the dataset.
@@ -1209,9 +1213,9 @@ Final_Data_Country <- Final_Data_Country[order(Final_Data_Country$COUNTRY, Final
 Final_Data_Country <- Final_Data_Country[order(Final_Data_Country$COUNTRY, Final_Data_Country$Date),]
 
 # Here, I integrate the Apple Mobility data. 
-mobility <- read.csv("https://covid19-static.cdn-apple.com/covid19-mobility-data/2012HotfixDev11/v3/en-us/applemobilitytrends-2020-07-12.csv")
+# mobility <- read.csv("https://covid19-static.cdn-apple.com/covid19-mobility-data/2012HotfixDev11/v3/en-us/applemobilitytrends-2020-07-12.csv")
 # You can also download it from online by changing the date in the following command
-# mobility <- read.csv("Data/applemobilitytrends.csv")
+mobility <- read.csv("Data/applemobilitytrends.csv")
 # mobility <- read.csv("https://covid19-static.cdn-apple.com/covid19-mobility-data/2012HotfixDev11/v3/en-us/applemobilitytrends-2020-07-12.csv")
 
 # First, we convert from wide to long format.
@@ -1771,6 +1775,8 @@ Final_Data_Country <- merge(Final_Data_Country, diseases, by = c("COUNTRY"), all
 Final_Data_Country <- Final_Data_Country[order(Final_Data_Country$COUNTRY, Final_Data_Country$Date),]
 # =========================================================================.
 
+# yetanothersafetycopyoffinaldatacountry <- Final_Data_Country
+# Final_Data_Country <- yetanothersafetycopyoffinaldatacountry
 
 
 # label variables ---------------------------------------------------------
@@ -1902,38 +1908,15 @@ unique(Final_Data_Country$COUNTRY)
 # saving Oxford_V1  --------------------------------------------------------
 Oxford_V1 <- Final_Data_Country
 View(Oxford_V1)
+ # safetycopynumber400orso <- Oxford_V1
+ # Oxford_V1 <- safetycopynumber400orso
+
 # Once the dataset "Oxford_V1" is created, a few variables still have to be added. However, these variables are hand-coded. 
 # Thus, I first export/save the dataset "Oxford_V1" and then manually add the variable in the exported excel sheet. 
 # Upon hand-coding, I then re-import the augmented sheet. 
 # =========================================================================.
 
-
-
-# IMPORTANT ---------------------------------------------------------------
-# 1. step: export dataframe
-# write_xlsx(Oxford_V1,"Data/Oxford_V1.xlsx")
-# 2. step: handcoding FED, ECB etc. dummy time series and saving it as "Oxford_V1_dummyts_additions.xlsx"
-# 3. step: importing additional dummy ts
-# Oxford_addition <- read_excel("Data/Oxford_V1_dummyts_additions.xlsx")
-# 4. step: merging Oxford_V1 with Oxford_addition and calling it mergedOxford
-# Oxford_V1 <- as_tibble(merge(Oxford_V1, Oxford_addition, by=c("COUNTRY", "Date")))
-# View(Oxford_V1)
-# 5. step: For future reference, I am gong to export the augmented dataset once so I have it again when I need it:
-# write_xlsx(Oxford_V1,"Data/Oxford_V1_augmented_3_8_2020.xlsx")
-# If I ever wanted to reimport the dataset instead of performing every step so far just use the line below
-# Oxford_V1 <- read_excel("Data/Oxford_V1_augmented_3_8_2020.xlsx")
-# =========================================================================.
-
-
-
 # Now, I calculate deaths per million.
-library(data.table)
-library(dplyr)
-library(writexl)
-library(readxl)
-
-
-
 # add population data in million ------------------------------------------
 # To calculate deaths per million, news sources divide the number of cumulative (total) deaths by the population size, measured in millions. Luxembourg and Malta have less than a million inhabitants, and thus I do not calculate deaths per million for these nations. Data was pulled from: https://www.statista.com/statistics/1104709/coronavirus-deaths-worldwide-per-million-inhabitants/.
 Mill_Pop <- read_excel("Data/Mill_Pop.xlsx")
@@ -1948,6 +1931,40 @@ Oxford_V1 <- Oxford_V1[order(Oxford_V1$COUNTRY, Oxford_V1$Date),]
 
 Oxford_V1$Total_Deaths_Per_Million = (Oxford_V1$Total_Deceased_Country / Oxford_V1$PopMil)
 # =========================================================================.
+
+
+# remove factor variables for government responses ------------------------
+Oxford_V1<-Oxford_V1 %>% dplyr::select(-contains("Flag"))
+Oxford_V1<-Oxford_V1 %>% dplyr::select(-contains("Lagged"))
+# Oxford_V1$latitude <- NULL
+# Oxford_V1$longitude <- NULL
+
+# IMPORTANT ---------------------------------------------------------------
+# 1. step: export dataframe
+# write_xlsx(Oxford_V1,"Data/Oxford_V1_4.1.2021.xlsx")
+# 2. step: handcoding FED, ECB etc. dummy time series and saving it as "Oxford_V1_dummyts_additions.xlsx"
+# 3. step: importing additional dummy ts
+# Oxford_addition <- read_excel("Data/Oxford_V1_dummyts_additions.xlsx")
+# 4. step: merging Oxford_V1 with Oxford_addition and calling it mergedOxford
+# Oxford_V1 <- as_tibble(merge(Oxford_V1, Oxford_addition, by=c("COUNTRY", "Date")))
+# View(Oxford_V1)
+# 5. step: For future reference, I am going to export the augmented dataset once so I have it again when I need it:
+# write_xlsx(Oxford_V1,"Data/Oxford_V1_augmented_4.1.2021.xlsx")
+# If I ever wanted to reimport the dataset instead of performing every step so far just use the line below
+# Oxford_V1 <- read_excel("Data/Oxford_V1_augmented_4.1.2021.xlsx")
+# =========================================================================.
+
+
+
+
+library(data.table)
+library(dplyr)
+library(writexl)
+library(readxl)
+
+
+
+
 
 
 
@@ -2026,11 +2043,7 @@ library(haven)
 
 
 
-# remove factor variables for government responses ------------------------
-Oxford_V1<-Oxford_V1 %>% dplyr::select(-contains("Flag"))
-Oxford_V1<-Oxford_V1 %>% dplyr::select(-contains("Lagged"))
-Oxford_V1$latitude <- NULL
-Oxford_V1$longitude <- NULL
+
 
 
 
@@ -3673,7 +3686,7 @@ grid.arrange(p5a,p5b,nrow=1)
 # grid.arrange(p5a,p5b,nrow=1)
 # dev.off()
 
-write.csv(data.frame(pdat$date,post.dat),"Data/covid_ez_spreads_weighted.csv")
+write.csv(data.frame(pdat$date,post.dat),"Data/covid_ez_spreads_weighted.csv") 
 write.csv(data.frame(pdat$date,predz),"Data/covid_ez_prediction_weighted.csv")
 
 corz<-c(0)
@@ -3863,7 +3876,7 @@ cds_5yr_prediction <- read.csv("data/covid_ez_prediction_weighted.csv", header =
 cds_5yr_actual <- read.csv("data/covid_ez_spreads_weighted.csv", header = T, sep = ',')
 
 oxford <- Oxford_V1
-oxford <- read_excel("Data/Oxford_V1.xlsx")
+# oxford <- read_excel("Data/Oxford_V1.xlsx")
 oxford <- oxford %>% dplyr::select(-contains("Flag"))
 oxford <- oxford %>% dplyr::select(-contains("Lagged"))
 colnames(oxford)[which(colnames(oxford) == "Total_Cases_Country")] <- "Total_Case"

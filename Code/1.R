@@ -1922,6 +1922,7 @@ Oxford_V2 <- Final_Data_Country
 # 3. step: removing non-augmented dataframe from R
 # remove(Oxford_V1)
 # 4. step: importing additional dummy ts
+# Oxford_V1 <- read_excel("Data/Oxford_V1.xlsx")
 Oxford_addition <- read_excel("Data/Oxford_V1_dummyts_additions.xlsx")
 # 5. step: merging Oxford_V1 with Oxford_addition and calling it mergedOxford
 Oxford_V1 <- as_tibble(merge(Oxford_V1, Oxford_addition, by=c("COUNTRY", "Date")))
@@ -2303,7 +2304,7 @@ Bottom5_Oxford_Death_Countries <- First_Death_April30increasing[1:5, "COUNTRY"]
 
 First_Death_High <- First_Death %>%
   dplyr::filter(COUNTRY %in% Top5_Mortality_Countries$COUNTRY)
-Plot_28D.1 <- ggplot(data = subset(First_Death_High, Date < as.Date("2020-06-30") & Date >= as.Date("2020-01-01") ), aes(x = Date, y = new_rolling_average_mortality * 100, color = COUNTRY, linetype = COUNTRY)) + geom_line() + theme_bw() + theme(axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("New Mortality Rate (%)") + theme(legend.title = element_blank()) + scale_x_date(date_labels = "%m-%Y")
+Plot_28D.1 <- ggplot(data = subset(First_Death_High, Date < as.Date("2020-06-30") & Date >= as.Date("2020-01-01") ), aes(x = as.Date(Date), y = new_rolling_average_mortality * 100, color = COUNTRY, linetype = COUNTRY)) + geom_line() + theme_bw() + theme(axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("New Mortality Rate (%)") + theme(legend.title = element_blank()) + scale_x_date(date_labels = "%m-%Y")
 Plot_28D.1 
 pdf(file = "Plots/top5mortalities_at_end_of_april.pdf", height = 4, width = 9)
 Plot_28D.1
@@ -2311,7 +2312,7 @@ dev.off()
 
 First_Death_Low <- First_Death %>%
   dplyr::filter(COUNTRY %in% Bottom5_Mortality_Countries$COUNTRY)
-Plot_28D.2 <- ggplot(data = subset(First_Death_Low, Date < as.Date("2020-06-30") & Date >= as.Date("2020-01-01") ), aes(x = Date, y = new_rolling_average_mortality * 100, color = COUNTRY, linetype = COUNTRY)) + geom_line() + theme_bw() + theme(axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("New Mortality Rate (%)") + theme(legend.title = element_blank()) + scale_x_date(date_labels = "%m-%Y")
+Plot_28D.2 <- ggplot(data = subset(First_Death_Low, Date < as.Date("2020-06-30") & Date >= as.Date("2020-01-01") ), aes(x = as.Date(Date), y = new_rolling_average_mortality * 100, color = COUNTRY, linetype = COUNTRY)) + geom_line() + theme_bw() + theme(axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("New Mortality Rate (%)") + theme(legend.title = element_blank()) + scale_x_date(date_labels = "%m-%Y")
 Plot_28D.2 
 pdf(file = "Plots/bottom5mortalities_at_end_of_april.pdf", height = 4, width = 9)
 Plot_28D.2
@@ -2319,7 +2320,7 @@ dev.off()
 
 First_Death_High_And_Low <- First_Death %>%
   dplyr::filter(  (COUNTRY %in% Top5_Mortality_Countries$COUNTRY) |  (COUNTRY %in% Bottom5_Mortality_Countries$COUNTRY)   )
-Plot_28D.A <- ggplot(data = subset(First_Death_High_And_Low, Date < as.Date("2020-06-30") & Date >= as.Date("2020-01-01") ), aes(x = Date, y = new_rolling_average_mortality * 100, color = COUNTRY, linetype = COUNTRY)) + geom_line() + theme_bw() + theme(axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("New Mortality Rate (%)") + theme(legend.title = element_blank()) + scale_x_date(date_labels = "%m-%Y")
+Plot_28D.A <- ggplot(data = subset(First_Death_High_And_Low, Date < as.Date("2020-06-30") & Date >= as.Date("2020-01-01") ), aes(x = as.Date(Date), y = new_rolling_average_mortality * 100, color = COUNTRY, linetype = COUNTRY)) + geom_line() + theme_bw() + theme(axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("New Mortality Rate (%)") + theme(legend.title = element_blank()) + scale_x_date(date_labels = "%m-%Y")
 Plot_28D.A 
 pdf(file = "Plots/top_and_bottom_5mortalities_at_end_of_april.pdf", height = 4, width = 9)
 Plot_28D.A
@@ -2328,7 +2329,7 @@ dev.off()
 
 Oxford_Death_High <- Oxford_V1 %>%
   dplyr::filter(COUNTRY %in% Top5_Oxford_Death_Countries$COUNTRY)
-Plot_28H <- ggplot(data = subset(Oxford_Death_High, Date < as.Date("2020-06-30") & Date >= as.Date("2020-01-01") ), aes(x = Date, y = Total_Deaths_Per_Million, color = COUNTRY, linetype = COUNTRY)) + geom_line() + theme_bw() + theme( axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("Total Deaths Per Million") + theme(legend.title = element_blank()) + scale_x_date(date_labels = "%m-%Y")
+Plot_28H <- ggplot(data = subset(Oxford_Death_High, Date < as.Date("2020-06-30") & Date >= as.Date("2020-01-01") ), aes(x = as.Date(Date), y = Total_Deaths_Per_Million, color = COUNTRY, linetype = COUNTRY)) + geom_line() + theme_bw() + theme( axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("Total Deaths Per Million") + theme(legend.title = element_blank()) + scale_x_date(date_labels = "%m-%Y")
 Plot_28H
 pdf(file = "Plots/top5deathspermillion_at_end_of_april.pdf", height = 4, width = 9)
 Plot_28H
@@ -2336,7 +2337,7 @@ dev.off()
 
 Oxford_Death_Low <- Oxford_V1 %>%
   dplyr::filter( COUNTRY %in% Bottom5_Oxford_Death_Countries$COUNTRY  )
-Plot_28J <- ggplot(data = subset(Oxford_Death_Low, Date < as.Date("2020-06-30") & Date >= as.Date("2020-01-01") ), aes(x = Date, y = Total_Deaths_Per_Million, color = COUNTRY, linetype = COUNTRY)) + geom_line() + theme_bw() + theme( axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("Total Deaths Per Million") + theme(legend.title = element_blank()) + scale_x_date(date_labels = "%m-%Y")
+Plot_28J <- ggplot(data = subset(Oxford_Death_Low, Date < as.Date("2020-06-30") & Date >= as.Date("2020-01-01") ), aes(x = as.Date(Date), y = Total_Deaths_Per_Million, color = COUNTRY, linetype = COUNTRY)) + geom_line() + theme_bw() + theme( axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("Total Deaths Per Million") + theme(legend.title = element_blank()) + scale_x_date(date_labels = "%m-%Y")
 Plot_28J
 pdf(file = "Plots/bottom5deathspermillion_at_end_of_april.pdf", height = 4, width = 9)
 Plot_28J
@@ -2344,12 +2345,12 @@ dev.off()
 
 Oxford_Death_Medium <- Oxford_V1 %>%
   dplyr::filter( !(     (COUNTRY %in% Top5_Oxford_Death_Countries$COUNTRY)  | (COUNTRY %in% Bottom5_Oxford_Death_Countries$COUNTRY)  )        )
-Plot_28I <- ggplot(data = Oxford_Death_Medium, aes(x = Date, y = Total_Deaths_Per_Million, color = COUNTRY, linetype = COUNTRY)) + geom_line() + theme_bw() + theme( axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("Total Deaths Per Million") + scale_x_date(date_labels = "%m-%Y")
+Plot_28I <- ggplot(data = Oxford_Death_Medium, aes(x = as.Date(Date), y = Total_Deaths_Per_Million, color = COUNTRY, linetype = COUNTRY)) + geom_line() + theme_bw() + theme( axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("Total Deaths Per Million") + scale_x_date(date_labels = "%m-%Y")
 Plot_28I
 
 Oxford_Death_High_And_Low <- Oxford_V1 %>%
   dplyr::filter( (COUNTRY %in% Bottom5_Oxford_Death_Countries$COUNTRY) | (COUNTRY %in% Top5_Oxford_Death_Countries$COUNTRY) )
-Plot_28K <- ggplot(data = subset(Oxford_Death_High_And_Low, Date < as.Date("2020-06-30") & Date >= as.Date("2020-01-01") ), aes(x = Date, y = Total_Deaths_Per_Million, color = COUNTRY, linetype = COUNTRY)) + geom_line() + theme_bw() + theme( axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("Total Deaths Per Million") + theme(legend.title = element_blank()) + scale_x_date(date_labels = "%m-%Y")
+Plot_28K <- ggplot(data = subset(Oxford_Death_High_And_Low, Date < as.Date("2020-06-30") & Date >= as.Date("2020-01-01") ), aes(x = as.Date(Date), y = Total_Deaths_Per_Million, color = COUNTRY, linetype = COUNTRY)) + geom_line() + theme_bw() + theme( axis.title.y=element_text(size=9), axis.title.x=element_blank()) + ylab("Total Deaths Per Million") + theme(legend.title = element_blank()) + scale_x_date(date_labels = "%m-%Y")
 Plot_28K
 pdf(file = "Plots/top_and_bottom5deathspermillion_at_end_of_april.pdf", height = 4, width = 9)
 Plot_28K
@@ -3173,13 +3174,13 @@ pdat<-data.frame(em_cds2$Date[which(em_cds2$Date>="2019-06-30")], # date
                  apply(apply(post.dat,2,cumsum),1,sd)) # EM_SD
 colnames(pdat)<-c("date","EM_Avg", "Developed_Avg", "EM_Avg_COVID", "EM_Avg_nCOVID", "EM_Pred", "Developed_Pred", "EM_Pred_COVID","EM_Pred_nCOVID","EM_SD")
 
-p<-ggplot(data=pdat[-1,],aes(x=date,y=cumsum(EM_Avg)))+geom_line()+geom_line(aes(y=cumsum(EM_Pred)),linetype=2)+theme_bw()+xlab("")+ylab("Cumulative Change (Log CDS)")+ggtitle("Emerging Markets Average CDS Spreads, Out-of-Sample Period")+geom_vline(xintercept = c(as.numeric(as.Date("2020-03-18")),as.numeric(as.Date("2020-06-04"))),alpha=.5)
+p<-ggplot(data=pdat[-1,],aes(x=date,y=cumsum(EM_Avg)))+geom_line()+geom_line(aes(y=cumsum(EM_Pred)),linetype=2)+theme_bw()+xlab("")+ylab("Cumulative Change (Log CDS)")+ggtitle("EM Average CDS Spreads, Out-of-Sample Period")+geom_vline(xintercept = c(as.numeric(as.Date("2020-03-18")),as.numeric(as.Date("2020-06-04"))),alpha=.5)+annotate("text", x = c(as.POSIXct("2020-04-20"),as.POSIXct("2020-04-20")), y = c(.75,0.35), label = c("Actual", "Predicted") , fontface=c("bold","plain"))
 p
-p2<-ggplot(data=pdat[-1,],aes(x=date,y=EM_SD))+geom_line()+theme_bw()+xlab("")+ylab("Standard Deviation")+ggtitle("Emerging Markets CDS Spreads Dispersion")+geom_vline(xintercept = c(as.numeric(as.Date("2020-03-18")),as.numeric(as.Date("2020-06-04"))),alpha=.5)
+p2<-ggplot(data=pdat[-1,],aes(x=date,y=EM_SD))+geom_line()+theme_bw()+xlab("")+ylab("Standard Deviation")+ggtitle("EM CDS Spreads Dispersion")+geom_vline(xintercept = c(as.numeric(as.Date("2020-03-18")),as.numeric(as.Date("2020-06-04"))),alpha=.5)
 p2
-p4a<-ggplot(data=pdat[-1,],aes(x=date,y=cumsum(EM_Avg_COVID)))+geom_line()+geom_line(aes(y=cumsum(EM_Avg_nCOVID)),size=1)+theme_bw()+xlab("")+ylab("Cumulative Change (Log CDS)")+ggtitle("High Vs. Low COVID Moralities: Actual")  + annotate(geom ="text", x = c(as.POSIXct("2020-01-25"),as.POSIXct("2020-01-25")  ), y = c(.4,.1), label = c("Low Mortality", "High Mortality") , fontface=c("bold","plain"))
+p4a<-ggplot(data=pdat[-1,],aes(x=date,y=cumsum(EM_Avg_COVID)))+geom_line()+geom_line(aes(y=cumsum(EM_Avg_nCOVID)),size=1)+theme_bw()+xlab("")+ylab("Cumulative Change (Log CDS)")+ggtitle("High Vs. Low COVID Mortalities: Actual")  + annotate(geom ="text", x = c(as.POSIXct("2020-01-20"),as.POSIXct("2020-04-15")  ), y = c(.4,-.25), label = c("Low Mortality", "High Mortality") , fontface=c("bold","plain"))
 p4a
-p4b<-ggplot(data=pdat[-1,],aes(x=date,y=cumsum(EM_Avg_COVID-EM_Pred_COVID)))+geom_line()+geom_line(aes(y=cumsum(EM_Avg_nCOVID-EM_Pred_nCOVID)),size=1)+theme_bw()+xlab("")+ylab("Cumulative Residuals")+labs(title="High Vs. Low COVID Moralities: Actual-Fitted")+geom_vline(xintercept=c(as.numeric(as.Date("2020-03-18")),as.numeric(as.Date("2020-06-04"))),alpha=.5)+annotate("text", x = c(as.POSIXct("2020-02-01"),as.POSIXct("2020-02-10")), y = c(.0,-.2), label = c("Low Mortality", "High Mortality") , fontface=c("bold","plain"))
+p4b<-ggplot(data=pdat[-1,],aes(x=date,y=cumsum(EM_Avg_COVID-EM_Pred_COVID)))+geom_line()+geom_line(aes(y=cumsum(EM_Avg_nCOVID-EM_Pred_nCOVID)),size=1)+theme_bw()+xlab("")+ylab("Cumulative Residuals")+labs(title="High Vs. Low COVID Mortalities: Actual-Fitted")+geom_vline(xintercept=c(as.numeric(as.Date("2020-03-18")),as.numeric(as.Date("2020-06-04"))),alpha=.5)+annotate("text", x = c(as.POSIXct("2020-02-01"),as.POSIXct("2020-02-10")), y = c(.0,-.2), label = c("Low Mortality", "High Mortality") , fontface=c("bold","plain"))
 p4b
 grid.arrange(p,p2,p4a,p4b,nrow=2)
 
@@ -4089,7 +4090,7 @@ SWF_TS <- SWF_TS[, ! colnames(SWF_TS) %in% c("foo")]
 # dim(SWF_TS)
 
 # Here I add an id variable so that I can then later resphape the wide data into a long panel
-SWF_TS$id <- seq(from = 1, to = 548, by = 1 )
+SWF_TS$id <- seq(from = 1, to = 549, by = 1 )
 
 # Now I make it a dataframe such as to keep the index part of the data
 SWF_TS <- data.frame(Date=index(SWF_TS), coredata(SWF_TS))
@@ -4213,7 +4214,7 @@ SWFandPPF_TS <- SWFandPPF_TS[, ! colnames(SWFandPPF_TS) %in% c("foo")]
 # dim(SWFandPPF_TS)
 
 # Here I add an id variable so that I can then later resphape the wide data into a long panel
-SWFandPPF_TS$id <- seq(from = 1, to = 548, by = 1 )
+SWFandPPF_TS$id <- seq(from = 1, to = 549, by = 1 )
 
 # Now I make it a dataframe such as to keep the index part of the data
 SWFandPPF_TS <- data.frame(Date=index(SWFandPPF_TS), coredata(SWFandPPF_TS))
@@ -4239,7 +4240,7 @@ dim(SWFandPPF_TS_long)
 # merged_test_3 <- merge(panel, SWFandPPF_TS_long, by=c("Country", "Date"), all.x=TRUE)
 # View(merged_test_3)
 
-SWF1 <- ggplot(SWF, aes(COUNTRY, SWF_GDP_RATIO, label = SWF_GDP_RATIO)) +
+SWF1 <- ggplot(SWF_TS_long, aes(Country, SWF_GDP_ratio, label = SWF_GDP_ratio)) +
   coord_flip() +
   geom_bar(stat="identity", width=.90) + 
   xlab("") + # Set axis labels
@@ -4249,7 +4250,7 @@ SWF1 <- ggplot(SWF, aes(COUNTRY, SWF_GDP_RATIO, label = SWF_GDP_RATIO)) +
 SWF1 <- SWF1  + ggtitle("Sovereign Wealth Fund / GDP ratio")
 SWF1
 
-SWFandPPF1 <- ggplot(SWFandPPF, aes(COUNTRY, SWFandPPF_GDP_RATIO, label = SWFandPPF_GDP_RATIO)) +
+SWFandPPF1 <- ggplot(SWFandPPF_TS_long, aes(Country, SWFandPPF_GDP_ratio, label = SWFandPPF_GDP_ratio)) +
   coord_flip() +
   geom_bar(stat="identity", width=.90) + 
   xlab("") + # Set axis labels
@@ -4341,6 +4342,8 @@ colnames(pdat)<-c("PD","Intercept","AR","Global","EM","countries")
 
 p<-ggplot(data=pdat,aes(x=PD,y=Global))+geom_point(shape=21,fill="grey",size=3)+theme_bw()+geom_text(aes(label=countries),hjust="inward", vjust="inward")+xlab("Public Debt/GDP (%)")+ylab("Global Beta")+stat_cor(method = "pearson", label.x = 40, label.y = -3)+geom_smooth(method="lm",se=F,color="red",linetype=2,size=.5)
 p
+p_handcoded <- ggplot(data=pdat,aes(x=PD,y=Global))+geom_point(shape=21,fill="grey",size=3)+theme_bw()+geom_text(aes(label=countries),hjust="inward", vjust="inward")+xlab("Public Debt/GDP (%)")+ylab("Global Beta")+geom_smooth(method="lm",se=F,color="red",linetype=2,size=.5) + annotate(geom ="text", x = c(50), y = c(-.2), label = c("R = 0.25, p = 0.18") , fontface=c("plain") )
+p_handcoded
 # # Save plot
 # jpeg("Plots/Figure6a.jpg", width = 1920, height = 1080)
 # p
@@ -4351,6 +4354,8 @@ p
 
 p2<-ggplot(data=pdat,aes(x=PD,y=EM))+geom_point(shape=21,fill="grey",size=3)+theme_bw()+geom_text(aes(label=countries),hjust="inward", vjust="inward")+xlab("Public Debt/GDP (%)")+ylab("Regional Beta")+stat_cor(method = "pearson", label.x = 45, label.y = 1.9)+geom_smooth(method="lm",se=F,color="red",linetype=2,size=.5)
 p2
+p2_handcoded <- ggplot(data=pdat,aes(x=PD,y=EM))+geom_point(shape=21,fill="grey",size=3)+theme_bw()+geom_text(aes(label=countries),hjust="inward", vjust="inward")+xlab("Public Debt/GDP (%)")+geom_smooth(method="lm",se=F,color="red",linetype=2,size=.5) + annotate(geom ="text", x = c(45), y = c(1.9), label = c("R = 0.36, p = 0.05") , fontface=c("plain") )
+p2_handcoded
 # # Save plot
 # jpeg("Plots/Figure6b.jpg", width = 1920, height = 1080)
 # p2
@@ -4359,13 +4364,13 @@ p2
 # p2
 # dev.off()
 
-grid.arrange(p,p2,nrow=1)
+grid.arrange(p_handcoded,p2_handcoded,nrow=1)
 # Save plot
 jpeg("Plots/Figure6.jpg", width = 1920, height = 1080)
-grid.arrange(p,p2,nrow=1)
+grid.arrange(p_handcoded,p2_handcoded,nrow=1)
 dev.off()
 pdf("Plots/Figure6.pdf", width = 16)
-grid.arrange(p,p2,nrow=1)
+grid.arrange(p_handcoded,p2_handcoded,nrow=1)
 dev.off()
 
 
