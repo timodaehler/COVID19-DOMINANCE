@@ -1,0 +1,723 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title></title><META http-equiv="Content-Type" content="text/html; charset=utf-8" /></head><body><table align="center"><tr><td colspan="6"><center><b>List of importers for the selected product </b></center></td></tr><tr><td colspan="6"><center>   Product: 2709 Petroleum oils and oils obtained from bituminous minerals, crude</center></td></tr></table><table><tr><td> </td></tr></table><table id="ctl00_PageContent_GridLegendTable" class="table_legend" border="0">
+	<tr>
+		<td>Sources: ITC calculations based on UN COMTRADE and ITC statistics.</td>
+	</tr><tr>
+		<td>The world aggregation represents the sum of reporting and non reporting countries  </td>
+	</tr><tr>
+		<td>Data based on the partner reported data (Mirror data) are shown in orange </td>
+	</tr><tr>
+		<td></td>
+	</tr><tr>
+		<td></td>
+	</tr><tr>
+		<td></td>
+	</tr><tr>
+		<td></td>
+	</tr>
+</table><table><tr><td> </td></tr></table><table id="ctl00_PageContent_GridLabelUnitTable" border="0">
+	<tr>
+		<td><span id="ctl00_PageContent_Label_Unit" class="Comment">Unit : US Dollar thousand</span></td>
+	</tr>
+</table><table><tr><td> </td></tr></table><div>
+	<table cellspacing="0" cellpadding="4" rules="all" border="1" id="ctl00_PageContent_MyGridView1" style="color:#002B54;border-color:#002B54;width:100%;border-collapse:collapse;">
+		<tr style="color:White;background-color:#5D7B9D;font-size:80%;font-weight:bold;">
+			<th scope="col">Importers</th><th scope="col">Imported value in 2017</th><th scope="col">Imported value in 2018</th><th scope="col">Imported value in 2019</th>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td title="The world aggregation represents the sum of reporting and non reporting countries  " align="left" style="width:30%;">
+                            World
+                                </td><td title="The data aggregated are mirror and direct data" style="color:BlueViolet;border-color:#002B54;">885963067</td><td title="The data aggregated are mirror and direct data" style="color:BlueViolet;border-color:#002B54;">1188561044</td><td title="The data aggregated are mirror and direct data" style="color:BlueViolet;border-color:#002B54;">1067098277</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            China
+                                </td><td>162191057</td><td>239222367</td><td>238707061</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            United States of America
+                                </td><td>139287630</td><td>162801503</td><td>132370663</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            India
+                                </td><td>82065030</td><td>115082789</td><td>101948597</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Japan
+                                </td><td>63771259</td><td>80676236</td><td>73085389</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Korea, Republic of
+                                </td><td>59595047</td><td>80374087</td><td>70193489</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Germany
+                                </td><td>36231014</td><td>45086740</td><td>40738077</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Netherlands
+                                </td><td>28398193</td><td>35848721</td><td>34062713</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Spain
+                                </td><td>25756723</td><td>34198938</td><td>29994413</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Italy
+                                </td><td>26123354</td><td>32571120</td><td>29131881</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            United Kingdom
+                                </td><td>20710133</td><td>26347851</td><td>24535365</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            France
+                                </td><td>23853234</td><td>28462368</td><td>24446306</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Singapore
+                                </td><td>21405724</td><td>27968565</td><td>24224539</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Thailand
+                                </td><td>20035155</td><td>28452518</td><td>22284239</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Taipei, Chinese
+                                </td><td>16836698</td><td>23346537</td><td>21326199</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Belgium
+                                </td><td>15244586</td><td>19466573</td><td>18451320</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Canada
+                                </td><td>12792054</td><td>14837108</td><td>14275027</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Poland
+                                </td><td>8996682</td><td>14500512</td><td>11966872</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Greece
+                                </td><td>8657014</td><td>12426263</td><td>10479290</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            South Africa
+                                </td><td>6417550</td><td>10923569</td><td>8840167</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Australia
+                                </td><td>7234116</td><td>10253681</td><td>8615668</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Sweden
+                                </td><td>7739844</td><td>10547441</td><td>8117075</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Belarus
+                                </td><td>5338082</td><td>6822678</td><td>6580854</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Malaysia
+                                </td><td>3953902</td><td>5724763</td><td>6461097</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Israel
+                                </td><td>4483113</td><td>6126655</td><td>5978970</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Finland
+                                </td><td>4921129</td><td>6531172</td><td>5802468</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Indonesia
+                                </td><td>7063600</td><td>9161335</td><td>5704589</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Portugal
+                                </td><td>5548689</td><td>7186604</td><td>5437115</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Bahrain
+                                </td><td>4246244</td><td>5721285</td><td>5333652</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Brazil
+                                </td><td>2966954</td><td>5042501</td><td>4651642</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Lithuania
+                                </td><td>3887804</td><td>4898313</td><td>4409899</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Panama
+                                </td><td>0</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">4114077</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">4243731</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Austria
+                                </td><td>3046250</td><td>4533132</td><td>4228948</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Romania
+                                </td><td>3031791</td><td>4256037</td><td>4102503</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Chile
+                                </td><td>3219955</td><td>4120398</td><td>4096985</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Pakistan
+                                </td><td>3139637</td><td>4922447</td><td>3913908</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Viet Nam
+                                </td><td>645539</td><td>2914298</td><td>3809033</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Czech Republic
+                                </td><td>3178126</td><td>3967919</td><td>3740778</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Philippines
+                                </td><td>3476644</td><td>5160572</td><td>3468523</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Bulgaria
+                                </td><td>2640926</td><td>2969219</td><td>3111644</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            United Arab Emirates
+                                </td><td>33145</td><td>2498579</td><td>2960404</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Egypt
+                                </td><td>1750712</td><td>3562761</td><td>2909011</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Hungary
+                                </td><td>2276633</td><td>3207589</td><td>2880184</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            New Zealand
+                                </td><td>2217112</td><td>2880906</td><td>2807741</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Peru
+                                </td><td>2470827</td><td>2871995</td><td>2476082</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Denmark
+                                </td><td>2048916</td><td>2573135</td><td>2412864</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Slovakia
+                                </td><td>1908988</td><td>2762668</td><td>2293374</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Norway
+                                </td><td>657463</td><td>1727949</td><td>1545006</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Côte d'Ivoire
+                                </td><td>812443</td><td>1548771</td><td>1485570</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Ireland
+                                </td><td>1392469</td><td>1634641</td><td>1325705</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Switzerland
+                                </td><td>1153718</td><td>1656954</td><td>1308835</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Brunei Darussalam
+                                </td><td>38</td><td>4</td><td>1159197</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Jordan
+                                </td><td>1094049</td><td>1233548</td><td>1101500</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Serbia
+                                </td><td>934161</td><td>1388487</td><td>1012865</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Uruguay
+                                </td><td>280418</td><td>1182400</td><td>990612</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Croatia
+                                </td><td>1097180</td><td>1524954</td><td>961731</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Jamaica
+                                </td><td>405460</td><td>516499</td><td>634621</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Dominican Republic
+                                </td><td>414442</td><td>680795</td><td>599444</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Zambia
+                                </td><td>428133</td><td>433063</td><td>504747</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Ukraine
+                                </td><td>441057</td><td>433374</td><td>412401</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Senegal
+                                </td><td>519820</td><td>680953</td><td>403322</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Cameroon
+                                </td><td>221456</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">225516</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">347344</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Nicaragua
+                                </td><td>255278</td><td>397616</td><td>267439</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Bahamas
+                                </td><td>4</td><td>14</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">242710</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Gibraltar
+                                </td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">305772</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">147368</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">231639</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Azerbaijan
+                                </td><td>18205</td><td>53764</td><td>191347</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Colombia
+                                </td><td>19</td><td>79546</td><td>143887</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Qatar
+                                </td><td>77</td><td>476</td><td>130668</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Papua New Guinea
+                                </td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">76373</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">253583</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">125655</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Uzbekistan
+                                </td><td>131779</td><td>261282</td><td>100546</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Dominica
+                                </td><td></td><td></td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">62547</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Slovenia
+                                </td><td>0</td><td>0</td><td>42942</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Curaçao
+                                </td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">213498</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">722148</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">38505</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Afghanistan
+                                </td><td>33202</td><td>54742</td><td>34372</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Mexico
+                                </td><td>110</td><td>74874</td><td>20592</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Tunisia
+                                </td><td>325058</td><td>299578</td><td>18371</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Kazakhstan
+                                </td><td>13302</td><td>9865</td><td>11138</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Tajikistan
+                                </td><td>3243</td><td>6625</td><td>7012</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Georgia
+                                </td><td>64</td><td>595</td><td>5663</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Trinidad and Tobago
+                                </td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">1015603</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">924865</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">5431</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Lao People's Democratic Republic
+                                </td><td>2179</td><td>2897</td><td>3201</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Pitcairn
+                                </td><td></td><td></td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">2254</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Fiji
+                                </td><td>672</td><td>1858</td><td>1568</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Latvia
+                                </td><td>592</td><td>606</td><td>1553</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Ecuador
+                                </td><td>5463</td><td>34376</td><td>1018</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Luxembourg
+                                </td><td>24</td><td>34</td><td>682</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Namibia
+                                </td><td>3727</td><td>313</td><td>616</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Palestine, State of
+                                </td><td>626</td><td>771</td><td>526</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Kyrgyzstan
+                                </td><td>445</td><td>651</td><td>502</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Bosnia and Herzegovina
+                                </td><td>329641</td><td>361165</td><td>342</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Ethiopia
+                                </td><td>165</td><td>144</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">253</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Guatemala
+                                </td><td>184</td><td>345</td><td>236</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Mozambique
+                                </td><td>80</td><td>75</td><td>213</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Estonia
+                                </td><td>16410</td><td>2159</td><td>203</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Kiribati
+                                </td><td></td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">9</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">170</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Oman
+                                </td><td>0</td><td>2</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">122</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            New Caledonia
+                                </td><td></td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">222</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">120</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Samoa
+                                </td><td>0</td><td>103</td><td>108</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Tokelau
+                                </td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">10</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">6</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">88</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Russian Federation
+                                </td><td>52825</td><td>64247</td><td>81</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Iraq
+                                </td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">1648</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">1321</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">60</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Cuba
+                                </td><td>1126551</td><td>1591726</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">54</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Marshall Islands
+                                </td><td></td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">25</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">53</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Togo
+                                </td><td>0</td><td>0</td><td>44</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Ghana
+                                </td><td>53</td><td>5</td><td>41</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Paraguay
+                                </td><td>71</td><td>65</td><td>37</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Lesotho
+                                </td><td>70</td><td>30</td><td>37</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Eswatini
+                                </td><td>26</td><td>10</td><td>34</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Cambodia
+                                </td><td>1</td><td>0</td><td>33</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Sudan
+                                </td><td>64404</td><td>49586</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">30</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Tonga
+                                </td><td></td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">34</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">25</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Nepal
+                                </td><td>87</td><td>11</td><td>25</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Vanuatu
+                                </td><td></td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">9</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">25</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Libya, State of
+                                </td><td></td><td>0</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">24</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Guyana
+                                </td><td>1</td><td>3</td><td>17</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Ship stores and bunkers
+                                </td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">1</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">100</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">17</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Angola
+                                </td><td>23</td><td>1</td><td>14</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Mauritania
+                                </td><td>0</td><td>39</td><td>14</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Zimbabwe
+                                </td><td>55</td><td>141</td><td>12</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            El Salvador
+                                </td><td>37</td><td>68</td><td>12</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Costa Rica
+                                </td><td>26</td><td>29</td><td>12</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Benin
+                                </td><td>104</td><td>193</td><td>11</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Andorra
+                                </td><td>0</td><td>0</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">11</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Comoros
+                                </td><td>9</td><td>26</td><td>10</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Seychelles
+                                </td><td>0</td><td>0</td><td>9</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Uganda
+                                </td><td>28</td><td>17</td><td>8</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Syrian Arab Republic
+                                </td><td></td><td></td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">7</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Botswana
+                                </td><td>183</td><td>37</td><td>7</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Iceland
+                                </td><td>1</td><td>5</td><td>6</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Malawi
+                                </td><td>12</td><td>5</td><td>5</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Gabon
+                                </td><td></td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">49719</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">3</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Congo, Democratic Republic of the
+                                </td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">1</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">863</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">2</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Cook Islands
+                                </td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">17</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">11</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">2</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Kenya
+                                </td><td>0</td><td>2</td><td>2</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Madagascar
+                                </td><td>0</td><td>0</td><td>1</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Morocco
+                                </td><td>2</td><td>0</td><td>1</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Antigua and Barbuda
+                                </td><td>1</td><td>1</td><td>1</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Myanmar
+                                </td><td>36</td><td>11</td><td>1</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Tanzania, United Republic of
+                                </td><td>0</td><td>2</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">1</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Burkina Faso
+                                </td><td>0</td><td>2</td><td>0</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Congo
+                                </td><td>6</td><td>7891</td><td>0</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Argentina
+                                </td><td>455188</td><td>199103</td><td>0</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Bolivia, Plurinational State of
+                                </td><td>1</td><td>0</td><td>0</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Rwanda
+                                </td><td>57</td><td>0</td><td>0</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Saint Lucia
+                                </td><td>17</td><td>1</td><td>0</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Mali
+                                </td><td>0</td><td>164</td><td>0</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Malta
+                                </td><td>0</td><td>1</td><td>0</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Mongolia
+                                </td><td>0</td><td>28</td><td>0</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Moldova, Republic of
+                                </td><td>577</td><td>42</td><td>0</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Lebanon
+                                </td><td>0</td><td>1</td><td>0</td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Honduras
+                                </td><td>0</td><td>1</td><td>0</td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Korea, Democratic People's Republic of
+                                </td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">76</td><td></td><td></td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Liberia
+                                </td><td>26</td><td></td><td></td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            St. Pierre and Miquelon
+                                </td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">2</td><td></td><td></td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Saint Helena
+                                </td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">1</td><td></td><td></td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Saint Kitts and Nevis
+                                </td><td>8</td><td></td><td></td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Somalia
+                                </td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">4321</td><td></td><td></td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Guinea-Bissau
+                                </td><td>2</td><td>2</td><td></td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Bangladesh
+                                </td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">2968</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">24</td><td></td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            British Indian Ocean Territory
+                                </td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">27656</td><td></td><td></td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Solomon Islands
+                                </td><td>220</td><td>9</td><td></td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Algeria
+                                </td><td>13</td><td></td><td></td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Cayman Islands
+                                </td><td></td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">1</td><td></td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Sri Lanka
+                                </td><td>602846</td><td></td><td></td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Chad
+                                </td><td></td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">33428</td><td></td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Djibouti
+                                </td><td></td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">226</td><td></td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Haiti
+                                </td><td>5</td><td></td><td></td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Guinea
+                                </td><td></td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">26861</td><td></td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Grenada
+                                </td><td></td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">1</td><td></td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Yemen
+                                </td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">5259</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">59</td><td></td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            United States Minor Outlying Islands
+                                </td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">23958</td><td></td><td></td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Venezuela, Bolivarian Republic of
+                                </td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">1</td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">47747</td><td></td>
+		</tr><tr align="right" style="background-color:#F7F6F3;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            West Asia not elsewhere specified
+                                </td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">152658</td><td></td><td></td>
+		</tr><tr align="right" style="background-color:White;font-size:80%;">
+			<td align="left" style="width:30%;">
+                            Turkmenistan
+                                </td><td title="Mirror data" style="color:Goldenrod;border-color:#002B54;">1</td><td></td><td></td>
+		</tr>
+	</table>
+</div></body></html>
