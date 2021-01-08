@@ -518,21 +518,148 @@ ExportData$Exports2016[is.na(ExportData$Exports2016)] <- 0
 # Now I sum up all the shars of a country's partners for 2016. 
 Sumofexportshares <- aggregate(Exports2016 ~ Exporter, ExportData, sum)
 colnames(Sumofexportshares) <- c("Exporter", "SumofExportsharsof2016")
-
+# Now I add the sums to the dataset
 ExportData <- left_join(ExportData, Sumofexportshares, by = c("Exporter" = "Exporter")  ) 
-
+# Now I divide a parntner's share by the total of the partners' shares
+# This gives me the weight for each partner which is proportional to that partner's share of trade
+# compared to all trade with the 29 partners.
 ExportData <- ExportData %>%
 mutate(Shareoftotalexports = (Exports2016 / SumofExportsharsof2016) )
-view(ExportData)
-
-
+# summary(ExportData)
+# a <-order(ExportData$Shareoftotalexports, decreasing =T)
+# view(ExportData[a,])
+# Now I subset for the needed data:
 ExportData <- ExportData[, c("Exporter", "Partner", "Shareoftotalexports")]
 # aggregate(Shareoftotalexports ~ Exporter, ExportData, sum) # works
 
 
 
 
+# Now I start creating the weighted log CDS changes by multiplying the weights with the log CDS changes of all partners on a daily basis
+my_data.frame <- as.data.frame(unique(panel_for_revised_paper$Country) )
+mynewlist <-  list()
+for(i in 1:nrow(my_data.frame) ) {   
+  NameofExporter <- my_data.frame[i,1]
+  testpanel <- panel_for_revised_paper[panel_for_revised_paper$Country != NameofExporter, c("Date", "Country", "changes.log.CDS")]
+  CDS <- as.data.frame(spread(testpanel, Country, changes.log.CDS))
+  Weights <- spread(ExportData[ExportData$Exporter == NameofExporter , ], Partner, Shareoftotalexports   )
+  # Weights <- as.data.frame(lapply(Weights, rep, 2373))
+  temp <- rowSums(data.frame(  mapply(`*`,CDS[, -c(1)], Weights[, -c(1)]  )    ) )
+  mynewlist[[NameofExporter]] <- temp
+}
 
+# Create a safetycopy
+# outputofloop <-mynewlist
+# mynewlist <- outputofloop
+
+
+# Stack each list element into one dataframe.
+WeightedCDSdata  <- NULL
+for(i in 1:nrow(my_data.frame) ) { 
+  name <- my_data.frame[i,1]
+  tmp <- as.data.frame(mynewlist[[i]] )
+  WeightedCDSdata <- dplyr::bind_rows(WeightedCDSdata, tmp)  }
+# Rename the column of the dataframe so that it then looks good when appended to paneo_for_revised_paper
+colnames(WeightedCDSdata) <- "trade_share_weighed_log_CDS_changes_of_29_peers"
+# copyblabla <- panel_for_revised_paper 
+panel_for_revised_paper <- cbind(panel_for_revised_paper, WeightedCDSdata)
+
+# view(panel_for_revised_paper)
+
+vis_dat(panel_for_revised_paper, warn_large_data = F)
+
+
+
+
+
+
+
+
+
+
+
+
+
+cbind(copyblabla, WeightedCDSdata)
+DATAAA <- panel_for_revised_paper[,c("Date", "Country")]
+
+newyleiiwo <- cbind(DATAAA,WeightedCDSdata)
+colnames(newyleiiwo) <- c("Date", "Country", "trade_share_weighed_log_CDS_changes_of_peers")
+tail(newyleiiwo)
+summary(newyleiiwo)
+
+
+
+Date <- as.data.frame(unique(panel_for_revised_paper$Date))
+Date <- as.data.frame(lapply(Date, rep, 30))
+
+str(Date)
+view(Date)
+
+str (unique(panel_for_revised_paper$Date) )
+view(WeightedCDSdata)
+
+
+
+
+WeightedCDSdata$Date <- Date
+view(WeightedCDSdata)
+
+str(WeightedCDSdata)
+
+
+
+
+
+
+
+
+mynewlist$Argentina
+str(mynewlist)
+
+
+str(CDS[, -c(1)])
+str(Weights[, -c(1)])
+
+CDS
+Weights
+unique(testpanel$Country)
+str(CDS)
+
+
+testpanel <- panel_for_revised_paper[panel_for_revised_paper$Country != "Argentina", c("Date", "Country", "changes.log.CDS")]
+as.data.frame(spread(testpanel, Country, changes.log.CDS))
+Argentina.CDS <- as.data.frame(spread(testpanel, Country, changes.log.CDS))
+
+Argentina.Weights <- spread(ExportData[ExportData$Exporter == "Argentina" , -c(1) ], Partner, Shareoftotalexports   )
+str(Argentina.Weights)
+
+Argentina.weightedCDS <- 
+str(Argentina.CDS)
+
+Argentina.CDS[, -c(1)]*Argentina.Weights
+
+
+rowSums(data.frame(mapply(`*`,Argentina.CDS[, -c(1)],Argentina.Weights)) )
+
+head(data.frame(mapply(`*`,Argentina.CDS[, -c(1)],Argentina.Weights)), n=1)
+view(head(data.frame(mapply(`*`,Argentina.CDS[, -c(1)],Argentina.Weights)), n=1))
+head(Argentina.Weights, n=1)
+head( Argentina.CDS[, -c(1)], n=1)
+
+str(rowSums(data.frame(mapply(`*`,Argentina.CDS[, -c(1)],Argentina.Weights)) ))
+
+rowSums(data.frame(mapply(`*`,Argentina.CDS[, -c(1)],Argentina.Weights)) )
+
+
+Argentina <- subset(as.data.frame(spread(testpanel, Country, changes.log.CDS)), -c("Argentina")   )
+
+
+
+panel_for_revised_paper$GDPweightedglobalCDSlogchanges
+
+panel_for_revised_paper$changes.log.CDS
+view(panel_for_revised_paper)
 
 mybiglist <- list()
 for(i in 1:nrow(my_data.frame) ) {   
