@@ -1130,9 +1130,9 @@ Final_Data_Country <- Final_Data_Country[order(Final_Data_Country$COUNTRY, Final
 Final_Data_Country <- Final_Data_Country[order(Final_Data_Country$COUNTRY, Final_Data_Country$Date),]
 
 # Here, I integrate the Apple Mobility data. 
-mobility <- read.csv("https://covid19-static.cdn-apple.com/covid19-mobility-data/2012HotfixDev11/v3/en-us/applemobilitytrends-2020-07-12.csv")
+# mobility <- read.csv("https://covid19-static.cdn-apple.com/covid19-mobility-data/2012HotfixDev11/v3/en-us/applemobilitytrends-2020-07-12.csv")
 # You can also download it from online by changing the date in the following command
-# mobility <- read.csv("Data/applemobilitytrends.csv")
+mobility <- read.csv("Data/applemobilitytrends.csv")
 # mobility <- read.csv("https://covid19-static.cdn-apple.com/covid19-mobility-data/2012HotfixDev11/v3/en-us/applemobilitytrends-2020-07-12.csv")
 
 # First, we convert from wide to long format.
@@ -1157,6 +1157,8 @@ myvarsmobility <- c("region", "transportation_type", "Date", "value")
 mobility <- mobility[myvarsmobility]
 
 mobility$COUNTRY <- mobility$region
+
+# mobility$COUNTRY[mobility$COUNTRY == "Czech Republic"] <- "Czechia"
 
 # Now, I re-convert from long to wide format.
 mobility <- pivot_wider(mobility, id_cols = c("COUNTRY", "Date", "transportation_type"), names_from = "transportation_type", values_from = c("value"))
