@@ -230,7 +230,6 @@ panel_for_revised_paper <- left_join(panel_for_revised_paper, BRENT, by = c("Cou
 # All these variables were generated with the script "Sensitivity Analysis.R" for the first edition of the paper. 
 # Thus, all I need to do here is import the excel sheet that was the other script's output. 
 Oxford_V1 <- read_excel("Data/Oxford_V1_augmented_5.1.2021.xlsx") 
-colnames(Oxford_V1)
 oxford <- Oxford_V1
 
 # Manipulating some variables
@@ -286,61 +285,16 @@ for(i in c(23, 27:28)  ) {
 panel_for_revised_paper <- panel_for_revised_paper %>%   dplyr::group_by(Country) %>% fill(transit, .direction = "up")
 panel_for_revised_paper <- panel_for_revised_paper %>%   dplyr::group_by(Country) %>% fill(driving, .direction = "up")
 panel_for_revised_paper <- panel_for_revised_paper %>%   dplyr::group_by(Country) %>% fill(walking, .direction = "up")
-# Checking how it looks
-# vis_dat(panel_for_revised_paper, warn_large_data = F)
+
+# Safetycopy 
+# safetywithfilledupvalues <- panel_for_revised_paper
+# panel_for_revised_paper <- safetywithfilledupvalues
 
 
-
-
-
-
-
-
-table(panel_for_revised_paper[is.na(panel_for_revised_paper$Total_Mortality_Rate_Growth), c("Date", "Country", "Total_Mortality_Rate_Growth" ) ]$Date)
-view(panel_for_revised_paper[is.na(panel_for_revised_paper$Total_Mortality_Rate_Growth), c("Date", "Country", "Total_Mortality_Rate_Growth" ) ] )
-a <-    panel_for_revised_paper[!is.na(panel_for_revised_paper$Total_Mortality_Rate_Growth), c("Date", "Country", "Total_Mortality_Rate_Growth" ) ] 
-unique(a$Country)
-view (panel_for_revised_paper[panel_for_revised_paper$Date == as.Date("2014-01-01"), c("Date", "Country", "New_Mortality_Rate_Growth", "driving") ] )
-New_Mortality_Rate_Growth
-# Safetycopy
-# safetywithoxford <- panel_for_revised_paper
-# panel_for_revised_paper <- safetywithoxford
-
-panel_for_revised_paper[panel_for_revised_paper$Date == as.Date("2020-01-13"), c("Date", "Country", "driving", "walking", "transit") ]
-panel_for_revised_paper[panel_for_revised_paper$Date==as.Date("2014-01-01") , "driving"] <- 99
-panel_for_revised_paper[panel_for_revised_paper$Date==as.Date("2020-06-30") , "driving"] <- 99
-panel_for_revised_papertest <- panel_for_revised_paper %>% fill(driving, .direction = "up")
-
-# view( panel_for_revised_paper[!is.na(panel_for_revised_paper$walking), c("Date", "Country", "driving", "walking", "transit")]  )
-# With this comand, I can see where we still have missing data. This seems to be the case for transit, walking, and driving, which is not a problem. 
-vis_dat(panel_for_revised_paper, warn_large_data = F)
-# view(colnames(panel_for_revised_paper))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-mobility <- read.csv("Data/applemobilitytrends.csv")
-mobility <- pivot_longer(mobility, cols = starts_with("X"), names_to = "Dates")
-str(mobility)
-
-
-# Creating safety copy
-# safetyofmobility_google <- mobility_google
 
 # Import google mobility stringency ---------------------------------------
 # Importing
-mobility_google <- read.csv("Data/Global_Mobility_Report.csv")
+mobility_google <- read.csv("Data/Global_Mobility_Report.csv") # This thing is large so I keep a copy here: copyofmobility_google <- mobility_google
 # Subsetting for the right 30 EM countries. It turns out China is missing, but that's fine. In fact, having data for 29 countries is much better than for the Apple mobility data. 
 mobility_google <- mobility_google[mobility_google$country_region %in% listofneededcountries, ] 
 # Subsetting for data on the country as a hole
@@ -349,13 +303,20 @@ mobility_google <- mobility_google[mobility_google$metro_area == "", ]
 # Getting the date in the right format
 mobility_google$Date <- ymd(mobility_google$date, quiet = FALSE, tz = NULL, locale = Sys.getlocale("LC_TIME"), truncated = 0)
 # Subset for the right dates for our panel
-mobility_google <- mobility_google[mobility_google$Date <= as.Date("2020-07-01"), ]
-
-# Now I can join the Oxford_V1 database that contain many of the explanatory variables to the panel_for_revised_paper 
+mobility_google <- mobility_google[mobility_google$Date < as.Date("2020-07-01"), ]
+# Subset for the right variables/columns
+mobility_google <- mobility_google[, c("Date", "country_region", "retail_and_recreation_percent_change_from_baseline", "grocery_and_pharmacy_percent_change_from_baseline", "parks_percent_change_from_baseline", "transit_stations_percent_change_from_baseline", "workplaces_percent_change_from_baseline", "residential_percent_change_from_baseline" )]
+# Now I can join the mobility_google database to the panel_for_revised_paper 
 panel_for_revised_paper <- left_join(panel_for_revised_paper, mobility_google, by = c("Country" = "country_region", "Date" = "Date")  )
+# Since the first day for which google provides data is 2020-02-15, I set values for 2020-02-14 to zero and fill up the early stages of the time series with zeros, too
+for(i in c(50:55)  ) {       
+  panel_for_revised_paper[panel_for_revised_paper$Date==as.Date("2020-02-14") & panel_for_revised_paper$Country != "China", i] <- 0
+  panel_for_revised_paper <- panel_for_revised_paper  %>% dplyr::group_by(Country) %>% fill(i, .direction = "up") }
+# I was trying to fill up the missing google_mobility data for China with apple mobility data but that is also not available for China. 
 
-vis_dat(panel_for_revised_paper, warn_large_data = F)
-
+# Safetycopy 
+# safetywithmobility_google <- panel_for_revised_paper
+# panel_for_revised_paper <- safetywithmobility_google
 
 
 
@@ -380,14 +341,9 @@ Government_Response <- Government_Response[Government_Response$Jurisdiction=="NA
 # Now I subset for only those variables that I need again
 Government_Response <- Government_Response[,c("Country", "Date", "StringencyIndex")]
 # Now I can join the Government_Response data to the panel_for_revised_paper
-# Now I can join the Oxford_V1 database that contain many of the explanatory variables to the 
 panel_for_revised_paper <- left_join(panel_for_revised_paper, Government_Response, by = c("Country" = "Country", "Date" = "Date")  )
-# Creating a safety copy
-# safetycopynumber534857 <- panel_for_revised_paper    
-# panel_for_revised_paper <- safetycopynumber534857
 
-# Now I can create the Strinencyindex growth as SI_Growth
-# First, I set the NAs to zero
+# Now I can create the Strinencyindex growth variable and name it SI_Growth. First, I set the NAs to zero. I checked at the end of the panel to make sure I can do so without problems
 panel_for_revised_paper$StringencyIndex[is.na(panel_for_revised_paper$StringencyIndex)] <- 0
 # Then I create the growth number
 panel_for_revised_paper <- panel_for_revised_paper %>%
@@ -395,44 +351,37 @@ panel_for_revised_paper <- panel_for_revised_paper %>%
   dplyr::mutate(SI_Growth = (StringencyIndex - Lag(StringencyIndex,1))/Lag(StringencyIndex,1))
 # The first number is a NA since it does not have a divisor. So I set it to zero
 panel_for_revised_paper$SI_Growth[is.na(panel_for_revised_paper$SI_Growth)] <- 0
-# There are a few SI_Growth observations that are inf as the divisor is zero. I don't know what to do about it. 
-table(panel_for_revised_paper$SI_Growth)
-# panel_for_revised_paper$SI_Growth[is.infinite(panel_for_revised_paper$SI_Growth)] <- 0
-# table(panel_for_revised_paper$SI_Growth)
-# view(panel_for_revised_paper[panel_for_revised_paper$Country=="Argentina", ])
-# safetycopynumber5yxcewercc <- panel_for_revised_paper    
-# panel_for_revised_paper <- safetycopynumber5yxcewercc
+# The remaining problem is that there are some SI_Growth terms that are infinite values because of division by zero. I leave them in now.
+# Maybe when we do the regressions, we should exclude those values. 
+
+# Safetycopy 
+# safetywithgovernmentstringency <- panel_for_revised_paper
+# panel_for_revised_paper <- safetywithgovernmentstringency
 
 
+
+# Adding additional variables such as oil income effects ------------------
+# Importing the net oil exports as a share of GDP
+net_oil_exp_of_GDP <- as.data.frame(read_excel("Data/OilshareofGDP.xlsx", sheet = "R") )
 # For some reason, I need to change the country names to do the merge. I will set them back later. 
 panel_for_revised_paper$Country[panel_for_revised_paper$Country == "Dominican Republic"] <- "DominicanRepublic"
 panel_for_revised_paper$Country[panel_for_revised_paper$Country == "Saudi Arabia"] <- "SaudiArabia"
 panel_for_revised_paper$Country[panel_for_revised_paper$Country == "South Africa"] <- "SouthAfrica"
 panel_for_revised_paper$Country[panel_for_revised_paper$Country == "Sri Lanka"] <- "SriLanka"
-
-# Adding additional variables such as oil income effects ------------------
-# Importing the net oil exports as a share of GDP
-net_oil_exp_of_GDP <- as.data.frame(read_excel("Data/OilshareofGDP.xlsx", sheet = "R") )
-
 # Joining it to the panel
 panel_for_revised_paper <- left_join(panel_for_revised_paper, net_oil_exp_of_GDP, by = c("Country" = "Country")  )
-
-# Creating the oil income effect variable by multiplying the net oil exports as a share of GDP with log changes in Brent prices
-panel_for_revised_paper <- panel_for_revised_paper %>% mutate(oil_income_price_effect =  net_oil_exp_of_GDP*changes.log.BRENT) 
-
+vis_dat(panel_for_revised_paper, warn_large_data = F)
 # Now I change the names back again
 panel_for_revised_paper$Country[panel_for_revised_paper$Country == "DominicanRepublic"] <- "Dominican Republic"
 panel_for_revised_paper$Country[panel_for_revised_paper$Country == "SaudiArabia"] <- "Saudi Arabia"
 panel_for_revised_paper$Country[panel_for_revised_paper$Country == "SouthAfrica"] <- "South Africa"
 panel_for_revised_paper$Country[panel_for_revised_paper$Country == "SriLanka"] <- "Sri Lanka"
-unique(panel_for_revised_paper$Country)
-vis_dat(panel_for_revised_paper, warn_large_data = F)
-colnames(panel_for_revised_paper)
+# Creating the oil income effect variable by multiplying the net oil exports as a share of GDP with log changes in Brent prices
+panel_for_revised_paper <- panel_for_revised_paper %>% mutate(oil_income_price_effect =  net_oil_exp_of_GDP*changes.log.BRENT) 
 
-# safetycopy
-ycqwe3yeyadas <- panel_for_revised_paper
-panel_for_revised_paper <- ycqwe3yeyadas 
-
+# Safetycopy 
+# safetywithoilincome <- panel_for_revised_paper
+# panel_for_revised_paper <- safetywithoilincome
 
 
 
@@ -440,9 +389,8 @@ panel_for_revised_paper <- ycqwe3yeyadas
 # Importing Reserves
 Reserves <- gather(as.data.frame(read_excel("Data/International_Liquidity.xlsx", sheet = "R") ), "Date", "Reserves_in_millions", -"Country"   )
 # Getting the right Date format
-Reserves$Date <- as.numeric(Reserves$Date)
-Reserves$Date <- as.Date(Reserves$Date, origin = "1899-12-30")
-# Multiplying values by 1 million to ger normal number rather than million scale
+Reserves$Date <- as.Date(as.numeric(Reserves$Date),  origin = "1899-12-30")
+# Multiplying values by 1 million to get normal number rather than million scale
 Reserves$Reserves_in_millions <- as.numeric(Reserves$Reserves_in_millions)
 Reserves <- Reserves %>% mutate(Reserves = Reserves_in_millions *1000000  )
 # Subsetting for only those 30 EMs for which we need data
@@ -450,19 +398,15 @@ Reserves <- Reserves[Reserves$Country %in% listofneededcountries, ]
 # Joining it to the panel_for_revised_paper
 panel_for_revised_paper <- left_join(panel_for_revised_paper, Reserves, by = c("Country" = "Country", "Date" = "Date")  )
 # Filling up the missing values of the month from the End-of-Month-value
-panel_for_revised_paper <- panel_for_revised_paper %>% fill(Reserves, .direction = "up")
-panel_for_revised_paper <- panel_for_revised_paper %>% fill(Reserves_in_millions, .direction = "up")
+panel_for_revised_paper <- panel_for_revised_paper %>% dplyr::group_by(Country) %>% fill(Reserves, .direction = "up")
+panel_for_revised_paper <- panel_for_revised_paper %>% dplyr::group_by(Country) %>% fill(Reserves_in_millions, .direction = "up")
 # This worked well. The only country for which there is no Data is Peru after March 2020. But I just project these values forward into the future.
-panel_for_revised_paper <- panel_for_revised_paper %>% fill(Reserves)
-panel_for_revised_paper <- panel_for_revised_paper %>% fill(Reserves_in_millions)
-# view(panel_for_revised_paper[panel_for_revised_paper$Country=="China", c("Date", "Country", "Reserves")])
-# str(panel_for_revised_paper)
-# summary(panel_for_revised_paper$Reserves)
-# view(panel_for_revised_paper[is.na(panel_for_revised_paper$Reserves),])
-# listofneededcountries <- unique(panel_for_revised_paper$Country)
-# Reserves <- Reserves[Reserves$Country %in% listofneededcountries, ]
-# unique(Reserves$Country)  == unique(panel_for_revised_paper$Country)
+panel_for_revised_paper <- panel_for_revised_paper %>% dplyr::group_by(Country) %>% fill(Reserves)
+panel_for_revised_paper <- panel_for_revised_paper %>% dplyr::group_by(Country) %>% fill(Reserves_in_millions)
 
+# Safetycopy 
+# safetywithreserves <- panel_for_revised_paper
+# panel_for_revised_paper <- safetywithreserves
 
 
 
@@ -498,6 +442,17 @@ vis_dat(panel_for_revised_paper, warn_large_data = F)
 # alxlqllxrrrt <- panel_for_revised_paper
 panel_for_revised_paper <- alxlqllxrrrt
 
+
+
+
+view(panel_for_revised_paper[is.na(panel_for_revised_paper$Reserves),c("Date", "Country", "net_oil_exp_of_GDP", "changes.log.BRENT", "oil_income_price_effect", "Reserves")])
+table(panel_for_revised_paper$net_oil_exp_of_GDP)
+unique(panel_for_revised_paper$Country)
+vis_dat(panel_for_revised_paper, warn_large_data = F)
+colnames(panel_for_revised_paper)
+# safetycopy
+# view(panel_for_revised_paper[panel_for_revised_paper$SI_Growth > 0, c("Country", "Date", "SI_Growth", "StringencyIndex")])
+# view(panel_for_revised_paper[panel_for_revised_paper$Date > as.Date("2020-01-21"), c("Country", "Date", "SI_Growth", "StringencyIndex")])
 
 
 
@@ -690,6 +645,40 @@ vis_dat(panel_for_revised_paper, warn_large_data = F)
 
 
 
+
+
+
+
+
+
+
+table(panel_for_revised_paper[is.na(panel_for_revised_paper$Total_Mortality_Rate_Growth), c("Date", "Country", "Total_Mortality_Rate_Growth" ) ]$Date)
+view(panel_for_revised_paper[is.na(panel_for_revised_paper$Total_Mortality_Rate_Growth), c("Date", "Country", "Total_Mortality_Rate_Growth" ) ] )
+a <-    panel_for_revised_paper[!is.na(panel_for_revised_paper$Total_Mortality_Rate_Growth), c("Date", "Country", "Total_Mortality_Rate_Growth" ) ] 
+unique(a$Country)
+view (panel_for_revised_paper[panel_for_revised_paper$Date == as.Date("2014-01-01"), c("Date", "Country", "New_Mortality_Rate_Growth", "driving") ] )
+New_Mortality_Rate_Growth
+# Safetycopy
+# safetywithoxford <- panel_for_revised_paper
+# panel_for_revised_paper <- safetywithoxford
+
+panel_for_revised_paper[panel_for_revised_paper$Date == as.Date("2020-01-13"), c("Date", "Country", "driving", "walking", "transit") ]
+panel_for_revised_paper[panel_for_revised_paper$Date==as.Date("2014-01-01") , "driving"] <- 99
+panel_for_revised_paper[panel_for_revised_paper$Date==as.Date("2020-06-30") , "driving"] <- 99
+panel_for_revised_papertest <- panel_for_revised_paper %>% fill(driving, .direction = "up")
+
+# view( panel_for_revised_paper[!is.na(panel_for_revised_paper$walking), c("Date", "Country", "driving", "walking", "transit")]  )
+# With this comand, I can see where we still have missing data. This seems to be the case for transit, walking, and driving, which is not a problem. 
+vis_dat(panel_for_revised_paper, warn_large_data = F)
+# view(colnames(panel_for_revised_paper))
+
+
+
+
+
+mobility <- read.csv("Data/applemobilitytrends.csv")
+mobility <- pivot_longer(mobility, cols = starts_with("X"), names_to = "Dates")
+str(mobility)
 
 
 
