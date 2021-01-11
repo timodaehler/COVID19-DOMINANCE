@@ -429,31 +429,18 @@ colnames(allCountriesSWF) <- "COUNTRY"
 SWF <- SWF[SWF$COUNTRY %in% allCountriesSWF$COUNTRY,  ]
 # Summing funds per country to get country total SWF
 SWF_Countryaggregates <- aggregate(SWF$AuM, by=list(Category=SWF$COUNTRY), FUN=sum)
+# Renaming columns
 colnames(SWF_Countryaggregates) <- c("Country", "SWF_2019_AuMinUSD")
-SWF_Countryaggregates
-unique(SWF_Countryaggregates$Country)
 # Joining it to the panel_for_revised_paper
 panel_for_revised_paper <- left_join(panel_for_revised_paper, SWF_Countryaggregates, by = c("Country" = "Country")  )
 # Filling up the missing values for those countries with no sovereign wealth fund with zeros
 panel_for_revised_paper$SWF_2019_AuMinUSD[is.na(panel_for_revised_paper$SWF_2019_AuMinUSD)] <- 0
 # Checking if the data looks complete
 vis_dat(panel_for_revised_paper, warn_large_data = F)
-# Creating a safetycopy
-# alxlqllxrrrt <- panel_for_revised_paper
-panel_for_revised_paper <- alxlqllxrrrt
 
-
-
-
-view(panel_for_revised_paper[is.na(panel_for_revised_paper$Reserves),c("Date", "Country", "net_oil_exp_of_GDP", "changes.log.BRENT", "oil_income_price_effect", "Reserves")])
-table(panel_for_revised_paper$net_oil_exp_of_GDP)
-unique(panel_for_revised_paper$Country)
-vis_dat(panel_for_revised_paper, warn_large_data = F)
-colnames(panel_for_revised_paper)
-# safetycopy
-# view(panel_for_revised_paper[panel_for_revised_paper$SI_Growth > 0, c("Country", "Date", "SI_Growth", "StringencyIndex")])
-# view(panel_for_revised_paper[panel_for_revised_paper$Date > as.Date("2020-01-21"), c("Country", "Date", "SI_Growth", "StringencyIndex")])
-
+# Safetycopy 
+# safetywithSWF <- panel_for_revised_paper
+# panel_for_revised_paper <- safetywithSWF
 
 
 
@@ -465,9 +452,12 @@ GDP_Worldbank$Date <- as.Date(GDP_Worldbank$Date)
 # Joining it to the panel_for_revised_paper
 panel_for_revised_paper <- left_join(panel_for_revised_paper, GDP_Worldbank, by = c("Country" = "Country", "Date" = "Date")  )
 # Since GDP data is always year end data, I fill up the empty observations of each year with the data on the 31.12.xxxx of that year. That is, for every day of for example 2014, the GDP data is the end of year 2014 data.
-panel_for_revised_paper <- panel_for_revised_paper %>% fill(Annual_GDP, .direction = "up") 
-# vis_dat(panel_for_revised_paper, warn_large_data = F)
-# table(panel_for_revised_paper$GDP)
+panel_for_revised_paper <- panel_for_revised_paper %>% dplyr::group_by(Country) %>% fill(Annual_GDP, .direction = "up") 
+vis_dat(panel_for_revised_paper, warn_large_data = F)
+
+# Safetycopy 
+# safetywithGDP <- panel_for_revised_paper
+# panel_for_revised_paper <- safetywithGDP
 
 
 
@@ -479,16 +469,11 @@ Externaldebtforeigncurrencyshareoftotalexternaldebt$Date <- as.Date(Externaldebt
 # Joining it to the panel_for_revised_paper
 panel_for_revised_paper <- left_join(panel_for_revised_paper, Externaldebtforeigncurrencyshareoftotalexternaldebt, by = c("Country" = "Country", "Date" = "Date")  )
 # Since external debt data is always year end data, I fill up the empty observations of each year with the data on the 31.12.xxxx of that year. That is, for every day of for example 2014, the external debt data is the end of year 2014 data.
-panel_for_revised_paper <- panel_for_revised_paper %>% fill(External_debt_foreign_currency_share_of_total_external_debt, .direction = "up") 
-# vis_dat(panel_for_revised_papertest, warn_large_data = F)
-# table(panel_for_revised_papertest$Externaldebtforeigncurrencyshareoftotalexternaldebt)
-# countries <- read_excel("Data/laender.xlsx", sheet = "EM")
-# allCountriesSWF <- countries[ which(countries$EM_dummy5yr ==1), "COUNTRY5yrCDS"]
-# colnames(allCountriesSWF) <- "COUNTRY"
-# # Subsetting countries with external debt that are in sample
-# Externaldebtforeigncurrencyshareoftotalexternaldebt <- Externaldebtforeigncurrencyshareoftotalexternaldebt[Externaldebtforeigncurrencyshareoftotalexternaldebt$Country %in% allCountriesSWF$COUNTRY,  ]
-# unique(Externaldebtforeigncurrencyshareoftotalexternaldebt$Country)
-# table((panel_for_revised_papertest[is.na(panel_for_revised_papertest$Externaldebtforeigncurrencyshareoftotalexternaldebt),c("Externaldebtforeigncurrencyshareoftotalexternaldebt","Date","Country")])$Country)
+panel_for_revised_paper <- panel_for_revised_paper %>% dplyr::group_by(Country) %>% fill(External_debt_foreign_currency_share_of_total_external_debt, .direction = "up") 
+
+# Safetycopy 
+# safetywithforeigncurrencyshareofexternaldebt <- panel_for_revised_paper
+# panel_for_revised_paper <- safetywithforeigncurrencyshareofexternaldebt
 
 
 
@@ -501,11 +486,11 @@ TotalexternaldebtasshareofGDP$Date <- as.Date(TotalexternaldebtasshareofGDP$Date
 # Joining it to the panel_for_revised_paper
 panel_for_revised_paper <- left_join(panel_for_revised_paper, TotalexternaldebtasshareofGDP, by = c("Country" = "Country", "Date" = "Date")  )
 # Since external debt data is always year end data, I fill up the empty observations of each year with the data on the 31.12.xxxx of that year. That is, for every day of for example 2014, the external debt data is the end of year 2014 data.
-panel_for_revised_paper <- panel_for_revised_paper %>% fill(Total_external_debt_as_share_of_GDP, .direction = "up") 
-# vis_dat(panel_for_revised_paper, warn_large_data = F)
-# table(panel_for_revised_paper$TotalexternaldebtasshareofGDP)
-# safetcopy24542 <- panel_for_revised_paper
-panel_for_revised_paper <- safetcopy24542
+panel_for_revised_paper <- panel_for_revised_paper %>% dplyr::group_by(Country) %>% fill(Total_external_debt_as_share_of_GDP, .direction = "up") 
+
+# Safetycopy 
+# safetywithexternalDebt <- panel_for_revised_paper
+# panel_for_revised_paper <- safetywithexternalDebt
 
 
 
@@ -515,21 +500,21 @@ panel_for_revised_paper <- safetcopy24542
 DebtToChina <- as.data.frame(read_excel("Data/HRT _ China Debt Stock Database_April2020.xlsx", sheet = "R") )
 # Getting the right date format
 DebtToChina$Date <- as.Date(DebtToChina$Date)
-str(DebtToChina)
+# Joining the data to panel_for_revised_paper
 panel_for_revised_paper <- left_join(panel_for_revised_paper, DebtToChina, by = c("Country" = "Country", "Date" = "Date")  )
 # Since external debt data is always year end data, I fill up the empty observations of each year with the data on the 31.12.xxxx of that year. That is, for every day of for example 2014, the external debt data is the end of year 2014 data.
-panel_for_revised_paper <- panel_for_revised_paper %>% fill(Debt_to_China_as_share_of_GDP, .direction = "up") 
+panel_for_revised_paper <- panel_for_revised_paper %>% dplyr::group_by(Country) %>% fill(Debt_to_China_as_share_of_GDP, .direction = "up") 
+panel_for_revised_paper <- panel_for_revised_paper %>% dplyr::group_by(Country) %>% fill(ChinaDebt_USD, .direction = "up") 
+
+# xxxx maybe I need to do these later
 # panel_for_revised_paper <- panel_for_revised_paper %>% fill(Debt_to_China_as_share_of_GDP) 
-panel_for_revised_paper <- panel_for_revised_paper %>% fill(ChinaDebt_USD, .direction = "up") 
 # panel_for_revised_paper <- panel_for_revised_paper %>% fill(ChinaDebt_USD) 
-# vis_dat(panel_for_revised_paper, warn_large_data = F)
-# view(panel_for_revised_paper[panel_for_revised_paper$Country == "Uruguay",c("Country", "Date", "Debt_to_China_as_share_of_GDP", "ChinaDebt_USD")])
-# tail(panel_for_revised_paper)
+
+# Safetycopy 
+# safetywithChinaDebt <- panel_for_revised_paper
+# panel_for_revised_paper <- safetywithChinaDebt
+
 vis_dat(panel_for_revised_paper, warn_large_data = F)
-view(unique(panel_for_revised_paper$Country))
-
-
-
 
 
 
@@ -565,7 +550,6 @@ ExportData$`Partner Name`[ExportData$`Partner Name` == "Egypt, Arab Rep."] <- "E
 allCountriesSWF <- countries[ which(countries$EM_dummy5yr ==1), "COUNTRY5yrCDS"]
 colnames(allCountriesSWF) <- "Country"
 ExportData <- ExportData[ExportData$`Partner Name` %in% allCountriesSWF$Country,  ]
-view(ExportData)
 table(ExportData$`Reporter Name`)
 # This looks somewhat odd. Every country should only have 29 partners, not 30. 
 # Thus, I manually check the excel sheets for those countries for which the country shows up
@@ -573,12 +557,13 @@ table(ExportData$`Reporter Name`)
 # However, it is still vexing that these entries are in there, so I delete them by subsetting for observations
 # where the reporting country and the partner country are not the dame.
 ExportData <- subset(ExportData,`Reporter Name` != `Partner Name`)
-table(ExportData$`Reporter Name`) # This worked well
+# This worked well
+table(ExportData$`Reporter Name`) 
 
 # I rename the columns
 colnames(ExportData) <- c("Exporter", "Partner", "Tradeflow", "Indicator", "Exports2014", "Exports2015", "Exports2016", "Exports2017", "Exports2018")
 # Now I check if we have any NAs
-summary(ExportData) # It appears that the least sparse expor column is for 2016
+summary(ExportData) # It appears that the least-sparse export column is for 2016
 # view(subset(ExportData, is.na(ExportData$Exports2016) )) # It appears that those country pairs where data is missing are negligeable. I set them equal to zero
 ExportData$Exports2016[is.na(ExportData$Exports2016)] <- 0
 
@@ -593,16 +578,13 @@ ExportData <- left_join(ExportData, Sumofexportshares, by = c("Exporter" = "Expo
 # Now I divide a parntner's share by the total of the partners' shares
 # This gives me the weight for each partner which is proportional to that partner's share of trade
 # compared to all trade with the 29 partners.
-ExportData <- ExportData %>%
-mutate(Shareoftotalexports = (Exports2016 / SumofExportsharsof2016) )
+ExportData <- ExportData %>% mutate(Shareoftotalexports2016 = (Exports2016 / SumofExportsharsof2016) )
 # summary(ExportData)
 # a <-order(ExportData$Shareoftotalexports, decreasing =T)
 # view(ExportData[a,])
 # Now I subset for the needed data:
-ExportData <- ExportData[, c("Exporter", "Partner", "Shareoftotalexports")]
+ExportData <- ExportData[, c("Exporter", "Partner", "Shareoftotalexports2016")]
 # aggregate(Shareoftotalexports ~ Exporter, ExportData, sum) # works
-
-
 
 
 # Now I start creating the weighted log CDS changes by multiplying the weights with the log CDS changes of all partners on a daily basis
@@ -612,7 +594,7 @@ for(i in 1:nrow(my_data.frame) ) {
   NameofExporter <- my_data.frame[i,1]
   testpanel <- panel_for_revised_paper[panel_for_revised_paper$Country != NameofExporter, c("Date", "Country", "changes.log.CDS")]
   CDS <- as.data.frame(spread(testpanel, Country, changes.log.CDS))
-  Weights <- spread(ExportData[ExportData$Exporter == NameofExporter , ], Partner, Shareoftotalexports   )
+  Weights <- spread(ExportData[ExportData$Exporter == NameofExporter , ], Partner, Shareoftotalexports2016   )
   # Weights <- as.data.frame(lapply(Weights, rep, 2373))
   temp <- rowSums(data.frame(  mapply(`*`,CDS[, -c(1)], Weights[, -c(1)]  )    ) )
   mynewlist[[NameofExporter]] <- temp
@@ -634,9 +616,12 @@ colnames(WeightedCDSdata) <- "trade_share_weighed_log_CDS_changes_of_29_peers"
 # copyblabla <- panel_for_revised_paper 
 panel_for_revised_paper <- cbind(panel_for_revised_paper, WeightedCDSdata)
 
-view(panel_for_revised_paper)
+# view(panel_for_revised_paper)
 vis_dat(panel_for_revised_paper, warn_large_data = F)
 
+# Create a safetycopy
+# safetywithWeightedCDSdata <- panel_for_revised_paper
+# panel_for_revised_paper <- safetywithWeightedCDSdata
 
 
 
@@ -645,6 +630,18 @@ vis_dat(panel_for_revised_paper, warn_large_data = F)
 
 
 
+
+
+
+
+
+view(panel_for_revised_paper[,c("Date", "Country", "trade_share_weighed_log_CDS_changes_of_29_peers", "changes.log.BRENT", "oil_income_price_effect", "Reserves")])
+table(panel_for_revised_paper$net_oil_exp_of_GDP)
+unique(panel_for_revised_paper$Country)
+
+vis_dat(panel_for_revised_paper, warn_large_data = F)
+
+colnames(panel_for_revised_paper)
 
 
 
