@@ -68,6 +68,7 @@ library(leaflet)
 library(corrplot)
 library(fBasics)
 library(stargazer)
+library(stringr) 
 library(tseries)
 library(vars)
 library(dplyr)
@@ -225,7 +226,6 @@ panel_for_revised_paper <- left_join(panel_for_revised_paper, BRENT, by = c("Cou
 
 
 
-
 # Importing the policy, economic, and epidemiological variables -----------
 # All these variables were generated with the script "Sensitivity Analysis.R" for the first edition of the paper. 
 # Thus, all I need to do here is import the excel sheet that was the other script's output. 
@@ -290,7 +290,7 @@ panel_for_revised_paper <- panel_for_revised_paper %>%   dplyr::group_by(Country
 
 # Import google mobility stringency ---------------------------------------
 # Importing
-mobility_google <- read.csv("Data/Global_Mobility_Report.csv") # This thing is large so I keep a copy here: copyofmobility_google <- mobility_google
+mobility_google <- read.csv("Data/Global_Mobility_Report.csv") # This thing is large so I keep a copy here: copyofmobility_google <- mobility_google  <- copyofmobility_google  
 # Subsetting for the right 30 EM countries. It turns out China is missing, but that's fine. In fact, having data for 29 countries is much better than for the Apple mobility data. 
 mobility_google <- mobility_google[mobility_google$country_region %in% listofneededcountries, ] 
 # Subsetting for data on the country as a hole
@@ -366,7 +366,6 @@ panel_for_revised_paper$Country[panel_for_revised_paper$Country == "South Africa
 panel_for_revised_paper$Country[panel_for_revised_paper$Country == "Sri Lanka"] <- "SriLanka"
 # Joining it to the panel
 panel_for_revised_paper <- left_join(panel_for_revised_paper, net_oil_exp_of_GDP, by = c("Country" = "Country")  )
-vis_dat(panel_for_revised_paper, warn_large_data = F)
 # Now I change the names back again
 panel_for_revised_paper$Country[panel_for_revised_paper$Country == "DominicanRepublic"] <- "Dominican Republic"
 panel_for_revised_paper$Country[panel_for_revised_paper$Country == "SaudiArabia"] <- "Saudi Arabia"
@@ -432,7 +431,7 @@ panel_for_revised_paper <- left_join(panel_for_revised_paper, SWF_Countryaggrega
 # Filling up the missing values for those countries with no sovereign wealth fund with zeros
 panel_for_revised_paper$SWF_2019_AuMinUSD[is.na(panel_for_revised_paper$SWF_2019_AuMinUSD)] <- 0
 # Checking if the data looks complete
-vis_dat(panel_for_revised_paper, warn_large_data = F)
+# vis_dat(panel_for_revised_paper, warn_large_data = F)
 
 # Safetycopy 
 # safetywithSWF <- panel_for_revised_paper
@@ -449,7 +448,7 @@ GDP_Worldbank$Date <- as.Date(GDP_Worldbank$Date)
 panel_for_revised_paper <- left_join(panel_for_revised_paper, GDP_Worldbank, by = c("Country" = "Country", "Date" = "Date")  )
 # Since GDP data is always year end data, I fill up the empty observations of each year with the data on the 31.12.xxxx of that year. That is, for every day of for example 2014, the GDP data is the end of year 2014 data.
 panel_for_revised_paper <- panel_for_revised_paper %>% dplyr::group_by(Country) %>% fill(Annual_GDP, .direction = "up") 
-vis_dat(panel_for_revised_paper, warn_large_data = F)
+# vis_dat(panel_for_revised_paper, warn_large_data = F)
 
 # Safetycopy 
 # safetywithGDP <- panel_for_revised_paper
@@ -502,15 +501,9 @@ panel_for_revised_paper <- left_join(panel_for_revised_paper, DebtToChina, by = 
 panel_for_revised_paper <- panel_for_revised_paper %>% dplyr::group_by(Country) %>% fill(Debt_to_China_as_share_of_GDP, .direction = "up") 
 panel_for_revised_paper <- panel_for_revised_paper %>% dplyr::group_by(Country) %>% fill(ChinaDebt_USD, .direction = "up") 
 
-# xxxx maybe I need to do these later
-# panel_for_revised_paper <- panel_for_revised_paper %>% fill(Debt_to_China_as_share_of_GDP) 
-# panel_for_revised_paper <- panel_for_revised_paper %>% fill(ChinaDebt_USD) 
-
 # Safetycopy 
 # safetywithChinaDebt <- panel_for_revised_paper
 # panel_for_revised_paper <- safetywithChinaDebt
-
-
 
 
 
@@ -609,9 +602,6 @@ for(i in 1:nrow(my_data.frame) ) {
 colnames(WeightedCDSdata) <- "trade_share_weighted_log_CDS_changes_of_29_peers"
 # copyblabla <- panel_for_revised_paper 
 panel_for_revised_paper <- cbind(panel_for_revised_paper, WeightedCDSdata)
-
-# view(panel_for_revised_paper)
-vis_dat(panel_for_revised_paper, warn_large_data = F)
 
 # Create a safetycopy
 # safetywithTradeWeightedCDSdata <- panel_for_revised_paper
@@ -1548,9 +1538,53 @@ panel_for_revised_paper <- left_join(panel_for_revised_paper, em_fac, by = c("Da
 
 
 # Creating the weighted fiscal response series ----------------------------
-summary(panel_for_revised_paper$Fiscal_Response_Dummy)
-summary(panel_for_revised_paper$E3_Fiscal.measures)
 
+# Importing Stimulus Data from Yothin
+Stimulus_GDP_from_Yothin <- read.csv("Data/27oct2020_ahm_aiz_jin_noy_dataset.csv")
+# Subsetting for needed variables
+Stimulus_GDP_from_Yothin <- Stimulus_GDP_from_Yothin[, c("country", "fiscal")]
+# Renaming columns
+colnames(Stimulus_GDP_from_Yothin) <-  c("Country", "Stimulus_GDP_Yothin")
+# Changing uppercase to correct lower case format
+Stimulus_GDP_from_Yothin$Country <- tolower(Stimulus_GDP_from_Yothin$Country)
+Stimulus_GDP_from_Yothin$Country <- str_to_title(Stimulus_GDP_from_Yothin$Country)
+# Changing some country names in order to be able to do the matching
+Stimulus_GDP_from_Yothin$Country[Stimulus_GDP_from_Yothin$Country == "Czech Republic"] <- "Czechia"
+# Subsetting for those countries that we need 
+Stimulus_GDP_from_Yothin <- Stimulus_GDP_from_Yothin[Stimulus_GDP_from_Yothin$Country %in% listofneededcountries, ] 
+# Absent countries are uruguay, qatar, and panama. Data for Chile is missing
+
+
+
+# Importing Stimulus Data from Elgin (http://www.ceyhunelgin.com)
+Stimulus_GDP_from_Elgin <- read_excel("Data/EconomicStimulusIndex.xlsx", sheet = "Sheet1")
+# Subsetting for the right fiscal variable
+Stimulus_GDP_from_Elgin <- Stimulus_GDP_from_Elgin[, c("Country", "Date", "fiscal_13")]
+# Renaming a country
+Stimulus_GDP_from_Elgin$Country[Stimulus_GDP_from_Elgin$Country == "Czech"] <- "Czechia"
+# Subsetting for the right 30 countries 
+Stimulus_GDP_from_Elgin <- Stimulus_GDP_from_Elgin[Stimulus_GDP_from_Elgin$Country %in% listofneededcountries, ]
+# Renaming variables
+colnames(Stimulus_GDP_from_Elgin) <- c("Country", "Date", "Stimulus_GDP_Elgin")
+
+
+# Importing Stimulus Data from ABD 
+Stimulus_GDP_from_ABD <- read_excel("Data/StimulusGDPfromABD_COVID policy database.xlsx", sheet = "Sheet1")
+# Subsetting for the right fiscal variable
+Stimulus_GDP_from_ABD <- Stimulus_GDP_from_ABD[, c("Country", "As of", "Total package share of GDP")]
+# Renaming variables
+colnames(Stimulus_GDP_from_ABD) <- c("Country", "Date", "Stimulus_GDP_ABD")
+
+
+StimulusGDPfromABD_COVID policy database.xlsx
+
+unique(Stimulus_GDP_from_Elgin$Country)
+unique(panel_for_revised_paper$Country)
+
+
+
+view(unique(panel_for_revised_paper$Country))
+summary(panel_for_revised_paper$Fiscal_Response_Dummy)
 view(panel_for_revised_paper$Fiscal_Response_Dummy)
 
 # Adding the PMI data -----------------------------------------------------
@@ -1567,3 +1601,6 @@ vis_dat(panel_for_revised_paper, warn_large_data = F)
 
 
 
+# xxxx maybe I need to do these later
+# panel_for_revised_paper <- panel_for_revised_paper %>% fill(Debt_to_China_as_share_of_GDP) 
+# panel_for_revised_paper <- panel_for_revised_paper %>% fill(ChinaDebt_USD) 
