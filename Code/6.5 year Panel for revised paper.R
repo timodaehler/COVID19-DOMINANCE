@@ -514,7 +514,6 @@ panel_for_revised_paper <- panel_for_revised_paper %>% dplyr::group_by(Country) 
 # safetywithChinaDebt <- panel_for_revised_paper
 # panel_for_revised_paper <- safetywithChinaDebt
 
-vis_dat(panel_for_revised_paper, warn_large_data = F)
 
 
 
@@ -604,7 +603,6 @@ for(i in 1:nrow(my_data.frame) ) {
 # outputofloop <-mynewlist
 # mynewlist <- outputofloop
 
-
 # Stack each list element into one dataframe.
 WeightedCDSdata  <- NULL
 for(i in 1:nrow(my_data.frame) ) { 
@@ -612,7 +610,7 @@ for(i in 1:nrow(my_data.frame) ) {
   tmp <- as.data.frame(mynewlist[[i]] )
   WeightedCDSdata <- dplyr::bind_rows(WeightedCDSdata, tmp)  }
 # Rename the column of the dataframe so that it then looks good when appended to paneo_for_revised_paper
-colnames(WeightedCDSdata) <- "trade_share_weighed_log_CDS_changes_of_29_peers"
+colnames(WeightedCDSdata) <- "trade_share_weighted_log_CDS_changes_of_29_peers"
 # copyblabla <- panel_for_revised_paper 
 panel_for_revised_paper <- cbind(panel_for_revised_paper, WeightedCDSdata)
 
@@ -620,695 +618,946 @@ panel_for_revised_paper <- cbind(panel_for_revised_paper, WeightedCDSdata)
 vis_dat(panel_for_revised_paper, warn_large_data = F)
 
 # Create a safetycopy
-# safetywithWeightedCDSdata <- panel_for_revised_paper
-# panel_for_revised_paper <- safetywithWeightedCDSdata
+# safetywithTradeWeightedCDSdata <- panel_for_revised_paper
+# panel_for_revised_paper <- safetywithTradeWeightedCDSdata
 
 
 
-
-
-
-
-
-
-
-
-
-
-view(panel_for_revised_paper[,c("Date", "Country", "trade_share_weighed_log_CDS_changes_of_29_peers", "changes.log.BRENT", "oil_income_price_effect", "Reserves")])
-table(panel_for_revised_paper$net_oil_exp_of_GDP)
-unique(panel_for_revised_paper$Country)
-
-vis_dat(panel_for_revised_paper, warn_large_data = F)
-
-colnames(panel_for_revised_paper)
-
-
-
-
-
-
-
-table(panel_for_revised_paper[is.na(panel_for_revised_paper$Total_Mortality_Rate_Growth), c("Date", "Country", "Total_Mortality_Rate_Growth" ) ]$Date)
-view(panel_for_revised_paper[is.na(panel_for_revised_paper$Total_Mortality_Rate_Growth), c("Date", "Country", "Total_Mortality_Rate_Growth" ) ] )
-a <-    panel_for_revised_paper[!is.na(panel_for_revised_paper$Total_Mortality_Rate_Growth), c("Date", "Country", "Total_Mortality_Rate_Growth" ) ] 
-unique(a$Country)
-view (panel_for_revised_paper[panel_for_revised_paper$Date == as.Date("2014-01-01"), c("Date", "Country", "New_Mortality_Rate_Growth", "driving") ] )
-New_Mortality_Rate_Growth
-# Safetycopy
-# safetywithoxford <- panel_for_revised_paper
-# panel_for_revised_paper <- safetywithoxford
-
-panel_for_revised_paper[panel_for_revised_paper$Date == as.Date("2020-01-13"), c("Date", "Country", "driving", "walking", "transit") ]
-panel_for_revised_paper[panel_for_revised_paper$Date==as.Date("2014-01-01") , "driving"] <- 99
-panel_for_revised_paper[panel_for_revised_paper$Date==as.Date("2020-06-30") , "driving"] <- 99
-panel_for_revised_papertest <- panel_for_revised_paper %>% fill(driving, .direction = "up")
-
-# view( panel_for_revised_paper[!is.na(panel_for_revised_paper$walking), c("Date", "Country", "driving", "walking", "transit")]  )
-# With this comand, I can see where we still have missing data. This seems to be the case for transit, walking, and driving, which is not a problem. 
-vis_dat(panel_for_revised_paper, warn_large_data = F)
-# view(colnames(panel_for_revised_paper))
-
-
-
-
-
-mobility <- read.csv("Data/applemobilitytrends.csv")
-mobility <- pivot_longer(mobility, cols = starts_with("X"), names_to = "Dates")
-str(mobility)
-
-
-
-
-
-
-
-cbind(copyblabla, WeightedCDSdata)
-DATAAA <- panel_for_revised_paper[,c("Date", "Country")]
-
-newyleiiwo <- cbind(DATAAA,WeightedCDSdata)
-colnames(newyleiiwo) <- c("Date", "Country", "trade_share_weighed_log_CDS_changes_of_peers")
-tail(newyleiiwo)
-summary(newyleiiwo)
-
-
-
-Date <- as.data.frame(unique(panel_for_revised_paper$Date))
-Date <- as.data.frame(lapply(Date, rep, 30))
-
-str(Date)
-view(Date)
-
-str (unique(panel_for_revised_paper$Date) )
-view(WeightedCDSdata)
-
-
-
-
-WeightedCDSdata$Date <- Date
-view(WeightedCDSdata)
-
-str(WeightedCDSdata)
-
-
-
-
-
-
-
-
-mynewlist$Argentina
-str(mynewlist)
-
-
-str(CDS[, -c(1)])
-str(Weights[, -c(1)])
-
-CDS
-Weights
-unique(testpanel$Country)
-str(CDS)
-
-
-testpanel <- panel_for_revised_paper[panel_for_revised_paper$Country != "Argentina", c("Date", "Country", "changes.log.CDS")]
-as.data.frame(spread(testpanel, Country, changes.log.CDS))
-Argentina.CDS <- as.data.frame(spread(testpanel, Country, changes.log.CDS))
-
-Argentina.Weights <- spread(ExportData[ExportData$Exporter == "Argentina" , -c(1) ], Partner, Shareoftotalexports   )
-str(Argentina.Weights)
-
-Argentina.weightedCDS <- 
-str(Argentina.CDS)
-
-Argentina.CDS[, -c(1)]*Argentina.Weights
-
-
-rowSums(data.frame(mapply(`*`,Argentina.CDS[, -c(1)],Argentina.Weights)) )
-
-head(data.frame(mapply(`*`,Argentina.CDS[, -c(1)],Argentina.Weights)), n=1)
-view(head(data.frame(mapply(`*`,Argentina.CDS[, -c(1)],Argentina.Weights)), n=1))
-head(Argentina.Weights, n=1)
-head( Argentina.CDS[, -c(1)], n=1)
-
-str(rowSums(data.frame(mapply(`*`,Argentina.CDS[, -c(1)],Argentina.Weights)) ))
-
-rowSums(data.frame(mapply(`*`,Argentina.CDS[, -c(1)],Argentina.Weights)) )
-
-
-Argentina <- subset(as.data.frame(spread(testpanel, Country, changes.log.CDS)), -c("Argentina")   )
-
-
-
-panel_for_revised_paper$GDPweightedglobalCDSlogchanges
-
-panel_for_revised_paper$changes.log.CDS
-view(panel_for_revised_paper)
-
-mybiglist <- list()
-for(i in 1:nrow(my_data.frame) ) {   
-NameofExporter <- my_data.frame[i,1]
-name <- NameofExporter
-tmp <- as.data.frame(read_excel(paste0("Data/",NameofExporter,".xlsx"), sheet = "Partner-Timeseries") )
-mybiglist[[name]] <- tmp
-}
-
-ExportData  <- NULL
-for(i in 1:nrow(my_data.frame) ) { 
-  name <- my_data.frame[i,1]
-  tmp <- as.data.frame(mybiglist[[i]] )
-  ExportData <- dplyr::bind_rows(ExportData, tmp)
-}
-
-view(ExportData)
-
-
-
-
-
-ExportData
-y <- data.frame()
-for(i in 1:nrow(my_data.frame) ) {   
-name <- my_data.frame[i,1]
-rbind(y, as.data.frame(mybiglist$my_data.frame[i,1]))
-}
-
-
-
-
-
-
-Argentina <- as.data.frame(mybiglist$Argentina)
-
-
-adfasdfadf <- rbind()
-
-
-mybiglist2 <- data.frame()
-for(i in 2:nrow(my_data.frame) ) {   
-  NameofExporter <- my_data.frame[i,1]
-  # name <- NameofExporter
-  tmp <- as.data.frame(mybiglist$NameofExporter )
-  mybiglist2 <- dplyr::bind_rows(tmp)
-}
-
-
-
-
-
-str(mybiglist2)
-
-Argentina <- as.data.frame(mybiglist[1])
-
-for(i in 1:nrow(my_data.frame) ) {   
-  NameofExporter <- my_data.frame[i,1]
-  name <- NameofExporter
-  tmp <- as.data.frame(mybiglist[i])
-f <- rbind(Argentina,tmp)
-}
-
-
-dplyr::bind_rows(as.data.frame(mybiglist[1]), as.data.frame(mybiglist[2]))
-
-
-df1 <- data.frame(a = c(1:5), b = c(6:10))
-df2 <- data.frame(a = c(11:15), b = c(16:20), c = LETTERS[1:5])
-dplyr::bind_rows(df1, df2)
-
-
-
-
-f <- rbind(as.data.frame(mybiglist[1]), as.data.frame(mybiglist[2]) )
-
-
-str(mybiglist)
-
-
-
-
-Bahrain <- mybiglist$Bahrain  
-str(Bahrain)
-
-
-
-
-
-view(unique(panel_for_revised_paper$Country))
-
-
-
-# Import the dataset
-TradeShare <- as.data.frame(read_excel("Data/Argentina.xlsx", sheet = "Partner-Timeseries") )
-
-# Import the dataset
-TradeShare <- as.data.frame(read_excel("Data/Argentina.xlsx", sheet = "Partner-Timeseries") )
-# Rename the partner names to standardize them
-TradeShare$`Partner Name`[TradeShare$`Partner Name` == "Czech Republic"] <- "Czechia"
-TradeShare$`Partner Name`[TradeShare$`Partner Name` == "Russian Federation"] <- "Russia"
-TradeShare$`Partner Name`[TradeShare$`Partner Name` == "Egypt, Arab Rep."] <- "Egypt"
-
-
-# Subset for the 30-1=29 partners because a country cannot be it's own partner. 
-allCountriesSWF <- countries[ which(countries$EM_dummy5yr ==1), "COUNTRY5yrCDS"]
-colnames(allCountriesSWF) <- "Country"
-TradeShare <- TradeShare[TradeShare$`Partner Name` %in% allCountriesSWF$Country,  ]
-
-paste(1:12)  
-
-
-# unique(Externaldebtforeigncurrencyshareoftotalexternaldebt$Country)
-# table((panel_for_revised_papertest[is.na(panel_for_revised_papertest$Externaldebtforeigncurrencyshareoftotalexternaldebt),c("Externaldebtforeigncurrencyshareoftotalexternaldebt","Date","Country")])$Country)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# Add GDP weighted regional CDS log changes to panel ----------------------
+# import and subset for countries
 countries <- read_excel("Data/laender.xlsx", sheet = "EM")
-allCountriesSWF <- countries[ which(countries$EM_dummy5yr ==1), "COUNTRY5yrCDS"]
-colnames(allCountriesSWF) <- "COUNTRY"
-# Subsetting countries with external debt share that are in sample
-DebtToChina <- DebtToChina[DebtToChina$Country %in% allCountriesSWF$COUNTRY,  ]
-unique(DebtToChina$Country)
-table((panel_for_revised_paper[is.na(panel_for_revised_paper$Debt_to_China_as_share_of_GDP),c("Debt_to_China_as_share_of_GDP","Date","Country")])$Country)
-unique((panel_for_revised_paper[!is.na(panel_for_revised_paper$Debt_to_China_as_share_of_GDP),c("Debt_to_China_as_share_of_GDP","Date","Country")])$Country)
+em_countries <- countries[ which(countries$EM_dummy5yr ==1), "COUNTRY5yrCDS"   ]
+# import CDS data and subset for the right time and countries
+cds_five <- read_excel("Data/CDS.xlsx", sheet = "5yrCDS")
+cds_five <- cds_five[which(cds_five$Date>="2013-12-31" & cds_five$Date<="2020-07-01"   ),]
+em_cds <- cds_five[, c("Date", em_countries$COUNTRY5yrCDS )]
+
+# difference it
+d_emcds<-apply(log(em_cds[,-1]),2,diff)
+d_emcds <- as.data.frame(d_emcds)
+dim(em_cds)
+dim(d_emcds)
+
+# Importing GDP 2019 data for all emerging markets
+GDP2019USDMIL <- read_excel("Data/GDP.xlsx", sheet = "EM")
+
+#Importing geographic classification of emerging markets
+geographic_classification <- read_excel("Data/geographic_classification.xlsx", sheet = "COARSE_GRANULATION")
+
+# Getting the names of the geographic groups
+regions <- colnames(geographic_classification)
+
+# Subsetting individual geographic groups
+Africa <- as.data.frame( drop_na(geographic_classification[,1] ) )
+names(Africa)[1] <- "COUNTRY"
+CentralAsia <- as.data.frame( drop_na(geographic_classification[,2]) )
+names(CentralAsia)[1] <- "COUNTRY"
+EastAsia <- as.data.frame( drop_na(geographic_classification[,3]) )
+names(EastAsia)[1] <- "COUNTRY"
+Europe <- as.data.frame( drop_na(geographic_classification[,4]) )
+names(Europe)[1] <- "COUNTRY"
+LATAM <- as.data.frame( drop_na(geographic_classification[,5]) )
+names(LATAM)[1] <- "COUNTRY"
+MiddleEast <- as.data.frame( drop_na(geographic_classification[, 6] ) )
+names(MiddleEast)[1] <- "COUNTRY"
+SouthAsia <- as.data.frame( drop_na(geographic_classification[,7] ) )
+names(SouthAsia)[1] <- "COUNTRY"
+
+# Adding GDP data to countries in groups
+Africa <- merge(Africa, GDP2019USDMIL, by = c("COUNTRY"), all.x = TRUE)
+CentralAsia <- merge(CentralAsia, GDP2019USDMIL, by = c("COUNTRY"), all.x = TRUE)
+EastAsia <- merge(EastAsia, GDP2019USDMIL, by = c("COUNTRY"), all.x = TRUE)
+Europe <- merge(Europe, GDP2019USDMIL, by = c("COUNTRY"), all.x = TRUE)
+LATAM <- merge(LATAM, GDP2019USDMIL, by = c("COUNTRY"), all.x = TRUE)
+MiddleEast <- merge(MiddleEast, GDP2019USDMIL, by = c("COUNTRY"), all.x = TRUE)
+SouthAsia <- merge(SouthAsia, GDP2019USDMIL, by = c("COUNTRY"), all.x = TRUE)
+
+# str(as.data.frame(drop_na(geographic_classification[,1] ) ) )
+
+# sum of others, i.e. sum of GDP for each country's regional peers
+for(i in 1:(nrow(Africa)) ) {
+  Africa[i,"sumofothers"] <-  sum(Africa[-i,]$GDP2019MIL) }
+
+for(i in 1:(nrow(CentralAsia)) ) {
+  CentralAsia[i,"sumofothers"] <-  sum(CentralAsia[-i,]$GDP2019MIL) }
+
+for(i in 1:(nrow(EastAsia)) ) {
+  EastAsia[i,"sumofothers"] <-  sum(EastAsia[-i,]$GDP2019MIL) }
+
+for(i in 1:(nrow(Europe)) ) {
+  Europe[i,"sumofothers"] <-  sum(Europe[-i,]$GDP2019MIL) }
+
+for(i in 1:(nrow(LATAM)) ) {
+  LATAM[i,"sumofothers"] <-  sum(LATAM[-i,]$GDP2019MIL) }
+
+for(i in 1:(nrow(MiddleEast)) ) {
+  MiddleEast[i,"sumofothers"] <-  sum(MiddleEast[-i,]$GDP2019MIL) }
+
+for(i in 1:(nrow(SouthAsia)) ) {
+  SouthAsia[i,"sumofothers"] <-  sum(SouthAsia[-i,]$GDP2019MIL) }
+
+# Adding additional country columns
+Countries_Africa <- Africa$COUNTRY
+Matrix_Africa <- matrix(NA, nrow = nrow(Africa), ncol = nrow(Africa))
+colnames(Matrix_Africa) <- Countries_Africa
+Africa <- cbind(Africa, Matrix_Africa )
+
+Countries_CentralAsia <- CentralAsia$COUNTRY
+Matrix_CentralAsia <- matrix(NA, nrow = nrow(CentralAsia), ncol = nrow(CentralAsia))
+colnames(Matrix_CentralAsia) <- Countries_CentralAsia
+CentralAsia <- cbind(CentralAsia, Matrix_CentralAsia )
+
+Countries_EastAsia <- EastAsia$COUNTRY
+Matrix_EastAsia <- matrix(NA, nrow = nrow(EastAsia), ncol = nrow(EastAsia))
+colnames(Matrix_EastAsia) <- Countries_EastAsia
+EastAsia <- cbind(EastAsia, Matrix_EastAsia )
+
+Countries_Europe <- Europe$COUNTRY
+Matrix_Europe <- matrix(NA, nrow = nrow(Europe), ncol = nrow(Europe))
+colnames(Matrix_Europe) <- Countries_Europe
+Europe <- cbind(Europe, Matrix_Europe )
+
+Countries_LATAM <- LATAM$COUNTRY
+Matrix_LATAM <- matrix(NA, nrow = nrow(LATAM), ncol = nrow(LATAM))
+colnames(Matrix_LATAM) <- Countries_LATAM
+LATAM <- cbind(LATAM, Matrix_LATAM )
+
+Countries_MiddleEast <- MiddleEast$COUNTRY
+Matrix_MiddleEast <- matrix(NA, nrow = nrow(MiddleEast), ncol = nrow(MiddleEast))
+colnames(Matrix_MiddleEast) <- Countries_MiddleEast
+MiddleEast <- cbind(MiddleEast, Matrix_MiddleEast )
+
+Countries_SouthAsia <- SouthAsia$COUNTRY
+Matrix_SouthAsia <- matrix(NA, nrow = nrow(SouthAsia), ncol = nrow(SouthAsia))
+colnames(Matrix_SouthAsia) <- Countries_SouthAsia
+SouthAsia <- cbind(SouthAsia, Matrix_SouthAsia )
+
+# Creating country specific weights 
+for(i in 4:(ncol(Africa)) ) {
+  for(j in 1:nrow(Africa)) {
+    
+    Africa[j, i ] <- Africa[i-3, "GDP2019MIL"]   / Africa[j,"sumofothers"] }
+}
+
+for(i in 4:(ncol(CentralAsia)) ) {
+  for(j in 1:nrow(CentralAsia)) {
+    
+    CentralAsia[j, i ] <- CentralAsia[i-3, "GDP2019MIL"]   / CentralAsia[j,"sumofothers"] }
+}
+
+for(i in 4:(ncol(EastAsia)) ) {
+  for(j in 1:nrow(EastAsia)) {
+    
+    EastAsia[j, i ] <- EastAsia[i-3, "GDP2019MIL"]   / EastAsia[j,"sumofothers"] }
+}
 
+for(i in 4:(ncol(Europe)) ) {
+  for(j in 1:nrow(Europe)) {
+    
+    Europe[j, i ] <- Europe[i-3, "GDP2019MIL"]   / Europe[j,"sumofothers"] }
+}
 
-vis_dat(panel_for_revised_paper, warn_large_data = F)
-# table(panel_for_revised_papertest$GDP)
+for(i in 4:(ncol(LATAM)) ) {
+  for(j in 1:nrow(LATAM)) {
+    
+    LATAM[j, i ] <- LATAM[i-3, "GDP2019MIL"]   / LATAM[j,"sumofothers"] }
+}
 
-panel_for_revised_paper[panel_for_revised_paper$Date==as.Date("2019-12-30"),c("GDP","Date","Country")]
-table((panel_for_revised_paper[!is.na(panel_for_revised_paper$GDP),c("GDP","Date","Country")])$Country)
+for(i in 4:(ncol(MiddleEast)) ) {
+  for(j in 1:nrow(MiddleEast)) {
+    
+    MiddleEast[j, i ] <- MiddleEast[i-3, "GDP2019MIL"]   / MiddleEast[j,"sumofothers"] }
+}
 
-# Defining sample countries so that I can subset the SWF dataset 
-countries <- read_excel("Data/laender.xlsx", sheet = "EM")
-allCountriesSWF <- countries[ which(countries$EM_dummy5yr ==1), "COUNTRY5yrCDS"]
-colnames(allCountriesSWF) <- "COUNTRY"
-# Subsetting countries with SWF that are in sample
-GDP_Worldbank <- GDP_Worldbank[GDP_Worldbank$Country %in% allCountriesSWF$COUNTRY,  ]
-# Summing funds per country to get country total SWF
-SWF_Countryaggregates <- aggregate(SWF$AuM, by=list(Category=SWF$COUNTRY), FUN=sum)
-colnames(SWF_Countryaggregates) <- c("Country", "SWF_2019_AuMinUSD")
-SWF_Countryaggregates
-unique(GDP_Worldbank$Country)
+for(i in 4:(ncol(SouthAsia)) ) {
+  for(j in 1:nrow(SouthAsia)) {
+    
+    SouthAsia[j, i ] <- SouthAsia[i-3, "GDP2019MIL"]   / SouthAsia[j,"sumofothers"] }
+}
 
-import <-gather(as.data.frame( read_excel("2_Data/testimport.xlsx", col_names = TRUE) ), "Year", "GDPpc", -"Country Name")
-paneladdition <- read_excel("Data/paneladdition.xlsx")
-view(paneladdition)
+# Adding NAs on the diagonal
+for(i in 4:(ncol(Africa)) ) {
+  Africa[i-3, i ] <- NA
+}
 
+for(i in 4:(ncol(CentralAsia)) ) {
+  CentralAsia[i-3, i ] <- NA
+}
 
+for(i in 4:(ncol(EastAsia)) ) {
+  EastAsia[i-3, i ] <- NA
+}
 
+for(i in 4:(ncol(LATAM)) ) {
+  LATAM[i-3, i ] <- NA
+}
 
-# listofneededcountries <- unique(panel_for_revised_paper$Country)
-# 
-# 
-# Government_Responseasdfasdf <- Government_Response[Government_Response$Country %in% listofneededcountries, ]
-# 
-# unique(Government_Responseasdfasdf$Country)
-# unique(Government_Response$Country)
-# 
-# view(Government_Response$StringencyIndex)
+for(i in 4:(ncol(LATAM)) ) {
+  LATAM[i-3, i ] <- NA
+}
 
-# Oxford_V1$StringencyIndex[is.na(Oxford_V1$StringencyIndex)] <- 0
-# Oxford_V1 <- Oxford_V1 %>%
-#   dplyr::group_by(COUNTRY) %>%
-#   dplyr::mutate(SI_Growth = (StringencyIndex - Lag(StringencyIndex,1))/Lag(StringencyIndex,1))
-# Oxford_V1$SI_Growth[is.na(Oxford_V1$SI_Growth)] <- 0
-# 
-# 
-# 
-# view(Oxford_V1[, c("Date", "COUNTRY", "StringencyIndex", "SI_Growth")][is.infinite(Oxford_V1$SI_Growth),])
-# 
-# view(Government_Responses[, c("Date", "CountryName", "StringencyIndex")][Government_Responses$CountryName == "Brazil",])
-# colnames(Government_Responses)
-# 
-# oxford$Country <- as.character(oxford$Country)
-# 
-# # xxx I have to add zeros here for the code to work 
-# oxford$driving[is.na(oxford$driving)] <- 0
-# oxford$SI_Growth[is.na(oxford$SI_Growth)] <- 0
-# oxford$SI_Growth[is.na(oxford$SI_Growth)] <- 0
-# oxford$SI_Growth[is.infinite(oxford$SI_Growth)] <- 0
+for(i in 4:(ncol(MiddleEast)) ) {
+  MiddleEast[i-3, i ] <- NA
+}
 
+for(i in 4:(ncol(SouthAsia)) ) {
+  SouthAsia[i-3, i ] <- NA
+}
 
 
+Africa <- Africa[,-(2:3)]
+CentralAsia <- CentralAsia[,-(2:3)]
+EastAsia <- EastAsia[,-(2:3)]
+Europe <- Europe[,-(2:3)]
+LATAM <- LATAM[,-(2:3)]
+MiddleEast <- MiddleEast[,-(2:3)]
+SouthAsia <- SouthAsia[,-(2:3)]
 
-# Saving a safety copy so that I canreset the panel if it gets lost along the way
-# asdflkycppppoweijjiadf <- panel_for_revised_paper
-panel_for_revised_paper <- asdflkycppppoweijjiadf
+Africa
+CentralAsia
+EastAsia
+Europe
+LATAM
+MiddleEast
+SouthAsia
 
-colnames(panel_for_revised_paper)
 
 
+regions
+Africa$COUNTRY
 
+Egypt_affiliate_countries <- Africa$COUNTRY[!Africa$COUNTRY %in% "Egypt"]
+Egypt_affiliate_countries
 
+Egypt_weights <- subset(Africa, COUNTRY == "Egypt")
+Egypt_weights 
 
-paneladdition <- read_excel("Data/paneladdition.xlsx")
+Egypt_weights <- Egypt_weights[,Egypt_affiliate_countries]
+Egypt_weights
 
+sum(Egypt_weights) # just a check
 
+# Subset for affiliates countries
+Egypt_affiliates_matrix <- d_emcds[, Egypt_affiliate_countries]
 
+# Change to a dataframe so that the multiplication works
+Egypt_affiliates_matrix <- data.frame(Egypt_affiliates_matrix)
 
+Egypt <- rowSums(data.frame(mapply(`*`,Egypt_affiliates_matrix,Egypt_weights)) )
+Egypt
 
-SI_Growth Dummy_Fiscal_Country Dummy_Monetary_ECB Dummy_Monetary_Fed         IR
 
+Ghana_affiliate_countries <- Africa$COUNTRY[!Africa$COUNTRY %in% "Ghana"]
+Ghana_affiliate_countries
 
+Ghana_weights <- subset(Africa, COUNTRY == "Ghana")
+Ghana_weights 
 
+Ghana_weights <- Ghana_weights[,Ghana_affiliate_countries]
+Ghana_weights
 
+sum(Ghana_weights) # just a check
 
+# Subset for affiliates countries
+Ghana_affiliates_matrix <- d_emcds[, Ghana_affiliate_countries]
 
+# Change to a dataframe so that the multiplication works
+Ghana_affiliates_matrix <- data.frame(Ghana_affiliates_matrix)
 
+Ghana <- rowSums(data.frame(mapply(`*`,Ghana_affiliates_matrix,Ghana_weights)) )
+Ghana
 
 
+South.Africa_affiliate_countries <- Africa$COUNTRY[!Africa$COUNTRY %in% "South Africa"]
+South.Africa_affiliate_countries
 
-# paneladdition <- read_excel("Data/paneladdition.xlsx") # adding variables such as the oil, IMF suppot dummy, remittances, RFI, etc.
-# panel <- merge(panel, paneladdition, by = c("Country", "Date"), all.x = TRUE )
-# View(panel)
-view(colnames(panel_for_revised_paper))
+South.Africa_weights <- subset(Africa, COUNTRY == "South Africa")
+South.Africa_weights 
 
+South.Africa_weights <- South.Africa_weights[,South.Africa_affiliate_countries]
+South.Africa_weights
 
+sum(South.Africa_weights) # just a check
 
-view(panel_for_revised_paper[is.na(panel_for_revised_paper$transit),])
-a <- panel_for_revised_paper[!is.na(panel_for_revised_paper$transit),]
-unique(a$Country)
-b <- panel_for_revised_paper[!is.na(panel_for_revised_paper$walking),]
-unique(b$Country)
-c <- panel_for_revised_paper[!is.na(panel_for_revised_paper$driving),]
-unique(c$Country)
+# Subset for affiliates countries
+South.Africa_affiliates_matrix <- d_emcds[, South.Africa_affiliate_countries]
 
+# Change to a dataframe so that the multiplication works
+South.Africa_affiliates_matrix <- data.frame(South.Africa_affiliates_matrix)
 
+South.Africa <- rowSums(data.frame(mapply(`*`,South.Africa_affiliates_matrix,South.Africa_weights)) )
+South.Africa
 
 
+regions
+CentralAsia$COUNTRY
 
+Kazakhstan_affiliate_countries <- CentralAsia$COUNTRY[!CentralAsia $COUNTRY %in% "Kazakhstan"]
+Kazakhstan_affiliate_countries
 
+Kazakhstan_weights <- subset(CentralAsia, COUNTRY == "Kazakhstan")
+Kazakhstan_weights 
 
+Kazakhstan_weights <- Kazakhstan_weights[,Kazakhstan_affiliate_countries]
+Kazakhstan_weights
 
+sum(Kazakhstan_weights) # just a check
 
+# Subset for affiliates countries
+Kazakhstan_affiliates_matrix <- d_emcds[, Kazakhstan_affiliate_countries]
 
+# Change to a dataframe so that the multiplication works
+Kazakhstan_affiliates_matrix <- data.frame(Kazakhstan_affiliates_matrix)
 
+Kazakhstan <- rowSums(data.frame(mapply(`*`,Kazakhstan_affiliates_matrix,Kazakhstan_weights)) )
+Kazakhstan
 
 
+Russia_affiliate_countries <- CentralAsia$COUNTRY[!CentralAsia $COUNTRY %in% "Russia"]
+Russia_affiliate_countries
 
+Russia_weights <- subset(CentralAsia, COUNTRY == "Russia")
+Russia_weights 
 
-view(colnames(panel_for_revised_paper))
-# Now I can look at a few portions of the data to check if it looks good.
-# view(head(panel_for_revised_paper))
-# view(colnames(panel_for_revised_paper))
-# view(head(panel_for_revised_paper))
-# view(panel_for_revised_paper[panel_for_revised_paper$Country == "China", ])
-# tail(panel_for_revised_paper)
-# view(panel_for_revised_paper[panel_for_revised_paper$Date == as.Date("2020-04-16"), ])
+Russia_weights <- Russia_weights[,Russia_affiliate_countries]
+Russia_weights
 
+sum(Russia_weights) # just a check
 
+# Subset for affiliates countries
+Russia_affiliates_matrix <- d_emcds[, Russia_affiliate_countries]
 
+# Change to a dataframe so that the multiplication works
+Russia_affiliates_matrix <- data.frame(Russia_affiliates_matrix)
 
+Russia <- rowSums(data.frame(mapply(`*`,Russia_affiliates_matrix,Russia_weights)) )
+Russia
 
 
-d_nemds$Date <- unique(em_cds$Date)
-d_nemds <- d_nemds[, c(21, 1:20)]
+regions
+EastAsia$COUNTRY
 
-nonem_cds <- gather(d_nemds, "Country", "CDSlogchanges", -"Date")
+China_affiliate_countries <- EastAsia$COUNTRY[!EastAsia $COUNTRY %in% "China"]
+China_affiliate_countries
 
+China_weights <- subset(EastAsia, COUNTRY == "China")
+China_weights 
 
-# prepare data for regression ---------------------------------------------
-# Importing GDP 2019 data for developed markets
-GDP2019USDMIL_D <- read_excel("Data/GDP.xlsx", sheet = "GLOBAL")
-total <- sum(GDP2019USDMIL_D$GDP2019MIL)
-GDP2019USDMIL_D <- GDP2019USDMIL_D %>% mutate(weight = GDP2019MIL/ total  )
+China_weights <- China_weights[,China_affiliate_countries]
+China_weights
 
-###Prepare data for regression
-em_cds2<- em_cds
-# xxx nonem_cds2 <- nonem_cds
+sum(China_weights) # just a check
 
-# em_cds_test <- em_cds[which(em_cds$Date>="2020-06-20" & cds_five$Date<="2020-07-01"   ),]
-# d_emcds_test<-apply(log(em_cds_test[,-1]),2,diff) #log differences of EM spreads
-# View(em_cds_test)
-# View(d_emcds_test)
+# Subset for affiliates countries
+China_affiliates_matrix <- d_emcds[, China_affiliate_countries]
 
-d_emcds<-apply(log(em_cds2[,-1]),2,diff) #log differences of EM spreads
-d_nemds<-apply(log(nonem_cds[,-1]),2,diff) # log differences of non-EM spreads
+# Change to a dataframe so that the multiplication works
+China_affiliates_matrix <- data.frame(China_affiliates_matrix)
 
+China <- rowSums(data.frame(mapply(`*`,China_affiliates_matrix,China_weights)) )
+China
 
 
-# This was the old way before we starting weighting things
-# glo_cds <- as.data.frame(rowMeans(d_nemds) )# create a global CDS factor excluding EM
-# I changed this on 11. September 2020 as I realized I had not weighted the global factor accordingly. 
 
+Indonesia_affiliate_countries <- EastAsia$COUNTRY[!EastAsia $COUNTRY %in% "Indonesia"]
+Indonesia_affiliate_countries
 
+Indonesia_weights <- subset(EastAsia, COUNTRY == "Indonesia")
+Indonesia_weights 
+
+Indonesia_weights <- Indonesia_weights[,Indonesia_affiliate_countries]
+Indonesia_weights
+
+sum(Indonesia_weights) # just a check
+
+# Subset for affiliates countries
+Indonesia_affiliates_matrix <- d_emcds[, Indonesia_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Indonesia_affiliates_matrix <- data.frame(Indonesia_affiliates_matrix)
+
+Indonesia <- rowSums(data.frame(mapply(`*`,Indonesia_affiliates_matrix,Indonesia_weights)) )
+Indonesia
+
+
+
+Malaysia_affiliate_countries <- EastAsia$COUNTRY[!EastAsia $COUNTRY %in% "Malaysia"]
+Malaysia_affiliate_countries
+
+Malaysia_weights <- subset(EastAsia, COUNTRY == "Malaysia")
+Malaysia_weights 
+
+Malaysia_weights <- Malaysia_weights[,Malaysia_affiliate_countries]
+Malaysia_weights
+
+sum(Malaysia_weights) # just a check
+
+# Subset for affiliates countries
+Malaysia_affiliates_matrix <- d_emcds[, Malaysia_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Malaysia_affiliates_matrix <- data.frame(Malaysia_affiliates_matrix)
+
+Malaysia <- rowSums(data.frame(mapply(`*`,Malaysia_affiliates_matrix,Malaysia_weights)) )
+Malaysia
+
+
+
+Philippines_affiliate_countries <- EastAsia$COUNTRY[!EastAsia $COUNTRY %in% "Philippines"]
+Philippines_affiliate_countries
+
+Philippines_weights <- subset(EastAsia, COUNTRY == "Philippines")
+Philippines_weights 
+
+Philippines_weights <- Philippines_weights[,Philippines_affiliate_countries]
+Philippines_weights
+
+sum(Philippines_weights) # just a check
+
+# Subset for affiliates countries
+Philippines_affiliates_matrix <- d_emcds[, Philippines_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Philippines_affiliates_matrix <- data.frame(Philippines_affiliates_matrix)
+
+Philippines <- rowSums(data.frame(mapply(`*`,Philippines_affiliates_matrix,Philippines_weights)) )
+Philippines
+
+
+Thailand_affiliate_countries <- EastAsia$COUNTRY[!EastAsia $COUNTRY %in% "Thailand"]
+Thailand_affiliate_countries
+
+Thailand_weights <- subset(EastAsia, COUNTRY == "Thailand")
+Thailand_weights 
+
+Thailand_weights <- Thailand_weights[,Thailand_affiliate_countries]
+Thailand_weights
+
+sum(Thailand_weights) # just a check
+
+# Subset for affiliates countries
+Thailand_affiliates_matrix <- d_emcds[, Thailand_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Thailand_affiliates_matrix <- data.frame(Thailand_affiliates_matrix)
+
+Thailand <- rowSums(data.frame(mapply(`*`,Thailand_affiliates_matrix,Thailand_weights)) )
+Thailand
+
+
+regions
+Europe$COUNTRY
+
+Czechia_affiliate_countries <- Europe$COUNTRY[!Europe $COUNTRY %in% "Czechia"]
+Czechia_affiliate_countries
+
+Czechia_weights <- subset(Europe, COUNTRY == "Czechia")
+Czechia_weights 
+
+Czechia_weights <- Czechia_weights[,Czechia_affiliate_countries]
+Czechia_weights
+
+sum(Czechia_weights) # just a check
+
+# Subset for affiliates countries
+Czechia_affiliates_matrix <- d_emcds[, Czechia_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Czechia_affiliates_matrix <- data.frame(Czechia_affiliates_matrix)
+
+Czechia <- rowSums(data.frame(mapply(`*`,Czechia_affiliates_matrix,Czechia_weights)) )
+Czechia
+
+
+Hungary_affiliate_countries <- Europe$COUNTRY[!Europe $COUNTRY %in% "Hungary"]
+Hungary_affiliate_countries
+
+Hungary_weights <- subset(Europe, COUNTRY == "Hungary")
+Hungary_weights 
+
+Hungary_weights <- Hungary_weights[,Hungary_affiliate_countries]
+Hungary_weights
+
+sum(Hungary_weights) # just a check
+
+# Subset for affiliates countries
+Hungary_affiliates_matrix <- d_emcds[, Hungary_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Hungary_affiliates_matrix <- data.frame(Hungary_affiliates_matrix)
+
+Hungary <- rowSums(data.frame(mapply(`*`,Hungary_affiliates_matrix,Hungary_weights)) )
+Hungary
+
+
+Poland_affiliate_countries <- Europe$COUNTRY[!Europe $COUNTRY %in% "Poland"]
+Poland_affiliate_countries
+
+Poland_weights <- subset(Europe, COUNTRY == "Poland")
+Poland_weights 
+
+Poland_weights <- Poland_weights[,Poland_affiliate_countries]
+Poland_weights
+
+sum(Poland_weights) # just a check
+
+# Subset for affiliates countries
+Poland_affiliates_matrix <- d_emcds[, Poland_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Poland_affiliates_matrix <- data.frame(Poland_affiliates_matrix)
+
+Poland <- rowSums(data.frame(mapply(`*`,Poland_affiliates_matrix,Poland_weights)) )
+Poland
+
+
+Romania_affiliate_countries <- Europe$COUNTRY[!Europe $COUNTRY %in% "Romania"]
+Romania_affiliate_countries
+
+Romania_weights <- subset(Europe, COUNTRY == "Romania")
+Romania_weights 
+
+Romania_weights <- Romania_weights[,Romania_affiliate_countries]
+Romania_weights
+
+sum(Romania_weights) # just a check
+
+# Subset for affiliates countries
+Romania_affiliates_matrix <- d_emcds[, Romania_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Romania_affiliates_matrix <- data.frame(Romania_affiliates_matrix)
+
+Romania <- rowSums(data.frame(mapply(`*`,Romania_affiliates_matrix,Romania_weights)) )
+Romania
+
+
+Turkey_affiliate_countries <- Europe$COUNTRY[!Europe $COUNTRY %in% "Turkey"]
+Turkey_affiliate_countries
+
+Turkey_weights <- subset(Europe, COUNTRY == "Turkey")
+Turkey_weights 
+
+Turkey_weights <- Turkey_weights[,Turkey_affiliate_countries]
+Turkey_weights
+
+sum(Turkey_weights) # just a check
+
+# Subset for affiliates countries
+Turkey_affiliates_matrix <- d_emcds[, Turkey_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Turkey_affiliates_matrix <- data.frame(Turkey_affiliates_matrix)
+
+Turkey <- rowSums(data.frame(mapply(`*`,Turkey_affiliates_matrix,Turkey_weights)) )
+Turkey
+
+
+Ukraine_affiliate_countries <- Europe$COUNTRY[!Europe $COUNTRY %in% "Ukraine"]
+Ukraine_affiliate_countries
+
+Ukraine_weights <- subset(Europe, COUNTRY == "Ukraine")
+Ukraine_weights 
+
+Ukraine_weights <- Ukraine_weights[,Ukraine_affiliate_countries]
+Ukraine_weights
+
+sum(Ukraine_weights) # just a check
+
+# Subset for affiliates countries
+Ukraine_affiliates_matrix <- d_emcds[, Ukraine_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Ukraine_affiliates_matrix <- data.frame(Ukraine_affiliates_matrix)
+
+Ukraine <- rowSums(data.frame(mapply(`*`,Ukraine_affiliates_matrix,Ukraine_weights)) )
+Ukraine
+
+
+
+regions
+LATAM$COUNTRY
+
+Argentina_affiliate_countries <- LATAM$COUNTRY[!LATAM $COUNTRY %in% "Argentina"]
+Argentina_affiliate_countries
+
+Argentina_weights <- subset(LATAM, COUNTRY == "Argentina")
+Argentina_weights 
+
+Argentina_weights <- Argentina_weights[,Argentina_affiliate_countries]
+Argentina_weights
+
+sum(Argentina_weights) # just a check
+
+# Subset for affiliates countries
+Argentina_affiliates_matrix <- d_emcds[, Argentina_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Argentina_affiliates_matrix <- data.frame(Argentina_affiliates_matrix)
+
+Argentina <- rowSums(data.frame(mapply(`*`,Argentina_affiliates_matrix,Argentina_weights)) )
+Argentina
+
+
+Brazil_affiliate_countries <- LATAM$COUNTRY[!LATAM $COUNTRY %in% "Brazil"]
+Brazil_affiliate_countries
+
+Brazil_weights <- subset(LATAM, COUNTRY == "Brazil")
+Brazil_weights 
+
+Brazil_weights <- Brazil_weights[,Brazil_affiliate_countries]
+Brazil_weights
+
+sum(Brazil_weights) # just a check
+
+# Subset for affiliates countries
+Brazil_affiliates_matrix <- d_emcds[, Brazil_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Brazil_affiliates_matrix <- data.frame(Brazil_affiliates_matrix)
+
+Brazil <- rowSums(data.frame(mapply(`*`,Brazil_affiliates_matrix,Brazil_weights)) )
+Brazil
+
+
+Chile_affiliate_countries <- LATAM$COUNTRY[!LATAM $COUNTRY %in% "Chile"]
+Chile_affiliate_countries
+
+Chile_weights <- subset(LATAM, COUNTRY == "Chile")
+Chile_weights 
+
+Chile_weights <- Chile_weights[,Chile_affiliate_countries]
+Chile_weights
+
+sum(Chile_weights) # just a check
+
+# Subset for affiliates countries
+Chile_affiliates_matrix <- d_emcds[, Chile_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Chile_affiliates_matrix <- data.frame(Chile_affiliates_matrix)
+
+Chile <- rowSums(data.frame(mapply(`*`,Chile_affiliates_matrix,Chile_weights)) )
+Chile
+
+
+Colombia_affiliate_countries <- LATAM$COUNTRY[!LATAM $COUNTRY %in% "Colombia"]
+Colombia_affiliate_countries
+
+Colombia_weights <- subset(LATAM, COUNTRY == "Colombia")
+Colombia_weights 
+
+Colombia_weights <- Colombia_weights[,Colombia_affiliate_countries]
+Colombia_weights
+
+sum(Colombia_weights) # just a check
+
+# Subset for affiliates countries
+Colombia_affiliates_matrix <- d_emcds[, Colombia_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Colombia_affiliates_matrix <- data.frame(Colombia_affiliates_matrix)
+
+Colombia <- rowSums(data.frame(mapply(`*`,Colombia_affiliates_matrix,Colombia_weights)) )
+Colombia
+
+
+Dominican.Republic_affiliate_countries <- LATAM$COUNTRY[!LATAM$COUNTRY %in% "Dominican Republic"]
+Dominican.Republic_affiliate_countries
+
+Dominican.Republic_weights <- subset(LATAM, COUNTRY == "Dominican Republic")
+Dominican.Republic_weights 
+
+Dominican.Republic_weights <- Dominican.Republic_weights[,Dominican.Republic_affiliate_countries]
+Dominican.Republic_weights
+
+sum(Dominican.Republic_weights) # just a check
+
+# Subset for affiliates countries
+Dominican.Republic_affiliates_matrix <- d_emcds[, Dominican.Republic_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Dominican.Republic_affiliates_matrix <- data.frame(Dominican.Republic_affiliates_matrix)
+
+Dominican.Republic <- rowSums(data.frame(mapply(`*`,Dominican.Republic_affiliates_matrix,Dominican.Republic_weights)) )
+Dominican.Republic
+
+
+Mexico_affiliate_countries <- LATAM$COUNTRY[!LATAM$COUNTRY %in% "Mexico"]
+Mexico_affiliate_countries
+
+Mexico_weights <- subset(LATAM, COUNTRY == "Mexico")
+Mexico_weights 
+
+Mexico_weights <- Mexico_weights[,Mexico_affiliate_countries]
+Mexico_weights
+
+sum(Mexico_weights) # just a check
+
+# Subset for affiliates countries
+Mexico_affiliates_matrix <- d_emcds[, Mexico_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Mexico_affiliates_matrix <- data.frame(Mexico_affiliates_matrix)
+
+Mexico <- rowSums(data.frame(mapply(`*`,Mexico_affiliates_matrix,Mexico_weights)) )
+Mexico
+
+
+Panama_affiliate_countries <- LATAM$COUNTRY[!LATAM$COUNTRY %in% "Panama"]
+Panama_affiliate_countries
+
+Panama_weights <- subset(LATAM, COUNTRY == "Panama")
+Panama_weights 
+
+Panama_weights <- Panama_weights[,Panama_affiliate_countries]
+Panama_weights
+
+sum(Panama_weights) # just a check
+
+# Subset for affiliates countries
+Panama_affiliates_matrix <- d_emcds[, Panama_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Panama_affiliates_matrix <- data.frame(Panama_affiliates_matrix)
+
+Panama <- rowSums(data.frame(mapply(`*`,Panama_affiliates_matrix,Panama_weights)) )
+Panama
+
+
+Peru_affiliate_countries <- LATAM$COUNTRY[!LATAM$COUNTRY %in% "Peru"]
+Peru_affiliate_countries
+
+Peru_weights <- subset(LATAM, COUNTRY == "Peru")
+Peru_weights 
+
+Peru_weights <- Peru_weights[,Peru_affiliate_countries]
+Peru_weights
+
+sum(Peru_weights) # just a check
+
+# Subset for affiliates countries
+Peru_affiliates_matrix <- d_emcds[, Peru_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Peru_affiliates_matrix <- data.frame(Peru_affiliates_matrix)
+
+Peru <- rowSums(data.frame(mapply(`*`,Peru_affiliates_matrix,Peru_weights)) )
+Peru
+
+Uruguay_affiliate_countries <- LATAM$COUNTRY[!LATAM$COUNTRY %in% "Uruguay"]
+Uruguay_affiliate_countries
+
+Uruguay_weights <- subset(LATAM, COUNTRY == "Uruguay")
+Uruguay_weights 
+
+Uruguay_weights <- Uruguay_weights[,Uruguay_affiliate_countries]
+Uruguay_weights
+
+sum(Uruguay_weights) # just a check
+
+# Subset for affiliates countries
+Uruguay_affiliates_matrix <- d_emcds[, Uruguay_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Uruguay_affiliates_matrix <- data.frame(Uruguay_affiliates_matrix)
+
+Uruguay <- rowSums(data.frame(mapply(`*`,Uruguay_affiliates_matrix,Uruguay_weights)) )
+Uruguay
+
+regions
+MiddleEast$COUNTRY
+
+Bahrain_affiliate_countries <- MiddleEast$COUNTRY[!MiddleEast$COUNTRY %in% "Bahrain"]
+Bahrain_affiliate_countries
+
+Bahrain_weights <- subset(MiddleEast, COUNTRY == "Bahrain")
+Bahrain_weights 
+
+Bahrain_weights <- Bahrain_weights[,Bahrain_affiliate_countries]
+Bahrain_weights
+
+sum(Bahrain_weights) # just a check
+
+# Subset for affiliates countries
+Bahrain_affiliates_matrix <- d_emcds[, Bahrain_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Bahrain_affiliates_matrix <- data.frame(Bahrain_affiliates_matrix)
+
+Bahrain <- rowSums(data.frame(mapply(`*`,Bahrain_affiliates_matrix,Bahrain_weights)) )
+Bahrain
+
+
+Qatar_affiliate_countries <- MiddleEast$COUNTRY[!MiddleEast$COUNTRY %in% "Qatar"]
+Qatar_affiliate_countries
+
+Qatar_weights <- subset(MiddleEast, COUNTRY == "Qatar")
+Qatar_weights 
+
+Qatar_weights <- Qatar_weights[,Qatar_affiliate_countries]
+Qatar_weights
+
+sum(Qatar_weights) # just a check
+
+# Subset for affiliates countries
+Qatar_affiliates_matrix <- d_emcds[, Qatar_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Qatar_affiliates_matrix <- data.frame(Qatar_affiliates_matrix)
+
+Qatar <- rowSums(data.frame(mapply(`*`,Qatar_affiliates_matrix,Qatar_weights)) )
+Qatar
+
+
+Saudi.Arabia_affiliate_countries <- MiddleEast$COUNTRY[!MiddleEast$COUNTRY %in% "Saudi Arabia"]
+Saudi.Arabia_affiliate_countries
+
+Saudi.Arabia_weights <- subset(MiddleEast, COUNTRY == "Saudi Arabia")
+Saudi.Arabia_weights 
+
+Saudi.Arabia_weights <- Saudi.Arabia_weights[,Saudi.Arabia_affiliate_countries]
+Saudi.Arabia_weights
+
+sum(Saudi.Arabia_weights) # just a check
+
+# Subset for affiliates countries
+Saudi.Arabia_affiliates_matrix <- d_emcds[, Saudi.Arabia_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Saudi.Arabia_affiliates_matrix <- data.frame(Saudi.Arabia_affiliates_matrix)
+
+Saudi.Arabia <- rowSums(data.frame(mapply(`*`,Saudi.Arabia_affiliates_matrix,Saudi.Arabia_weights)) )
+Saudi.Arabia
+
+
+
+regions
+SouthAsia$COUNTRY
+
+India_affiliate_countries <- SouthAsia$COUNTRY[!SouthAsia$COUNTRY %in% "India"]
+India_affiliate_countries
+
+India_weights <- subset(SouthAsia, COUNTRY == "India")
+India_weights 
+
+India_weights <- India_weights[,India_affiliate_countries]
+India_weights
+
+sum(India_weights) # just a check
+
+# Subset for affiliates countries
+India_affiliates_matrix <- d_emcds[, India_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+India_affiliates_matrix <- data.frame(India_affiliates_matrix)
+
+India <- rowSums(data.frame(mapply(`*`,India_affiliates_matrix,India_weights)) )
+India
+
+
+Sri.Lanka_affiliate_countries <- SouthAsia$COUNTRY[!SouthAsia$COUNTRY %in% "Sri Lanka"]
+Sri.Lanka_affiliate_countries
+
+Sri.Lanka_weights <- subset(SouthAsia, COUNTRY == "Sri Lanka")
+Sri.Lanka_weights 
+
+Sri.Lanka_weights <- Sri.Lanka_weights[,Sri.Lanka_affiliate_countries]
+Sri.Lanka_weights
+
+sum(Sri.Lanka_weights) # just a check
+
+# Subset for affiliates countries
+Sri.Lanka_affiliates_matrix <- d_emcds[, Sri.Lanka_affiliate_countries]
+
+# Change to a dataframe so that the multiplication works
+Sri.Lanka_affiliates_matrix <- data.frame(Sri.Lanka_affiliates_matrix)
+
+Sri.Lanka <- rowSums(data.frame(mapply(`*`,Sri.Lanka_affiliates_matrix,Sri.Lanka_weights)) )
+Sri.Lanka
+
+
+
+# This was the old way before we started weighting things
+# em_fac<-matrix(NA,nrow=nrow(d_emcds),ncol=ncol(d_emcds)) # create an EM common factor excluding country i
+# for(i in 1:ncol(em_fac)){
+#   em_fac[,i]<-rowMeans(d_emcds[,-i])
+# }
 
 # This is the new way when we start weighting things
-d_nemds <- as.data.frame(d_nemds[,])
-weighted_matrix <- d_nemds*GDP2019USDMIL_D$weight
-glo_cds <- as.data.frame(rowMeans(weighted_matrix) )
+# First I create an empty matrix of 30 countries X the number of differenced log CDS spreads
+em_fac<-matrix(NA,nrow=nrow(d_emcds),ncol=ncol(d_emcds)) 
 
-# Weight of US in global factor
-GDP2019USDMIL_D[which(GDP2019USDMIL_D$COUNTRY == "US"), ]
-US_Weight <- GDP2019USDMIL_D[which(GDP2019USDMIL_D$COUNTRY == "US"), ]
+# Then I rename the column names to keep track of the individual columns
+colnames(em_fac) <- colnames(d_emcds)
 
-# Weight of Japan in global factor
-GDP2019USDMIL_D[which(GDP2019USDMIL_D$COUNTRY == "Japan"), ]
-Japan_Weight <- GDP2019USDMIL_D[which(GDP2019USDMIL_D$COUNTRY == "Japan"), ]
+# Then I fill up all the columns with the right data
+Africa$COUNTRY
+em_fac[, "Egypt"] <- Egypt
+em_fac[, "Ghana"] <- Ghana
+em_fac[, "South Africa"] <- South.Africa
 
-# Weight of Eurozone in global factor
-1-(US_Weight$weight + Japan_Weight$weight)
-EZ_Weight <- 1-(US_Weight$weight + Japan_Weight$weight)
+CentralAsia$COUNTRY
+em_fac[, "Kazakhstan"] <- Kazakhstan
+em_fac[, "Russia"] <- Russia
 
-# glo_cds_weighted <- 
-a <- as.data.frame(c("Germany", "France"), c(100,40) )
-countryexample <- c("Germany", "France")
-countrynumbers <- c(100,40)
-country.roster <- data.frame(countryexample, countrynumbers)
+EastAsia$COUNTRY
+em_fac[, "China"] <- China
+em_fac[, "Indonesia"] <- Indonesia
+em_fac[, "Malaysia"] <- Malaysia
+em_fac[, "Philippines"] <- Philippines
+em_fac[, "Thailand"] <- Thailand
 
-em_fac<-matrix(NA,nrow=nrow(d_emcds),ncol=ncol(d_emcds)) # create an EM common factor excluding country i
-for(i in 1:ncol(em_fac)){
-  em_fac[,i]<-rowMeans(d_emcds[,-i])
-}
+Europe$COUNTRY
+em_fac[, "Czechia"] <- Czechia
+em_fac[, "Hungary"] <- Hungary
+em_fac[, "Poland"] <- Poland
+em_fac[, "Romania"] <- Romania
+em_fac[, "Turkey"] <- Turkey
+em_fac[, "Ukraine"] <- Ukraine
 
-for(i in 1:ncol(em_fac)){
-  em_fac[,i]<-rowMeans(d_emcds[,-i])
-}
+LATAM$COUNTRY
+em_fac[, "Argentina"] <- Argentina
+em_fac[, "Brazil"] <- Brazil
+em_fac[, "Chile"] <- Chile
+em_fac[, "Colombia"] <- Colombia
+em_fac[, "Dominican Republic"] <- Dominican.Republic
+em_fac[, "Mexico"] <- Mexico
+em_fac[, "Panama"] <- Panama
+em_fac[, "Peru"] <- Peru
+em_fac[, "Uruguay"] <- Uruguay
 
+MiddleEast$COUNTRY
+em_fac[, "Bahrain"] <- Bahrain
+em_fac[, "Qatar"] <- Qatar
+em_fac[, "Saudi Arabia"] <- Saudi.Arabia
 
+SouthAsia$COUNTRY
+em_fac[, "India"] <- India
+em_fac[, "Sri Lanka"] <- Sri.Lanka
 
+# Now that I am done with the steps above, I need to create a long panel of them and then match them to the panel_for_revised_paper
+Date <- as.data.frame(unique(panel_for_revised_paper$Date) )
+colnames(Date) <- "Date"
+em_fac <- cbind(Date, em_fac )
+em_fac <- gather(em_fac, "Country", "GDPweightedregionalpeersCDSlogchanges", -"Date")
 
+# Join it to the panel_for_revised_paper
+panel_for_revised_paper <- left_join(panel_for_revised_paper, em_fac, by = c("Date" = "Date", "Country" = "Country")  )
 
+# Create a safetycopy
+# safetywithGDPweightedpeersregionalCDS <- panel_for_revised_paper
+# panel_for_revised_paper <- safetywithGDPweightedpeersregionalCDS
 
 
 
 
+# Adding the PMI data -----------------------------------------------------
 
 
 
+vis_dat(panel_for_revised_paper, warn_large_data = F)
 
 
 
-
-
-
-
-
-myJoin$Rating[myJoin$Month=="1989-12-31"] <- "xoxoxo"
-myJoin <- myJoin %>% fill(Rating)
-myJoin <- myJoin %>% fill(Home)
-
-# Removing first value
-myJoin <- myJoin[!(myJoin$Month=="1989-12-31"),]
-
-# 5) Removing all observations with no rating value 
-myJoin <- myJoin[!(myJoin$Rating=="xoxoxo"),]
-
-
-
-
-em_cds$value.lag1<-NA
-levs<-levels(as.factor(em_cds$Country))
-levs
-for (i in 1:length(levs)) {
-  temper<- subset(em_cds,Country==as.numeric(levs[i]))
-  temper<- rbind(NA,temper[-nrow(temper),])  
-  em_cds$value.lag1[df$Country==as.numeric(as.character(levs[i]))]<- temper
-}
-
-
-
-d <- data.frame( 
-  User = rep( LETTERS[1:3], each=10 ),
-  Date = seq.Date( Sys.Date(), length=30, by="day" ),
-  Value = rep(1:10, 3)
-)
-library(plyr)
-d <- ddply( 
-  d, .(User), transform,
-  # This assumes that the data is sorted
-  Value.new = c( NA, Value[-length(Value)] ) 
-)
-
-
-
-df$value.lag1<-NA
-levs<-levels(as.factor(df$User))
-levs
-for (i in 1:length(levs)) {
-  temper<- subset(df,User==as.numeric(levs[i]))
-  temper<- rbind(NA,temper[-nrow(temper),])  
-  df$value.lag1[df$User==as.numeric(as.character(levs[i]))]<- temper
-}
-
-library(dplyr)
-tlag <- function(x, n = 1L, time) { 
-  index <- match(time - n, time, incomparables = NA)
-  x[index]
-}
-
-em_cds <- em_cds %>% group_by(Country) %>% mutate(value_lagged = tlag(log.CDS, 1, time = Date))
-
-
-
-em_cds <- em_cds %>% group_by(Country) %>% mutate(log.CDSlag = lag(log.CDS, order_by =Date) )
-         
-
-view(em_cds[em_cds$Country=="Argentina",])
-str(em_cds)
-view(em_cds)
-     
-
-result <- do.call("rbind", by(A, A$person, f))
-result
-
-
-
-df<-pdata.frame(em_cds,index=c("id","date"))  
-
-
-em_cds <- em_cds %>%
-  group_by(Country) %>%
-  arrange(Country, Date) %>%
-  mutate(diff.CDS.lagged = lag(log.CDS, n = 2) )
-
-str(em_cds)
-view(em_cds)
-
-
-d_emcds<-apply(log(em_cds2[,-1]),2,diff) #log differences of EM spreads
-
-
-explanatoryVariable <- em_cds %>%
-  group_by(Country) %>%
-  arrange(Country, Date) %>%
-  mutate(GDPpc.12ma = rollapply(data = log.CDS, 
-                                width = 12, 
-                                FUN = mean, 
-                                align = "left", 
-                                fill = NA, 
-                                na.rm = T)) %>%
-  mutate(GDPpc.12ma.lagged = lag(GDPpc.12ma, n=12) )
-view(explanatoryVariable)
-
-
-
-
-
-em_cds$Date <- as.Date(em_cds$Date)
-
-
-
-em_cds %>%
-  mutate(log.CDS = log(CDS.level) ) 
-
-
-
-em_cds <- em_cds %>%
-  group_by(Country, Date) %>%
-  mutate(log.CDS.lagged = lag(log.CDS) )
-
-str(lag(em_cds$log.CDS))
-str(em_cds$log.CDS)
-
-view(em_cds)
-
-explanatoryVariable <- import %>%
-  group_by(Country) %>%
-  arrange(Country, Month) %>%
-  mutate(GDPpc.12ma = rollapply(data = GDPpc, 
-                                width = 12, 
-                                FUN = mean, 
-                                align = "left", 
-                                fill = NA, 
-                                na.rm = T)) %>%
-  mutate(GDPpc.12ma.lagged = lag(GDPpc.12ma, n=12) )
-
-
-em_cds <- em_cds %>%
-  group_by(Country) %>%
-  arrange(Country, Date) %>%
-  mutate(GDPpc.12ma = rollapply(data = GDPpc, 
-                                width = 12, 
-                                FUN = mean, 
-                                align = "left", 
-                                fill = NA, 
-                                na.rm = T)) %>%
-  mutate(GDPpc.12ma.lagged = lag(GDPpc.12ma, n=12) )
-
-
-
-explanatoryVariable <- import %>%
-  group_by(Country) %>%
-  arrange(Country, Month) %>%
-  mutate(GDPpc.12ma = rollapply(data = GDPpc, 
-                                width = 12, 
-                                FUN = mean, 
-                                align = "left", 
-                                fill = NA, 
-                                na.rm = T)) %>%
-  mutate(GDPpc.12ma.lagged = lag(GDPpc.12ma, n=12) )
-
-
-# ###### I don't think this is necessary
-# Oxford_V1 <- read_excel("Data/Oxford_V1.xlsx")
-# # safetyofthis <- Oxford_V1
-# # Oxford_V1 <- safetyofthis
-# Oxford_addition <- read_excel("Data/Oxford_V1_dummyts_additions.xlsx")
-# # safetyofthat <- Oxford_addition
-# # Oxford_addition <- safetyofthat
-# Oxford_V1 <- as_tibble(merge(Oxford_V1, Oxford_addition, by=c("COUNTRY", "Date")))
-# Oxford_V1 <- as.data.frame(Oxford_V1)
-# # safetyoftheother <- Oxford_V1
-# # Oxford_V1 <- safetyoftheother
-# # View(Oxford_V1)
-# # I don't think this is necessary up to here. 
 
