@@ -263,10 +263,6 @@ oxford <- oxford %>%
 # Now I can join the Oxford_V1 database that contain many of the explanatory variables to the panel_for_revised_paper 
 panel_for_revised_paper <- left_join(panel_for_revised_paper, oxford, by = c("Country" = "COUNTRY", "Date" = "Date")  )
 
-copy <- panel_for_revised_paper  <- copy
-# view(colnames(panel_for_revised_paper))
-# view(colnames(panel_for_revised_paper))
-
 # In order for this to work, I need to make the data numeric first.
 panel_for_revised_paper$Fiscal_Response_Dummy <- as.numeric(panel_for_revised_paper$Fiscal_Response_Dummy)
 panel_for_revised_paper$Monetary_Response_Dummy <- as.numeric(panel_for_revised_paper$Monetary_Response_Dummy)
@@ -1551,8 +1547,18 @@ panel_for_revised_paper <- left_join(panel_for_revised_paper, em_fac, by = c("Da
 
 
 
+# Creating the weighted fiscal response series ----------------------------
+summary(panel_for_revised_paper$Fiscal_Response_Dummy)
+summary(panel_for_revised_paper$E3_Fiscal.measures)
+
+view(panel_for_revised_paper$Fiscal_Response_Dummy)
 
 # Adding the PMI data -----------------------------------------------------
+
+
+
+
+
 
 
 
