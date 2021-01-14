@@ -56,7 +56,7 @@ library(fastDummies)
 library(car)
 library(heatmaply)
 library(htmlwidgets)
-library(summarytools)
+# library(summarytools)
 library(glmnet)
 library(caret)
 library(mlbench)
@@ -80,7 +80,7 @@ library(dplyr)
 library(writexl)
 library(plyr)
 library(visdat)
---------------------------------------------------------------------------
+
 
 # read in cds ddata -------------------------------------------------------
 cds_five <- read_excel("Data/CDS.xlsx", sheet = "5yrCDS")
@@ -286,8 +286,8 @@ panel_for_revised_paper <- panel_for_revised_paper %>%   dplyr::group_by(Country
 # safetywithfilledupvalues <- panel_for_revised_paper
 # panel_for_revised_paper <- safetywithfilledupvalues
 
-
-
+listofneededcountries <- em_countries
+listofneededcountries <- listofneededcountries$COUNTRY5yrCDS
 # Import google mobility stringency ---------------------------------------
 # Importing
 mobility_google <- read.csv("Data/Global_Mobility_Report.csv") # This thing is large so I keep a copy here: copyofmobility_google <- mobility_google  <- copyofmobility_google  
@@ -377,7 +377,7 @@ panel_for_revised_paper <- panel_for_revised_paper %>% mutate(oil_income_price_e
 # Safetycopy 
 # safetywithoilincome <- panel_for_revised_paper
 # panel_for_revised_paper <- safetywithoilincome
-
+# vis_dat(panel_for_revised_paper, warn_large_data = F)
 
 
 # Adding international reserves to the panel ------------------------------
@@ -1535,9 +1535,18 @@ panel_for_revised_paper <- left_join(panel_for_revised_paper, em_fac, by = c("Da
 # safetywithGDPweightedpeersregionalCDS <- panel_for_revised_paper
 # panel_for_revised_paper <- safetywithGDPweightedpeersregionalCDS
 
+# Create an excel safety copy so that the code above does not need to be rerun 
+# write_xlsx(panel_for_revised_paper, "Data/safetywithGDPweightedpeersregionalCDS13.1.2020.xlsx")
+# panel_for_revised_paper <- read_excel("Data/safetywithGDPweightedpeersregionalCDS13.1.2020.xlsx")
 
 
 # Creating the weighted fiscal response series ----------------------------
+# To create weighted series, I multiply them with each country's total stimulus package
+# Keep in mind: We capture these policies across individual countries. 
+# Policy announcements were coded as 1, and actions were coded as 2. 
+# On days with neither an announcement nor an action, we input 0. 
+# We always looked for announcement including "millions" and "billions". 
+# The stimulus package data comes from three sources: from Yothin, from professor Elgin, and from the ADB
 
 # Importing Stimulus Data from Yothin
 Stimulus_GDP_from_Yothin <- read.csv("Data/27oct2020_ahm_aiz_jin_noy_dataset.csv")
@@ -1550,10 +1559,10 @@ Stimulus_GDP_from_Yothin$Country <- tolower(Stimulus_GDP_from_Yothin$Country)
 Stimulus_GDP_from_Yothin$Country <- str_to_title(Stimulus_GDP_from_Yothin$Country)
 # Changing some country names in order to be able to do the matching
 Stimulus_GDP_from_Yothin$Country[Stimulus_GDP_from_Yothin$Country == "Czech Republic"] <- "Czechia"
+colnames(Stimulus_GDP_from_Yothin) <- c("Country", "StimulusGDP")
 # Subsetting for those countries that we need 
 Stimulus_GDP_from_Yothin <- Stimulus_GDP_from_Yothin[Stimulus_GDP_from_Yothin$Country %in% listofneededcountries, ] 
 # Absent countries are uruguay, qatar, and panama. Data for Chile is missing
-
 
 
 # Importing Stimulus Data from Elgin (http://www.ceyhunelgin.com)
@@ -1565,42 +1574,268 @@ Stimulus_GDP_from_Elgin$Country[Stimulus_GDP_from_Elgin$Country == "Czech"] <- "
 # Subsetting for the right 30 countries 
 Stimulus_GDP_from_Elgin <- Stimulus_GDP_from_Elgin[Stimulus_GDP_from_Elgin$Country %in% listofneededcountries, ]
 # Renaming variables
-colnames(Stimulus_GDP_from_Elgin) <- c("Country", "Date", "Stimulus_GDP_Elgin")
+colnames(Stimulus_GDP_from_Elgin) <- c("Country", "Date", "StimulusGDP")
+# Keeping only two variables
+Stimulus_GDP_from_Elgin <- Stimulus_GDP_from_Elgin[, c("Country", "StimulusGDP")]
+Stimulus_GDP_from_Elgin <- as.data.frame(Stimulus_GDP_from_Elgin)
+
+# # Importing Stimulus Data from ABD 
+# Stimulus_GDP_from_ADB <- read_excel("Data/StimulusGDPfromABD_COVID policy database.xlsx", sheet = "Sheet1")
+# # Subsetting for the right fiscal variable
+# Stimulus_GDP_from_ADB <- Stimulus_GDP_from_ADB[, c("Country", "Total package share of GDP")]
+# # Renaming variables
+# colnames(Stimulus_GDP_from_ADB) <- c("Country", "StimulusGDP")
+# Stimulus_GDP_from_ADB <- as.data.frame(Stimulus_GDP_from_ADB)
+
+# StimulusSources <- c("Stimulus_GDP_from_Yothin", "Stimulus_GDP_from_Elgin", "Stimulus_GDP_from_ABD")
+panel_for_revised_paper$Stimulus_GDP_from_Yothin <- NA
+panel_for_revised_paper$Stimulus_GDP_from_Elgin <- NA
 
 
-# Importing Stimulus Data from ABD 
-Stimulus_GDP_from_ABD <- read_excel("Data/StimulusGDPfromABD_COVID policy database.xlsx", sheet = "Sheet1")
-# Subsetting for the right fiscal variable
-Stimulus_GDP_from_ABD <- Stimulus_GDP_from_ABD[, c("Country", "As of", "Total package share of GDP")]
-# Renaming variables
-colnames(Stimulus_GDP_from_ABD) <- c("Country", "Date", "Stimulus_GDP_ABD")
+# Filling up the values for Yothin's stimulus data
+for(i in 1:nrow(as.data.frame(listofneededcountries))  ) {  
+  name <- listofneededcountries[i]
+  panel_for_revised_paper$Stimulus_GDP_from_Yothin[panel_for_revised_paper$Country == name] <- Stimulus_GDP_from_Yothin[Stimulus_GDP_from_Yothin$Country == name, c("StimulusGDP")]    }
+
+# Filling up the values for Elgin's stimulus data
+for(i in 1:nrow(as.data.frame(listofneededcountries))  ) {  
+  name <- listofneededcountries[i]
+  panel_for_revised_paper$Stimulus_GDP_from_Elgin[panel_for_revised_paper$Country == name] <- Stimulus_GDP_from_Elgin[Stimulus_GDP_from_Elgin$Country == name, c("StimulusGDP")]    }
 
 
-StimulusGDPfromABD_COVID policy database.xlsx
+# The simplest way to create a weighted Fiscal_Dummy_Series is to multiply the Stimulus/GDP with the dummy series
+panel_for_revised_paper <- panel_for_revised_paper %>%
+  mutate(Yothin_Stimulus_X_Fiscal_Response_Dummy = Stimulus_GDP_from_Yothin*Fiscal_Response_Dummy)  
 
-unique(Stimulus_GDP_from_Elgin$Country)
-unique(panel_for_revised_paper$Country)
+panel_for_revised_paper <- panel_for_revised_paper %>%
+  mutate(Elgin_Stimulus_X_Fiscal_Response_Dummy = Stimulus_GDP_from_Elgin/100*Fiscal_Response_Dummy)  
+
+# A better one is probably to create linearly increasing time series between the first date of an announcement or action and the end of our panel. 
+# For example, for a country making the first announcement on 1. February and the total stimulus in the end was 10%, the time series would be zeros
+# before 1. February. From then on onwards it would be increasing every day, linearly, to reach 10% at the end of June. 
+# The problem is that for four countries the dummy never got activated. Hence, for those countries we have to manually define when their time series starts. 
+# The four countries are Czech Republic, Panama, Poland, Uruguay. This can be seen by running the code below and checking which countries are missing here but are in the 30 country list. 
+# view( panel_for_revised_paper[panel_for_revised_paper$Fiscal_Response_Dummy > 0, c("Country", "Date", "Fiscal_Response_Dummy")] )
+m <- panel_for_revised_paper[panel_for_revised_paper$Fiscal_Response_Dummy > 0, c("Country", "Date" )]
+m <- m %>% arrange(Country, Date) %>% group_by(Country) %>% slice_head(c(1,n()))
+mean(m$Date)
+# When I take the average of the first dummy-activation-date of the 26 countries in an excel sheet, I get 2020-03-20. I am wondering if I should just start to linearly extrapolate the 
+# stimulus for each country on this day or if I should use individual starting dates and have the 2020-03-20 for those four countries for which there dummy does not get activated. I 
+# think I am using the later suggestion. To do so, I create the data in an excel sheet. 
+# Importing it
+LinearIncreasingStimulus <- gather(read_excel("Data/LinearIncreasingFiscalStimulus.xlsx", sheet = "R"), "Date2", "Stimulus", -"Date")
+# Renaming the variables
+colnames(LinearIncreasingStimulus) <- c("Country", "Date", "FiscalStimulus_LinearlyIncreasing")
+# Redefining Date 
+LinearIncreasingStimulus$Date <- as.Date(as.numeric(LinearIncreasingStimulus$Date),  origin = "1899-12-30")
+# Ordering and arranging the right way
+LinearIncreasingStimulus <- LinearIncreasingStimulus %>% group_by(Country) %>% arrange(Country, Date)
+# For some reason I need to rename the countries again before joining 
+panel_for_revised_paper$Country[panel_for_revised_paper$Country == "Dominican Republic"] <- "DominicanRepublic"
+panel_for_revised_paper$Country[panel_for_revised_paper$Country == "Saudi Arabia"] <- "SaudiArabia"
+panel_for_revised_paper$Country[panel_for_revised_paper$Country == "South Africa"] <- "SouthAfrica"
+panel_for_revised_paper$Country[panel_for_revised_paper$Country == "Sri Lanka"] <- "SriLanka"
+# Joining it to the panel
+panel_for_revised_paper <- left_join(panel_for_revised_paper, LinearIncreasingStimulus, by = c("Date" = "Date", "Country" = "Country")  )
+# Fill up the earlier values with zeros
+panel_for_revised_paper$FiscalStimulus_LinearlyIncreasing[is.na(panel_for_revised_paper$FiscalStimulus_LinearlyIncreasing)] <- 0
+# Now I change the names back again
+panel_for_revised_paper$Country[panel_for_revised_paper$Country == "DominicanRepublic"] <- "Dominican Republic"
+panel_for_revised_paper$Country[panel_for_revised_paper$Country == "SaudiArabia"] <- "Saudi Arabia"
+panel_for_revised_paper$Country[panel_for_revised_paper$Country == "SouthAfrica"] <- "South Africa"
+panel_for_revised_paper$Country[panel_for_revised_paper$Country == "SriLanka"] <- "Sri Lanka"
 
 
+# Create a safetycopy
+# safetywithlinearlyincreasingfiscal <- panel_for_revised_paper
+# panel_for_revised_paper <- safetywithlinearlyincreasingfiscal
 
-view(unique(panel_for_revised_paper$Country))
-summary(panel_for_revised_paper$Fiscal_Response_Dummy)
-view(panel_for_revised_paper$Fiscal_Response_Dummy)
-
-# Adding the PMI data -----------------------------------------------------
-
-
-
-
-
-
-
+# Create an excel safety copy so that the code above does not need to be rerun 
+# write_xlsx(panel_for_revised_paper, "Data/panelsafety13.1.2020.xlsx")
+# panel_for_revised_paper <- read_excel("Data/panelsafety13.1.2020.xlsx")
 
 vis_dat(panel_for_revised_paper, warn_large_data = F)
-
-
-
-
-# xxxx maybe I need to do these later
+vis_miss(panel_for_revised_paper, warn_large_data = F)
+# view(panel_for_revised_paper[panel_for_revised_paper$Date == as.Date("2020-06-30"), c("Country", "Date", "Stimulus_GDP_from_Elgin",  "retail_and_recreation_percent_change_from_baseline"  )]  )
+# maybe I need to do these later
 # panel_for_revised_paper <- panel_for_revised_paper %>% fill(Debt_to_China_as_share_of_GDP) 
 # panel_for_revised_paper <- panel_for_revised_paper %>% fill(ChinaDebt_USD) 
+
+
+
+
+# Regressions -------------------------------------------------------------
+# I keep a copy here so that I always have it on hand. 
+# copyofpanel <- panel_for_revised_paper
+# panel_for_revised_paper <- copyofpanel
+# Another way of getting a "hard copy" is importing the data from an excel sheet
+# panel_for_revised_paper <- read_excel("Data/panelsafety13.1.2020.xlsx")
+
+# First, we always need to know what are the variables we can use. We can find out through this:
+colnames(panel_for_revised_paper)
+# Importantly, before we run any regressions, we should always subset first for only those variables that we actually use. 
+# This dramatically reduces computing resources required. 
+
+# Regression 1 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+# Define needed Variables
+requiredVariables <- c("Date", "Country", "changes.log.CDS", "lagged.changes.log.CDS", "GDPweightedglobalCDSlogchanges", "trade_share_weighted_log_CDS_changes_of_29_peers", "GDPweightedregionalpeersCDSlogchanges"   )
+# Subset for needed Variables
+subsetPanel <- panel_for_revised_paper[, requiredVariables ]
+# Change format of panel
+pdf <- pdata.frame(subsetPanel, index = c("Country", "Date"))
+# Run regression
+model1 <- plm(changes.log.CDS ~ lagged.changes.log.CDS + GDPweightedregionalpeersCDSlogchanges + GDPweightedglobalCDSlogchanges,
+              method="pooling", 
+              data=pdf, na.action="na.exclude")
+se.model1 <- coeftest(model1, vcov = vcovHC(model1, type = "HC1"))
+# Look at output
+summary(model1) # This model only has country-fixed effects
+
+# Regression 2 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+# Define needed Variables
+requiredVariables <- c("Date", "Country", "changes.log.CDS", "lagged.changes.log.CDS", "GDPweightedglobalCDSlogchanges", "trade_share_weighted_log_CDS_changes_of_29_peers", "GDPweightedregionalpeersCDSlogchanges"   )
+# Subset for needed Variables
+subsetPanel <- panel_for_revised_paper[, requiredVariables ]
+# Change format of panel
+pdf <- pdata.frame(subsetPanel, index = c("Country", "Date"))
+# Run regression
+model2 <- plm(changes.log.CDS ~ lagged.changes.log.CDS + GDPweightedregionalpeersCDSlogchanges + GDPweightedglobalCDSlogchanges,
+              method="pooling", effect="twoways", 
+              data=pdf, na.action="na.exclude")
+se.model2 <- coeftest(model2, vcov = vcovHC(model2, type = "HC1"))
+# Look at output
+summary(model2) # This model has country and time-fixed effects. We should not use it as then the variable of the GDweightedglobalCDSlogchanges is dropped automatically. 
+
+# Regression 3 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+# Define needed Variables
+requiredVariables <- c("Date", "Country", "changes.log.CDS", "lagged.changes.log.CDS", "GDPweightedglobalCDSlogchanges", "trade_share_weighted_log_CDS_changes_of_29_peers", "GDPweightedregionalpeersCDSlogchanges"   )
+# Subset for needed Variables
+subsetPanel <- panel_for_revised_paper[, requiredVariables ]
+# Change format of panel
+pdf <- pdata.frame(subsetPanel, index = c("Country", "Date"))
+# Run regression
+model3 <- plm(changes.log.CDS ~ lagged.changes.log.CDS + trade_share_weighted_log_CDS_changes_of_29_peers + GDPweightedglobalCDSlogchanges,
+              method="pooling",  
+              data=pdf, na.action="na.exclude")
+se.model3 <- coeftest(model3, vcov = vcovHC(model3, type = "HC1"))
+# Look at output
+summary(model3)  
+
+
+# Regression 4 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+# Define needed Variables
+requiredVariables <- c("Date", "Country", "changes.log.CDS", "lagged.changes.log.CDS", "GDPweightedglobalCDSlogchanges", "trade_share_weighted_log_CDS_changes_of_29_peers", "GDPweightedregionalpeersCDSlogchanges"   )
+# Subset for needed Variables
+subsetPanel <- panel_for_revised_paper[, requiredVariables ]
+# Change format of panel
+pdf <- pdata.frame(subsetPanel, index = c("Country", "Date"))
+# Run regression
+model4 <- plm(changes.log.CDS ~ lagged.changes.log.CDS + GDPweightedregionalpeersCDSlogchanges ,
+              method="pooling",  effect="twoways",
+              data=pdf, na.action="na.exclude")
+se.model4 <- coeftest(model4, vcov = vcovHC(model4, type = "HC1"))
+# Look at output
+summary(model4)  
+
+install.packages("stargazer") 
+library(stargazer)
+
+
+stargazer(digits=5,model1,model2,model3, model4,
+          type="latex",se=list(se.model1[,2],se.model2[,2],se.model3[,2]),se.model4[,2]), out=file.path("TabletestTimo1412020.htm"),
+          dep.var.labels=c("CDSlogchanges"),
+          covariate.labels=c("lagged.changes.log.CDS", "GDPweightedregionalpeersCDSlogchanges", "trade_share_weighted_log_CDS_changes_of_29_peers", "GDPweightedglobalCDSlogchanges"), df = FALSE, omit.stat="adj.rsq", 
+          notes = c("*,**,*** correspond to 10%, 5% and 1% significance, respectively.","HAC robust standard errors, clustered by country. Time and Country FEs."),
+          notes.append=F, notes.align ="l",
+          title="my sample", add.lines = list(c("Fixed effects?", "Ind.","2-way","Ind.","2-way")))
+
+
+
+
+stargazer(digits=4,new_res.mortality.2,new_res.mortality.3,new_res.mortality.4,
+          type="latex",se=list(se.new_res.mortality.2[,2],se.new_res.mortality.3[,2],se.new_res.mortality.4[,2]), out=file.path("Table_inCOVID_panel_output_newRES_mortality.htm"),
+          dep.var.labels=c("COVID Residual"),
+          covariate.labels=c("New Mortality Rate", "New Mortality Rate Growth", 
+                             "Total Mortality Rate", "Total Mortality Rate Growth",
+                             "Mobility", "SI Growth",
+                             "Country Fiscal Policy Dummy", "ECB Policy Dummy", "Fed Policy Dummy"), df = FALSE, omit.stat="adj.rsq", 
+          notes = c("*,**,*** correspond to 10%, 5% and 1% significance, respectively.","HAC robust standard errors, clustered by country. Time and Country FEs."),
+          notes.append=F, notes.align ="l",
+          title="COVID-Sample Panel Analysis",add.lines = list(c("Fixed effects?", "Y","Y","Y","Y")))
+
+
+
+
+
+
+
+
+
+
+
+
+
+simple.fit <- lm(changes.log.CDS ~ lagged.changes.log.CDS + GDPweightedregionalpeersCDSlogchanges + GDPweightedglobalCDSlogchanges + factor(Date), data=subsetPanel)
+summary(simple.fit)
+
+
+# Regression 2 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+# Define needed Variables
+requiredVariables <- c("Date", "Country", "changes.log.CDS", "lagged.changes.log.CDS", "GDPweightedglobalCDSlogchanges", "trade_share_weighted_log_CDS_changes_of_29_peers", "GDPweightedregionalpeersCDSlogchanges"   )
+# Subset for needed Variables
+subsetPanel <- panel_for_revised_paper[panel_for_revised_paper$Date > as.Date("2020-01-01"), requiredVariables ]
+# Change format of panel
+pdf <- pdata.frame(subsetPanel, index = c("Country", "Date"))
+# Run regression
+model1 <- plm(changes.log.CDS ~ lagged.changes.log.CDS + GDPweightedregionalpeersCDSlogchanges + GDPweightedglobalCDSlogchanges,
+              # method="pooling", effect="time",
+              data=pdf, na.action="na.exclude")
+# Look at output
+summary(model1)
+
+
+
+
+
+
+
+
+
+
+
+
+# panel analysis of COVID residuals ---------------------------------------
+### Panel analysis: COVID residuals
+new_res.mortality.2 <- plm(CDS_5y_Residual ~ Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth),
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+
+se.new_res.mortality.2 <- coeftest(new_res.mortality.2, vcov = vcovHC(new_res.mortality.2, type = "HC1"))
+
+new_res.mortality.3 <- plm(CDS_5y_Residual ~ Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth) + driving + SI_Growth,
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+
+se.new_res.mortality.3 <- coeftest(new_res.mortality.3, vcov = vcovHC(new_res.mortality.3, type = "HC1"))
+
+new_res.mortality.4 <- plm(CDS_5y_Residual ~ Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth) + driving + SI_Growth + Lag(Dummy_Fiscal_Country) + Lag(Dummy_Monetary_ECB) + Lag(Dummy_Monetary_Fed),
+                           method="pooling", effect="twoways",
+                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
+se.new_res.mortality.4 <- coeftest(new_res.mortality.4, vcov = vcovHC(new_res.mortality.4, type = "HC1"))
+
+stargazer(digits=4,new_res.mortality.2,new_res.mortality.3,new_res.mortality.4,
+          type="latex",se=list(se.new_res.mortality.2[,2],se.new_res.mortality.3[,2],se.new_res.mortality.4[,2]), out=file.path("Table_inCOVID_panel_output_newRES_mortality.htm"),
+          dep.var.labels=c("COVID Residual"),
+          covariate.labels=c("New Mortality Rate", "New Mortality Rate Growth", 
+                             "Total Mortality Rate", "Total Mortality Rate Growth",
+                             "Mobility", "SI Growth",
+                             "Country Fiscal Policy Dummy", "ECB Policy Dummy", "Fed Policy Dummy"), df = FALSE, omit.stat="adj.rsq", 
+          notes = c("*,**,*** correspond to 10%, 5% and 1% significance, respectively.","HAC robust standard errors, clustered by country. Time and Country FEs."),
+          notes.append=F, notes.align ="l",
+          title="COVID-Sample Panel Analysis",add.lines = list(c("Fixed effects?", "Y","Y","Y","Y")))
+# =========================================================================.
+
+
+
+
