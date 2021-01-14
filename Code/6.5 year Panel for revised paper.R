@@ -1676,6 +1676,8 @@ colnames(panel_for_revised_paper)
 # Importantly, before we run any regressions, we should always subset first for only those variables that we actually use. 
 # This dramatically reduces computing resources required. 
 
+
+# Regression with basic controls of 1st stage, full period ---------------
 # Regression 1 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 # Define needed Variables
 requiredVariables <- c("Date", "Country", "changes.log.CDS", "lagged.changes.log.CDS", "GDPweightedglobalCDSlogchanges", "trade_share_weighted_log_CDS_changes_of_29_peers", "GDPweightedregionalpeersCDSlogchanges"   )
@@ -1684,13 +1686,12 @@ subsetPanel <- panel_for_revised_paper[, requiredVariables ]
 # Change format of panel
 pdf <- pdata.frame(subsetPanel, index = c("Country", "Date"))
 # Run regression
-model1 <- plm(changes.log.CDS ~ lagged.changes.log.CDS + GDPweightedregionalpeersCDSlogchanges + GDPweightedglobalCDSlogchanges,
-              method="pooling", 
+model1 <- plm(changes.log.CDS ~ lagged.changes.log.CDS + GDPweightedregionalpeersCDSlogchanges ,
+              method="pooling", effect = "individual",
               data=pdf, na.action="na.exclude")
 se.model1 <- coeftest(model1, vcov = vcovHC(model1, type = "HC1"))
 # Look at output
 summary(model1) # This model only has country-fixed effects
-
 # Regression 2 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 # Define needed Variables
 requiredVariables <- c("Date", "Country", "changes.log.CDS", "lagged.changes.log.CDS", "GDPweightedglobalCDSlogchanges", "trade_share_weighted_log_CDS_changes_of_29_peers", "GDPweightedregionalpeersCDSlogchanges"   )
@@ -1699,13 +1700,12 @@ subsetPanel <- panel_for_revised_paper[, requiredVariables ]
 # Change format of panel
 pdf <- pdata.frame(subsetPanel, index = c("Country", "Date"))
 # Run regression
-model2 <- plm(changes.log.CDS ~ lagged.changes.log.CDS + GDPweightedregionalpeersCDSlogchanges + GDPweightedglobalCDSlogchanges,
-              method="pooling", effect="twoways", 
+model2 <- plm(changes.log.CDS ~ lagged.changes.log.CDS + GDPweightedglobalCDSlogchanges,
+              method="pooling", effect="individual", 
               data=pdf, na.action="na.exclude")
 se.model2 <- coeftest(model2, vcov = vcovHC(model2, type = "HC1"))
 # Look at output
 summary(model2) # This model has country and time-fixed effects. We should not use it as then the variable of the GDweightedglobalCDSlogchanges is dropped automatically. 
-
 # Regression 3 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 # Define needed Variables
 requiredVariables <- c("Date", "Country", "changes.log.CDS", "lagged.changes.log.CDS", "GDPweightedglobalCDSlogchanges", "trade_share_weighted_log_CDS_changes_of_29_peers", "GDPweightedregionalpeersCDSlogchanges"   )
@@ -1714,14 +1714,12 @@ subsetPanel <- panel_for_revised_paper[, requiredVariables ]
 # Change format of panel
 pdf <- pdata.frame(subsetPanel, index = c("Country", "Date"))
 # Run regression
-model3 <- plm(changes.log.CDS ~ lagged.changes.log.CDS + trade_share_weighted_log_CDS_changes_of_29_peers + GDPweightedglobalCDSlogchanges,
-              method="pooling",  
+model3 <- plm(changes.log.CDS ~ lagged.changes.log.CDS + GDPweightedregionalpeersCDSlogchanges + GDPweightedglobalCDSlogchanges,
+              method="pooling",  effect = "individual",
               data=pdf, na.action="na.exclude")
 se.model3 <- coeftest(model3, vcov = vcovHC(model3, type = "HC1"))
 # Look at output
 summary(model3)  
-
-
 # Regression 4 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 # Define needed Variables
 requiredVariables <- c("Date", "Country", "changes.log.CDS", "lagged.changes.log.CDS", "GDPweightedglobalCDSlogchanges", "trade_share_weighted_log_CDS_changes_of_29_peers", "GDPweightedregionalpeersCDSlogchanges"   )
@@ -1730,38 +1728,291 @@ subsetPanel <- panel_for_revised_paper[, requiredVariables ]
 # Change format of panel
 pdf <- pdata.frame(subsetPanel, index = c("Country", "Date"))
 # Run regression
-model4 <- plm(changes.log.CDS ~ lagged.changes.log.CDS + GDPweightedregionalpeersCDSlogchanges ,
-              method="pooling",  effect="twoways",
+model4 <- plm(changes.log.CDS ~ lagged.changes.log.CDS + trade_share_weighted_log_CDS_changes_of_29_peers + GDPweightedglobalCDSlogchanges,
+              method="pooling",  effect="individual",
               data=pdf, na.action="na.exclude")
 se.model4 <- coeftest(model4, vcov = vcovHC(model4, type = "HC1"))
 # Look at output
-summary(model4)  
-
-install.packages("stargazer") 
-library(stargazer)
-
-
-stargazer(digits=5,model1,model2,model3, model4,
-          type="latex",se=list(se.model1[,2],se.model2[,2],se.model3[,2]),se.model4[,2]), out=file.path("TabletestTimo1412020.htm"),
-          dep.var.labels=c("CDSlogchanges"),
-          covariate.labels=c("lagged.changes.log.CDS", "GDPweightedregionalpeersCDSlogchanges", "trade_share_weighted_log_CDS_changes_of_29_peers", "GDPweightedglobalCDSlogchanges"), df = FALSE, omit.stat="adj.rsq", 
+summary(model4)
+# Regression 5 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+# Define needed Variables
+requiredVariables <- c("Date", "Country", "changes.log.CDS", "lagged.changes.log.CDS", "GDPweightedglobalCDSlogchanges", "trade_share_weighted_log_CDS_changes_of_29_peers", "GDPweightedregionalpeersCDSlogchanges"   )
+# Subset for needed Variables
+subsetPanel <- panel_for_revised_paper[, requiredVariables ]
+# Change format of panel
+pdf <- pdata.frame(subsetPanel, index = c("Country", "Date"))
+# Run regression
+model5 <- plm(changes.log.CDS ~ GDPweightedregionalpeersCDSlogchanges + GDPweightedglobalCDSlogchanges,
+              method="pooling",  effect="individual",
+              data=pdf, na.action="na.exclude")
+se.model5 <- coeftest(model5, vcov = vcovHC(model5, type = "HC1"))
+# Look at output
+summary(model5)
+# Regression 6 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+# Define needed Variables
+requiredVariables <- c("Date", "Country", "changes.log.CDS", "lagged.changes.log.CDS", "GDPweightedglobalCDSlogchanges", "trade_share_weighted_log_CDS_changes_of_29_peers", "GDPweightedregionalpeersCDSlogchanges"   )
+# Subset for needed Variables
+subsetPanel <- panel_for_revised_paper[, requiredVariables ]
+# Change format of panel
+pdf <- pdata.frame(subsetPanel, index = c("Country", "Date"))
+# Run regression
+model6 <- plm(changes.log.CDS ~ trade_share_weighted_log_CDS_changes_of_29_peers + GDPweightedglobalCDSlogchanges,
+              method="pooling",  effect="individual",
+              data=pdf, na.action="na.exclude")
+se.model6<- coeftest(model6, vcov = vcovHC(model6, type = "HC1"))
+# Look at output
+summary(model6)
+# Creating the output
+stargazer(model1, model2, model3, model4,
+          add.lines = list(c("Fixed effects?", "Ind.","2-way","Ind.","2-way")),
+          dep.var.labels=c("\\Delta CDS_{i,t}"),
+          covariate.labels=c("\\Delta CDS_{i,t-1}", "\\Delta RCDS_{i,t}, \\textrm{weighted by regional peer's GDP}   ", "\\Delta RCDS_{i,t}, \\textrm{weighted by 29 peer's trade-share}", "\\Delta GCDS_{i,t}"),
+          title="Results",
           notes = c("*,**,*** correspond to 10%, 5% and 1% significance, respectively.","HAC robust standard errors, clustered by country. Time and Country FEs."),
-          notes.append=F, notes.align ="l",
-          title="my sample", add.lines = list(c("Fixed effects?", "Ind.","2-way","Ind.","2-way")))
+          digits=5,
+          df = FALSE, omit.stat="adj.rsq", 
+          type="text", 
+          align=TRUE, 
+          notes.append=F, 
+          notes.align ="l" )
 
-
-
-
-stargazer(digits=4,new_res.mortality.2,new_res.mortality.3,new_res.mortality.4,
-          type="latex",se=list(se.new_res.mortality.2[,2],se.new_res.mortality.3[,2],se.new_res.mortality.4[,2]), out=file.path("Table_inCOVID_panel_output_newRES_mortality.htm"),
-          dep.var.labels=c("COVID Residual"),
-          covariate.labels=c("New Mortality Rate", "New Mortality Rate Growth", 
-                             "Total Mortality Rate", "Total Mortality Rate Growth",
-                             "Mobility", "SI Growth",
-                             "Country Fiscal Policy Dummy", "ECB Policy Dummy", "Fed Policy Dummy"), df = FALSE, omit.stat="adj.rsq", 
+# Creating the output
+stargazer(model1, model2, model3, model4, model5, model6, 
+          add.lines = list(c("Fixed effects?", "Country","Country","Country","Country", "Country", "Country")),
+          dep.var.labels=c("\\Delta CDS_{i,t}"),
+          covariate.labels=c("\\Delta CDS_{i,t-1}", "\\Delta RCDS_{i,t}, \\textrm{weighted by regional peer's GDP}   ", "\\Delta RCDS_{i,t}, \\textrm{weighted by 29 peer's trade-share}", "\\Delta GCDS_{i,t}"),
+          title="Results",
           notes = c("*,**,*** correspond to 10%, 5% and 1% significance, respectively.","HAC robust standard errors, clustered by country. Time and Country FEs."),
-          notes.append=F, notes.align ="l",
-          title="COVID-Sample Panel Analysis",add.lines = list(c("Fixed effects?", "Y","Y","Y","Y")))
+          digits=5,
+          df = FALSE, omit.stat="adj.rsq", 
+          type="text", 
+          align=TRUE, 
+          notes.append=F, 
+          notes.align ="l" )
+
+
+
+
+
+# Regression with basic controls of 1st stage, only 2020 period ----------
+# Regression 1 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+# Define needed Variables
+requiredVariables <- c("Date", "Country", "changes.log.CDS", "lagged.changes.log.CDS", "GDPweightedglobalCDSlogchanges", "trade_share_weighted_log_CDS_changes_of_29_peers", "GDPweightedregionalpeersCDSlogchanges"   )
+# Subset for needed Variables
+subsetPanel <- panel_for_revised_paper[panel_for_revised_paper$Date >= as.Date("2020-01-01"), requiredVariables ]
+# Change format of panel
+pdf <- pdata.frame(subsetPanel, index = c("Country", "Date"))
+# Run regression
+model1 <- plm(changes.log.CDS ~ lagged.changes.log.CDS + GDPweightedregionalpeersCDSlogchanges ,
+              method="pooling", effect = "individual",
+              data=pdf, na.action="na.exclude")
+se.model1 <- coeftest(model1, vcov = vcovHC(model1, type = "HC1"))
+# Look at output
+summary(model1) # This model only has country-fixed effects
+# Regression 2 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+# Run regression
+model2 <- plm(changes.log.CDS ~ lagged.changes.log.CDS + GDPweightedglobalCDSlogchanges,
+              method="pooling", effect="individual", 
+              data=pdf, na.action="na.exclude")
+se.model2 <- coeftest(model2, vcov = vcovHC(model2, type = "HC1"))
+# Look at output
+summary(model2) # This model has country and time-fixed effects. We should not use it as then the variable of the GDweightedglobalCDSlogchanges is dropped automatically. 
+# Regression 3 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+# Run regression
+model3 <- plm(changes.log.CDS ~ lagged.changes.log.CDS + GDPweightedregionalpeersCDSlogchanges + GDPweightedglobalCDSlogchanges,
+              method="pooling",  effect = "individual",
+              data=pdf, na.action="na.exclude")
+se.model3 <- coeftest(model3, vcov = vcovHC(model3, type = "HC1"))
+# Look at output
+summary(model3)  
+# Regression 4 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+# Run regression
+model4 <- plm(changes.log.CDS ~ lagged.changes.log.CDS + trade_share_weighted_log_CDS_changes_of_29_peers + GDPweightedglobalCDSlogchanges,
+              method="pooling",  effect="individual",
+              data=pdf, na.action="na.exclude")
+se.model4 <- coeftest(model4, vcov = vcovHC(model4, type = "HC1"))
+# Look at output
+summary(model4)
+# Regression 5 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+# Run regression
+model5 <- plm(changes.log.CDS ~ GDPweightedregionalpeersCDSlogchanges + GDPweightedglobalCDSlogchanges,
+              method="pooling",  effect="individual",
+              data=pdf, na.action="na.exclude")
+se.model5 <- coeftest(model5, vcov = vcovHC(model5, type = "HC1"))
+# Look at output
+summary(model5)
+# Regression 6 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+# Run regression
+model6 <- plm(changes.log.CDS ~ trade_share_weighted_log_CDS_changes_of_29_peers + GDPweightedglobalCDSlogchanges,
+              method="pooling",  effect="individual",
+              data=pdf, na.action="na.exclude")
+se.model6<- coeftest(model6, vcov = vcovHC(model6, type = "HC1"))
+# Look at output
+summary(model6)
+
+# Creating the output
+stargazer(model1, model2, model3, model4, model5, model6, 
+          add.lines = list(c("Fixed effects?", "Country","Country","Country","Country", "Country", "Country")),
+          dep.var.labels=c("\\Delta CDS_{i,t}"),
+          covariate.labels=c("\\Delta CDS_{i,t-1}", "\\Delta RCDS_{i,t}, \\textrm{weighted by regional peer's GDP}   ", "\\Delta RCDS_{i,t}, \\textrm{weighted by 29 peer's trade-share}", "\\Delta GCDS_{i,t}"),
+          title="Results",
+          notes = c("*,**,*** correspond to 10%, 5% and 1% significance, respectively.","HAC robust standard errors, clustered by country. Time and Country FEs."),
+          digits=5,
+          df = FALSE, omit.stat="adj.rsq", 
+          type="text", 
+          align=TRUE, 
+          notes.append=F, 
+          notes.align ="l" )
+
+
+colnames(panel_for_revised_paper)
+
+
+
+
+
+
+# Regression with additional controls of 2nd stage full period -----------
+
+# Define needed Variables
+requiredVariables <- c("Date", 
+                       "Country", 
+                       "changes.log.CDS", 
+                       "changes.log.VIX",
+                       "lagged.changes.log.CDS", 
+                       "GDPweightedglobalCDSlogchanges", 
+                       "trade_share_weighted_log_CDS_changes_of_29_peers", 
+                       "GDPweightedregionalpeersCDSlogchanges", 
+                       "New_Case_Rate",
+                       "New_Case_Rate_Growth",
+                       "Total_Case_Rate",
+                       "Total_Case_Rate_Growth",
+                       "New_Mortality_Rate", 
+                       "New_Mortality_Rate_Growth", 
+                       "Total_Mortality_Rate", 
+                       "Total_Mortality_Rate_Growth",
+                       "driving", 
+                       "transit_stations_percent_change_from_baseline",
+                       "StringencyIndex",
+                       "SI_Growth",
+                       "ECB_Announcement",
+                       "Fed_Announcement",
+                       "Total_external_debt_as_share_of_GDP",
+                       "External_debt_foreign_currency_share_of_total_external_debt",
+                       "Debt_to_China_as_share_of_GDP", 
+                       "oil_income_price_effect",
+                       "Reserves",
+                       "SWF_2019_AuMinUSD", 
+                       "Annual_GDP")
+
+# Subset for needed Variables
+subsetPanel <- panel_for_revised_paper[, requiredVariables ]
+
+# Looking at variable availability. I tried running the regression just like this but it would not work. Hence, I manipulate quite a few variabes below: 
+# vis_dat(subsetPanel, warn_large_data = F)
+
+# Filling up variables and creating new ones if necessary
+subsetPanel$New_Case_Rate_Growth[is.na(subsetPanel$New_Case_Rate_Growth)] <- 0
+subsetPanel$Total_Case_Rate_Growth[is.na(subsetPanel$Total_Case_Rate_Growth)] <- 0
+subsetPanel$New_Mortality_Rate_Growth[is.na(subsetPanel$New_Mortality_Rate_Growth)] <- 0
+subsetPanel$Total_Mortality_Rate_Growth[is.na(subsetPanel$Total_Mortality_Rate_Growth)] <- 0
+subsetPanel$Debt_to_China_as_share_of_GDP[subsetPanel$Country == "China"] <- 0
+
+# Filling up variables
+subsetPanel <- subsetPanel  %>% dplyr::group_by(Country) %>% fill(Total_external_debt_as_share_of_GDP)
+subsetPanel <- subsetPanel  %>% dplyr::group_by(Country) %>% fill(External_debt_foreign_currency_share_of_total_external_debt)
+subsetPanel <- subsetPanel  %>% dplyr::group_by(Country) %>% fill(Debt_to_China_as_share_of_GDP)
+subsetPanel <- subsetPanel  %>% dplyr::group_by(Country) %>% fill(Annual_GDP)
+
+# Creating two new series
+subsetPanel <- subsetPanel %>% mutate(ForeignCurrendyDebtAsShareOfGDP = External_debt_foreign_currency_share_of_total_external_debt*Total_external_debt_as_share_of_GDP ) 
+subsetPanel <- subsetPanel %>% mutate(ReservesasShareofGDP = Reserves/Annual_GDP ) 
+
+# Reformatting two series
+subsetPanel$SI_Growth <- as.numeric(subsetPanel$SI_Growth)
+subsetPanel$transit_stations_percent_change_from_baseline <- as.numeric(subsetPanel$transit_stations_percent_change_from_baseline)
+
+# Dropping infinite values
+subsetPanel <- subsetPanel[!is.infinite(subsetPanel$New_Case_Rate_Growth), ]
+subsetPanel <- subsetPanel[!is.infinite(subsetPanel$Total_Case_Rate_Growth), ]
+subsetPanel <- subsetPanel[!is.infinite(subsetPanel$New_Mortality_Rate_Growth), ]
+subsetPanel <- subsetPanel[!is.infinite(subsetPanel$Total_Mortality_Rate_Growth), ]
+subsetPanel <- subsetPanel[!is.infinite(subsetPanel$SI_Growth), ]
+
+# Subsetting for a shorter time frame 
+# subsetPanel <- subsetPanel[subsetPanel$Date > as.Date("2019-01-01"), ]
+
+vis_dat(subsetPanel, warn_large_data = F)
+
+# Change format of panel
+pdf <- pdata.frame(subsetPanel, index = c("Country", "Date"))
+
+
+
+
+
+
+
+
+
+pdf <- pdata.frame(subsetPanel, index = c("Country", "Date"))
+# Run regression
+model1 <- plm(changes.log.CDS ~ lagged.changes.log.CDS + GDPweightedregionalpeersCDSlogchanges + GDPweightedglobalCDSlogchanges + New_Mortality_Rate + New_Mortality_Rate_Growth + Total_Mortality_Rate + Total_Mortality_Rate_Growth + transit_stations_percent_change_from_baseline + StringencyIndex + ForeignCurrendyDebtAsShareOfGDP + oil_income_price_effect + SWF_2019_AuMinUSD , 
+              method="pooling", 
+              data=pdf, na.action="na.exclude")
+se.model1 <- coeftest(model1, vcov = vcovHC(model1, type = "HC1"))
+# Look at output
+summary(model1) # This model only has country-fixed effects
+
+
+
+pdf <- pdata.frame(subsetPanel, index = c("Country", "Date"))
+# Run regression
+model1 <- plm(changes.log.CDS ~ lagged.changes.log.CDS + GDPweightedregionalpeersCDSlogchanges + GDPweightedglobalCDSlogchanges + New_Mortality_Rate_Growth + Total_Mortality_Rate_Growth + transit_stations_percent_change_from_baseline + StringencyIndex  + oil_income_price_effect , 
+              method="pooling", 
+              data=pdf, na.action="na.exclude")
+se.model1 <- coeftest(model1, vcov = vcovHC(model1, type = "HC1"))
+# Look at output
+summary(model1) # This model only has country-fixed effects
+
+pdf <- pdata.frame(subsetPanel, index = c("Country", "Date"))
+# Run regression
+model1 <- plm(changes.log.CDS ~ lagged.changes.log.CDS + GDPweightedregionalpeersCDSlogchanges + GDPweightedglobalCDSlogchanges + New_Mortality_Rate_Growth + Total_Mortality_Rate_Growth + transit_stations_percent_change_from_baseline + SI_Growth  + oil_income_price_effect , 
+              method="pooling", 
+              data=pdf, na.action="na.exclude")
+se.model1 <- coeftest(model1, vcov = vcovHC(model1, type = "HC1"))
+# Look at output
+summary(model1) # This model only has country-fixed effects
+
+
+pdf <- pdata.frame(subsetPanel, index = c("Country", "Date"))
+# Run regression
+model1 <- plm(changes.log.CDS ~ lagged.changes.log.CDS + trade_share_weighted_log_CDS_changes_of_29_peers + GDPweightedglobalCDSlogchanges + New_Mortality_Rate_Growth + Total_Mortality_Rate_Growth + transit_stations_percent_change_from_baseline + SI_Growth  + oil_income_price_effect , 
+              method="pooling", 
+              data=pdf, na.action="na.exclude")
+se.model1 <- coeftest(model1, vcov = vcovHC(model1, type = "HC1"))
+# Look at output
+summary(model1)
+
+
+
+pdf <- pdata.frame(subsetPanel, index = c("Country", "Date"))
+# Run regression
+model1 <- plm(changes.log.CDS ~ lagged.changes.log.CDS + trade_share_weighted_log_CDS_changes_of_29_peers + GDPweightedglobalCDSlogchanges + New_Mortality_Rate_Growth + Total_Mortality_Rate_Growth + transit_stations_percent_change_from_baseline + SI_Growth  + oil_income_price_effect + ForeignCurrendyDebtAsShareOfGDP + Reserves , 
+              method="pooling", 
+              data=pdf, na.action="na.exclude")
+se.model1 <- coeftest(model1, vcov = vcovHC(model1, type = "HC1"))
+# Look at output
+summary(model1)
+
+pdf <- pdata.frame(subsetPanel, index = c("Country", "Date"))
+# Run regression
+model1 <- plm(changes.log.CDS ~ lagged.changes.log.CDS + GDPweightedregionalpeersCDSlogchanges + GDPweightedglobalCDSlogchanges + New_Case_Rate + New_Case_Rate_Growth + Total_Case_Rate + Total_Case_Rate_Growth +New_Mortality_Rate + New_Mortality_Rate_Growth + Total_Mortality_Rate + Total_Mortality_Rate_Growth + transit_stations_percent_change_from_baseline + StringencyIndex + ECB_Announcement + Fed_Announcement +  ForeignCurrendyDebtAsShareOfGDP + Debt_to_China_as_share_of_GDP + oil_income_price_effect + Reserves + SWF_2019_AuMinUSD , 
+              method="pooling", 
+              data=pdf, na.action="na.exclude")
+se.model1 <- coeftest(model1, vcov = vcovHC(model1, type = "HC1"))
+# Look at output
+summary(model1) # This model only has country-fixed effects
 
 
 
@@ -1775,8 +2026,49 @@ stargazer(digits=4,new_res.mortality.2,new_res.mortality.3,new_res.mortality.4,
 
 
 
-simple.fit <- lm(changes.log.CDS ~ lagged.changes.log.CDS + GDPweightedregionalpeersCDSlogchanges + GDPweightedglobalCDSlogchanges + factor(Date), data=subsetPanel)
-summary(simple.fit)
+
+
+
+view(subsetPanel$Reserves)
+
+# Regression 2 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+# Define needed Variables
+# Run regression
+model2 <- plm(changes.log.CDS ~ lagged.changes.log.CDS + GDPweightedregionalpeersCDSlogchanges + GDPweightedglobalCDSlogchanges + New_Mortality_Rate + New_Mortality_Rate_Growth + driving + SI_Growth + ECB_Announcement + Fed_Announcement +  Total_external_debt_as_share_of_GDP + Debt_to_China_as_share_of_GDP + oil_income_price_effect + Reserves + SWF_2019_AuMinUSD ,
+              method="pooling", effect="time", 
+              data=pdf[which(!is.infinite(-pdf$New_Mortality_Rate_Growth))], na.action="na.exclude")
+se.model2 <- coeftest(model2, vcov = vcovHC(model2, type = "HC1"))
+# Look at output
+summary(model2) # This model has country and time-fixed effects. We should not use it as then the variable of the GDweightedglobalCDSlogchanges is dropped automatically. 
+
+
+
+
+
+
+
+
+
+
+
+
+view(subsetPanel[ subsetPanel$Date > as.Date("2020-01-01")  , c("Date", "Country", "New_Mortality_Rate", "New_Mortality_Rate_Growth", "Total_Mortality_Rate", "Total_Mortality_Rate_Growth")] )
+view(subsetPanel[ is.infinite(subsetPanel$New_Mortality_Rate_Growth)   , c("Date", "Country", "New_Mortality_Rate", "New_Mortality_Rate_Growth", "Total_Mortality_Rate", "Total_Mortality_Rate_Growth")] )
+
+view(subsetPanel[ is.na(subsetPanel$Total_Case_Rate_Growth)   , c("Date", "Country", "Total_Case_Rate", "Total_Case_Rate_Growth")] )
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # Regression 2 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
