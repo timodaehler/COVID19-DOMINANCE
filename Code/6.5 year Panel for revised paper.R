@@ -2293,31 +2293,10 @@ summary(model2) # This model has country and time-fixed effects. We should not u
 
 
 
-
-
-
-
-
-
-
-
-
 view(subsetPanel[ subsetPanel$Date > as.Date("2020-01-01")  , c("Date", "Country", "New_Mortality_Rate", "New_Mortality_Rate_Growth", "Total_Mortality_Rate", "Total_Mortality_Rate_Growth")] )
 view(subsetPanel[ is.infinite(subsetPanel$New_Mortality_Rate_Growth)   , c("Date", "Country", "New_Mortality_Rate", "New_Mortality_Rate_Growth", "Total_Mortality_Rate", "Total_Mortality_Rate_Growth")] )
 
 view(subsetPanel[ is.na(subsetPanel$Total_Case_Rate_Growth)   , c("Date", "Country", "Total_Case_Rate", "Total_Case_Rate_Growth")] )
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -2347,36 +2326,175 @@ summary(model1)
 
 
 
-# panel analysis of COVID residuals ---------------------------------------
-### Panel analysis: COVID residuals
-new_res.mortality.2 <- plm(CDS_5y_Residual ~ Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth),
-                           method="pooling", effect="twoways",
-                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
 
-se.new_res.mortality.2 <- coeftest(new_res.mortality.2, vcov = vcovHC(new_res.mortality.2, type = "HC1"))
 
-new_res.mortality.3 <- plm(CDS_5y_Residual ~ Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth) + driving + SI_Growth,
-                           method="pooling", effect="twoways",
-                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
 
-se.new_res.mortality.3 <- coeftest(new_res.mortality.3, vcov = vcovHC(new_res.mortality.3, type = "HC1"))
 
-new_res.mortality.4 <- plm(CDS_5y_Residual ~ Lag(New_Mortality_Rate) + Lag(New_Mortality_Rate_Growth) + Lag(Total_Mortality_Rate) + Lag(Total_Mortality_Rate_Growth) + driving + SI_Growth + Lag(Dummy_Fiscal_Country) + Lag(Dummy_Monetary_ECB) + Lag(Dummy_Monetary_Fed),
-                           method="pooling", effect="twoways",
-                           data=panel_inCOVID[which(!is.infinite(-panel_inCOVID$New_Mortality_Rate_Growth) & !is.infinite(-panel_inCOVID$Total_Mortality_Rate_Growth)),], na.action="na.exclude")
-se.new_res.mortality.4 <- coeftest(new_res.mortality.4, vcov = vcovHC(new_res.mortality.4, type = "HC1"))
 
-stargazer(digits=4,new_res.mortality.2,new_res.mortality.3,new_res.mortality.4,
-          type="latex",se=list(se.new_res.mortality.2[,2],se.new_res.mortality.3[,2],se.new_res.mortality.4[,2]), out=file.path("Table_inCOVID_panel_output_newRES_mortality.htm"),
-          dep.var.labels=c("COVID Residual"),
-          covariate.labels=c("New Mortality Rate", "New Mortality Rate Growth", 
-                             "Total Mortality Rate", "Total Mortality Rate Growth",
-                             "Mobility", "SI Growth",
-                             "Country Fiscal Policy Dummy", "ECB Policy Dummy", "Fed Policy Dummy"), df = FALSE, omit.stat="adj.rsq", 
-          notes = c("*,**,*** correspond to 10%, 5% and 1% significance, respectively.","HAC robust standard errors, clustered by country. Time and Country FEs."),
-          notes.append=F, notes.align ="l",
-          title="COVID-Sample Panel Analysis",add.lines = list(c("Fixed effects?", "Y","Y","Y","Y")))
-# =========================================================================.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Regressions for revised paper, Jan 2014 to June 2020 -----------
+
+# Define needed Variables
+requiredVariables <- c("Date", 
+                       "Country", 
+                       "changes.log.CDS", 
+                       "changes.log.VIX",
+                       "lagged.changes.log.CDS", 
+                       "GDPweightedglobalCDSlogchanges", 
+                       "trade_share_weighted_log_CDS_changes_of_29_peers", 
+                       "GDPweightedregionalpeersCDSlogchanges", 
+                       "New_Case_Rate",
+                       "New_Case_Rate_Growth",
+                       "Total_Case_Rate",
+                       "Total_Case_Rate_Growth",
+                       "New_Mortality_Rate", 
+                       "New_Mortality_Rate_Growth", 
+                       "Total_Mortality_Rate", 
+                       "Total_Mortality_Rate_Growth",
+                       "driving", 
+                       "transit_stations_percent_change_from_baseline",
+                       "workplaces_percent_change_from_baseline",
+                       "StringencyIndex",
+                       "SI_Growth",
+                       "ECB_Announcement",
+                       "Fed_Announcement",
+                       "Total_external_debt_as_share_of_GDP",
+                       "External_debt_foreign_currency_share_of_total_external_debt",
+                       "Debt_to_China_as_share_of_GDP", 
+                       "oil_income_price_effect",
+                       "Reserves",
+                       "SWF_2019_AuMinUSD", 
+                       "Annual_GDP", 
+                       "Elgin_Stimulus_X_Fiscal_Response_Dummy", 
+                       "FiscalStimulus_LinearlyIncreasing", 
+                       "Fiscal_Response_Dummy"  )
+
+# Subset for needed Variables
+subsetPanel <- panel_for_revised_paper[, requiredVariables ]
+
+# Looking at variable availability. I tried running the regression just like this but it would not work. Hence, I manipulate quite a few variabes below: 
+# vis_dat(subsetPanel, warn_large_data = F)
+
+# Filling up variables and creating new ones if necessary
+subsetPanel$New_Case_Rate_Growth[is.na(subsetPanel$New_Case_Rate_Growth)] <- 0
+subsetPanel$Total_Case_Rate_Growth[is.na(subsetPanel$Total_Case_Rate_Growth)] <- 0
+subsetPanel$New_Mortality_Rate_Growth[is.na(subsetPanel$New_Mortality_Rate_Growth)] <- 0
+subsetPanel$Total_Mortality_Rate_Growth[is.na(subsetPanel$Total_Mortality_Rate_Growth)] <- 0
+subsetPanel$Debt_to_China_as_share_of_GDP[subsetPanel$Country == "China"] <- 0
+
+# Filling up variables
+subsetPanel <- subsetPanel  %>% dplyr::group_by(Country) %>% fill(Total_external_debt_as_share_of_GDP)
+subsetPanel <- subsetPanel  %>% dplyr::group_by(Country) %>% fill(External_debt_foreign_currency_share_of_total_external_debt)
+subsetPanel <- subsetPanel  %>% dplyr::group_by(Country) %>% fill(Debt_to_China_as_share_of_GDP)
+subsetPanel <- subsetPanel  %>% dplyr::group_by(Country) %>% fill(Annual_GDP)
+
+# Creating two new series
+subsetPanel <- subsetPanel %>% mutate(ForeignCurrendyDebtAsShareOfGDP = External_debt_foreign_currency_share_of_total_external_debt*Total_external_debt_as_share_of_GDP ) 
+subsetPanel <- subsetPanel %>% mutate(ReservesasShareofGDP = Reserves/Annual_GDP ) 
+subsetPanel <- subsetPanel %>% mutate(SWFasShareofGDP = SWF_2019_AuMinUSD/Annual_GDP ) 
+
+# Reformatting two series
+subsetPanel$SI_Growth <- as.numeric(subsetPanel$SI_Growth)
+subsetPanel$transit_stations_percent_change_from_baseline <- as.numeric(subsetPanel$transit_stations_percent_change_from_baseline)
+subsetPanel$workplaces_percent_change_from_baseline <- as.numeric(subsetPanel$workplaces_percent_change_from_baseline)
+
+# Dropping infinite values
+subsetPanel <- subsetPanel[!is.infinite(subsetPanel$New_Case_Rate_Growth), ]
+subsetPanel <- subsetPanel[!is.infinite(subsetPanel$Total_Case_Rate_Growth), ]
+subsetPanel <- subsetPanel[!is.infinite(subsetPanel$New_Mortality_Rate_Growth), ]
+subsetPanel <- subsetPanel[!is.infinite(subsetPanel$Total_Mortality_Rate_Growth), ]
+subsetPanel <- subsetPanel[!is.infinite(subsetPanel$SI_Growth), ]
+
+# Adding RFI data as I forgot to do so earlier 
+RFI <- as.data.frame(read_excel("Data/paneladdition.xlsx"))[, c("Country", "Date", "RFI_GDP")]
+RFI$Country[RFI$Country == "Dominican.Republic"] <- "Dominican Republic"
+RFI$Country[RFI$Country == "South.Africa"] <- "South Africa"
+RFI$Country[RFI$Country == "Saudi.Arabia"] <- "Saudi Arabia"
+RFI$Country[RFI$Country == "Sri.Lanka"] <- "Sri Lanka"
+RFI <- RFI[RFI$Date>= as.Date("2020-01-01"),]
+subsetPanel <- left_join(subsetPanel, RFI, by = c("Date" = "Date", "Country" = "Country")  )
+subsetPanel$RFI_GDP[is.na(subsetPanel$RFI_GDP)]  <- 0
+
+# vis_dat(subsetPanel, warn_large_data = F)
+
+# Change format of panel
+pdf <- pdata.frame(subsetPanel, index = c("Country", "Date"))
+
+
+model1 <- plm(changes.log.CDS ~ lagged.changes.log.CDS + GDPweightedglobalCDSlogchanges + GDPweightedregionalpeersCDSlogchanges ,
+              method="pooling", effect = "individual",
+              data=pdf, na.action="na.exclude")
+se.model1 <- coeftest(model1, vcov = vcovHC(model1, type = "HC1"))
+summary(model1)
+
+
+model2 <- plm(changes.log.CDS ~ lagged.changes.log.CDS + GDPweightedglobalCDSlogchanges + trade_share_weighted_log_CDS_changes_of_29_peers ,
+              method="pooling", effect = "individual",
+              data=pdf, na.action="na.exclude")
+se.model2 <- coeftest(model2, vcov = vcovHC(model2, type = "HC1"))
+summary(model2)
+
+model3 <- plm(changes.log.CDS ~ lagged.changes.log.CDS + GDPweightedglobalCDSlogchanges + GDPweightedregionalpeersCDSlogchanges  + Total_Mortality_Rate_Growth + 
+                workplaces_percent_change_from_baseline + SI_Growth +  Elgin_Stimulus_X_Fiscal_Response_Dummy + ECB_Announcement + Fed_Announcement + oil_income_price_effect + 
+                Total_external_debt_as_share_of_GDP  + ReservesasShareofGDP  ,
+              method="pooling", effect = "individual",
+              data=pdf, na.action="na.exclude")
+se.model3 <- coeftest(model3, vcov = vcovHC(model3, type = "HC1"))
+summary(model3)
+
+model4 <- plm(changes.log.CDS ~ lagged.changes.log.CDS + GDPweightedglobalCDSlogchanges + GDPweightedregionalpeersCDSlogchanges  + Total_Mortality_Rate_Growth + 
+                driving + SI_Growth +  Elgin_Stimulus_X_Fiscal_Response_Dummy + ECB_Announcement + Fed_Announcement + oil_income_price_effect + 
+                Total_external_debt_as_share_of_GDP  + ReservesasShareofGDP  ,
+              method="pooling", effect = "individual",
+              data=pdf, na.action="na.exclude")
+se.model4 <- coeftest(model4, vcov = vcovHC(model4, type = "HC1"))
+summary(model4)
+
+model5 <- plm(changes.log.CDS ~ lagged.changes.log.CDS + GDPweightedglobalCDSlogchanges + GDPweightedregionalpeersCDSlogchanges  + Total_Mortality_Rate_Growth + 
+                workplaces_percent_change_from_baseline + SI_Growth +  Elgin_Stimulus_X_Fiscal_Response_Dummy + ECB_Announcement + Fed_Announcement + oil_income_price_effect + 
+                ForeignCurrendyDebtAsShareOfGDP  + ReservesasShareofGDP  ,
+              method="pooling", effect = "individual",
+              data=pdf, na.action="na.exclude")
+se.model5 <- coeftest(model5, vcov = vcovHC(model5, type = "HC1"))
+summary(model5)
+
+model6 <- plm(changes.log.CDS ~ lagged.changes.log.CDS + GDPweightedglobalCDSlogchanges + GDPweightedregionalpeersCDSlogchanges  + Total_Mortality_Rate_Growth + 
+                workplaces_percent_change_from_baseline + SI_Growth +  Elgin_Stimulus_X_Fiscal_Response_Dummy + ECB_Announcement + Fed_Announcement + oil_income_price_effect + 
+                Debt_to_China_as_share_of_GDP  + ReservesasShareofGDP  ,
+              method="pooling", effect = "individual",
+              data=pdf, na.action="na.exclude")
+se.model6 <- coeftest(model6, vcov = vcovHC(model6, type = "HC1"))
+summary(model6)
+
+stargazer(model1, model2, model3, model4, model5, model6, 
+          add.lines = list(c("Fixed effects?", "\\multicolumn{1}{c}{Y}","\\multicolumn{1}{c}{Y}","\\multicolumn{1}{c}{Y}","\\multicolumn{1}{c}{Y}", "\\multicolumn{1}{c}{Y}", "\\multicolumn{1}{c}{Y}")),
+          dep.var.labels=c("\\Delta CDS"),
+          covariate.labels=c("\\Delta CDS, \\textrm{lagged}", "\\Delta RCDS, \\textrm{weighted by regional peers' GDP}", "\\Delta GCDS, \\textrm{weighted by core countries' GDP}", "\\Delta RCDS, \\textrm{weighted by 29 peers' trade shares}", "Total Mortality Rate Growth", "Mobility, \\textrm{Google worklplace activity data}", "Mobility, \\textrm{Apple driving request data}", "SI Growth", "Fiscal Response Dummy X stimulus as \\% of GDP", "ECB Policy Dummy", "Fed Policy Dummy", "Oil Income Price Effect", "External debt as \\% of GDP", "Foreign currency debt as \\% of GDP", "Debt to China as \\% of GDP", "International reserves as \\% of GDP"),
+          #title="Extended model, 2014-06.2020",
+          notes = c("*,**,*** correspond to 10\\%, 5\\% and 1\\% significance, respectively.","HAC robust standard errors, clustered by country. Country FEs."),
+          digits=4,
+          df = FALSE, omit.stat="adj.rsq", 
+          type="latex", 
+          align=TRUE, 
+          notes.append=F, 
+          notes.align ="l" )
+
+
 
 
 

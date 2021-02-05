@@ -2619,7 +2619,7 @@ library(stargazer)
 cds_5yr_prediction <- read.csv("data/covid_ez_prediction.csv", header = T, sep=',')
 cds_5yr_actual <- read.csv("data/covid_ez_spreads.csv", header = T, sep = ',')
 
-oxford <- read_excel("Data/Oxford_V1.xlsx")
+# oxford <- read_excel("Data/Oxford_V1.xlsx")
 oxford <- oxford %>% dplyr::select(-contains("Flag"))
 oxford <- oxford %>% dplyr::select(-contains("Lagged"))
 colnames(oxford)[which(colnames(oxford) == "Total_Cases_Country")] <- "Total_Case"

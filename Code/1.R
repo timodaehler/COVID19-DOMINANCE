@@ -3161,6 +3161,7 @@ for(i in 1:nrow(coefz)){
 }
 colnames(predz)<-colnames(post.dat)
 
+
 # I made a date change here so that the code runs smoothly
 pdat<-data.frame(em_cds2$Date[which(em_cds2$Date>="2019-06-30")], # date
                  rowMeans(post.dat), # EM_Avg
@@ -3821,6 +3822,31 @@ do.call("grid.arrange", c(country_lists2))
 pdf("Plots/actualvsfitted_before_COVID_period_small_sample.pdf", width = 16 )
 do.call("grid.arrange", c(country_lists2)) 
 dev.off()
+
+# making sure that date column is also maintained
+CountriesToDrop<- c("date", CountriesToDrop)
+n <- length(CountriesToDrop)
+
+# Create the individual figures of actual vs fitted of period before COVID for 10 countries which are dropped
+vectortodrop <- (colnames(pdat_before_COVID) %like% paste(CountriesToDrop, collapse="|") )
+dropped_pdat_before_COVID <- pdat_before_COVID[, (vectortodrop) ] 
+dim(dropped_pdat_before_COVID)
+dropped_pdat_before_COVID
+
+countriez<-colnames(dropped_pdat_before_COVID)[-1]
+country_lists2<-list()
+for(i in 1:(length(countriez)/2)) {
+  plotdat<-dropped_pdat_before_COVID[-1,c(1,i+1,i+n)]
+  plotdat[,-1]<-apply(plotdat[,-1],2,cumsum)
+  country_lists2[[i]] <- ggplot(data=(plotdat), aes_string(x="date",y=colnames(plotdat)[2]))+geom_line()+theme_bw()+ylab("")+xlab(countriez[i])+geom_line(aes_string(x="date",y=colnames(plotdat)[3]),linetype=2)
+}
+do.call("grid.arrange", c(country_lists2)) 
+
+# Save output
+pdf("Plots/actualvsfitted_before_COVID_period_dropped_sample_february2021.pdf", width = 16 )
+do.call("grid.arrange", c(country_lists2)) 
+dev.off()
+
 
 
 colnames(pdat)[1] <- "date"

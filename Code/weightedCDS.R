@@ -1903,7 +1903,7 @@ unique(Final_Data_Country$COUNTRY)
 
 # saving Oxford_V1  --------------------------------------------------------
 Oxford_V1 <- Final_Data_Country
-View(Oxford_V1)
+# View(Oxford_V1)
 # Once the dataset "Oxford_V1" is created, a few variables still have to be added. However, these variables are hand-coded. 
 # Thus, I first export/save the dataset "Oxford_V1" and then manually add the variable in the exported excel sheet. 
 # Upon hand-coding, I then re-import the augmented sheet. 
@@ -1916,9 +1916,9 @@ View(Oxford_V1)
 # write_xlsx(Oxford_V1,"Data/Oxford_V1.xlsx")
 # 2. step: handcoding FED, ECB etc. dummy time series and saving it as "Oxford_V1_dummyts_additions.xlsx"
 # 3. step: importing additional dummy ts
-# Oxford_addition <- read_excel("Data/Oxford_V1_dummyts_additions.xlsx")
+Oxford_addition <- read_excel("Data/Oxford_V1_dummyts_additions.xlsx")
 # 4. step: merging Oxford_V1 with Oxford_addition and calling it mergedOxford
-# Oxford_V1 <- as_tibble(merge(Oxford_V1, Oxford_addition, by=c("COUNTRY", "Date")))
+Oxford_V1 <- as_tibble(merge(Oxford_V1, Oxford_addition, by=c("COUNTRY", "Date")))
 # View(Oxford_V1)
 # 5. step: For future reference, I am gong to export the augmented dataset once so I have it again when I need it:
 # write_xlsx(Oxford_V1,"Data/Oxford_V1_augmented_3_8_2020.xlsx")
@@ -3638,6 +3638,65 @@ for(i in 1:nrow(coefz)){
 }
 colnames(predz)<-colnames(post.dat)
 
+
+#### First stage regression results as of 5 February 2021 ---------------------------
+#### In this quick section I create a table that summarizes the first-stage regression results. 
+testtesttest <- coefz[,1:4]
+testtesttest <- cbind(colnames(pre.dat), testtesttest, rsqz)
+testtesttest <- as.data.frame(testtesttest)
+colnames(testtesttest) <- c("Country", "intercept", "lagCDS", "globalCDS", "regionalfactor", "rsquared")
+testtesttest$intercept <- as.numeric(testtesttest$intercept)
+testtesttest$`lagCDS` <- as.numeric(testtesttest$`lagCDS`)
+testtesttest$`globalCDS` <- as.numeric(testtesttest$`globalCDS`)
+testtesttest$`regionalfactor` <- as.numeric(testtesttest$`regionalfactor`)
+testtesttest$rsquared <- as.numeric(testtesttest$rsquared)
+testtesttest <- testtesttest %>% mutate_at(vars(-Country), funs(round(., 3)))
+testtesttest
+mod_summary_complete <-matrix(NA,ncol=4,nrow=ncol(pre.dat))
+for(i in 1:nrow(coefz)){
+  mod<-lm(pre.dat[,i]~Lag(pre.dat[,i],1)+glo_cds_pre+em_fac_pre[,i])
+  mod_summary <- summary(mod)  
+  mod_summary_sign <- mod_summary$coefficients[ , 4]
+  mod_summary_stars <- NA 
+  mod_summary_stars[mod_summary_sign < 0.1] <- "."
+  mod_summary_stars[mod_summary_sign < 0.05] <- "*"
+  mod_summary_stars[mod_summary_sign < 0.01] <- "**"
+  mod_summary_stars[mod_summary_sign < 0.001] <- "***"
+  mod_summary_stars[is.na(mod_summary_stars)] <- ""
+  # names(mod_summary_stars) <- names(mod_summary_sign)
+  mod_summary_complete[i,1] <- mod_summary_stars[1]
+  mod_summary_complete[i,2] <- mod_summary_stars[2]
+  mod_summary_complete[i,3] <- mod_summary_stars[3]
+  mod_summary_complete[i,4] <- mod_summary_stars[4]
+}
+colnames(mod_summary_complete) <- c("interceptstars", "lagstars","globalstars", "regionalstars")
+yiwjej <- cbind(testtesttest, mod_summary_complete)
+yiwjej <- within(yiwjej, interceptnew <- paste(intercept,interceptstars,sep=''))
+yiwjej <- within(yiwjej, lagCDSnew <- paste(lagCDS,lagstars,sep=''))
+yiwjej <- within(yiwjej, globalCDSnew <- paste(globalCDS,globalstars,sep=''))
+yiwjej <- within(yiwjej, regionalCDSnew <- paste(regionalfactor,regionalstars,sep=''))
+yiwjej <- yiwjej[,c(1,11:14,6)]
+yiwjej <- yiwjej %>% arrange(Country)
+Correlationcoefficientsforjusther <- CountryCorrelationCoefficients_before_COVID %>% arrange(COUNTRY)
+cbind(yiwjej, Correlationcoefficientsforjusther)
+yiwjej <- cbind(yiwjej, Correlationcoefficientsforjusther)[,c(1:6,8)]
+yiwjej <- yiwjej %>% arrange(Correlation_Coefficient, Country)
+yiwjej <- yiwjej %>% mutate(Droppedvariable = NA)
+yiwjej$Droppedvariable[yiwjej$Correlation_Coefficient < 0.25] <- "X"
+yiwjej <- yiwjej[, -2]
+yiwjej <- yiwjej %>% arrange(Correlation_Coefficient, Country)
+# view(yiwjej)
+
+
+
+
+
+
+
+
+
+
+
 pdat<-data.frame(em_cds2$Date[which(em_cds2$Date>"2019-06-30")], # date
                  rowMeans(post.dat), # EM_Avg
                  rowMeans(post.dat.nonem[,which(colnames(post.dat.nonem) %in%  non_em_countries$COUNTRY5yrCDS  )]), # Developed_Avg
@@ -3865,7 +3924,7 @@ cds_5yr_prediction <- read.csv("data/covid_ez_prediction_weighted.csv", header =
 cds_5yr_actual <- read.csv("data/covid_ez_spreads_weighted.csv", header = T, sep = ',')
 
 oxford <- Oxford_V1
-oxford <- read_excel("Data/Oxford_V1.xlsx")
+# oxford <- read_excel("Data/Oxford_V1.xlsx")
 oxford <- oxford %>% dplyr::select(-contains("Flag"))
 oxford <- oxford %>% dplyr::select(-contains("Lagged"))
 colnames(oxford)[which(colnames(oxford) == "Total_Cases_Country")] <- "Total_Case"
@@ -3956,7 +4015,7 @@ cds_5yr_EM_Mar <- cds_5yr_EM[which(cds_5yr_EM$Date >= '2020-03-01' & cds_5yr_EM$
 cds_5yr_EM_Mar$residual2 <- (cds_5yr_EM_Mar$CDS_5y_Actual - cds_5yr_EM_Mar$CDS_5y_Predictio)^2  
 eval[3] <- mean(cds_5yr_EM_Mar$residual2, na.rm = TRUE)
 
-p_EM_preMar <- ggplot(dat = cds_5yr_EM_preMar,aes(x=Date,y=CDS_5y_Actual,linetype="Actual"))+geom_line()+geom_line(aes(y=CDS_5y_Prediction,linetype="Fitted"))+theme_bw()+xlab("")+ylab("Daily Change (Log CDS)")+ggtitle("Emerging Markets Average CDS Spreads, Mid Dec 2019 - Feb 2020")+theme(axis.title.y = element_text(size = 10),axis.text = element_text(size = 10),legend.title = element_blank(),plot.title = element_text(size=12),legend.position = c(0.8, 0.8))+ylim(-0.15,0.2)
+p_EM_preMar <- ggplot(dat = cds_5yr_EM_preMar,aes(x=Date,y=CDS_5y_Actual,linetype="Actual"))+geom_line()+geom_line(aes(y=CDS_5y_Prediction,linetype="Fitted"))+theme_bw()+xlab("")+ylab("Daily Change (Log CDS)")+ggtitle("Emerging Markets Average CDS Spreads, Jan 2020 - Feb 2020")+theme(axis.title.y = element_text(size = 10),axis.text = element_text(size = 10),legend.title = element_blank(),plot.title = element_text(size=12),legend.position = c(0.8, 0.8))+ylim(-0.15,0.2)
 p_EM_preMar
 
 p_EM_postMar <- ggplot(dat = cds_5yr_EM_postMar,aes(x=Date,y=CDS_5y_Actual,linetype="Actual"))+geom_line()+geom_line(aes(y=CDS_5y_Prediction,linetype="Fitted"))+theme_bw()+xlab("")+ylab("Daily Change (Log CDS)")+ggtitle("Emerging Markets Average CDS Spreads, Apr 2020 - June 2020")+theme(axis.title.y = element_text(size = 10),axis.text = element_text(size = 10),legend.title = element_blank(),plot.title = element_text(size=12),legend.position = c(0.8, 0.8))+ylim(-0.15,0.2)
@@ -3965,12 +4024,9 @@ p_EM_postMar
 p_EM_Mar <- ggplot(dat = cds_5yr_EM_Mar,aes(x=Date,y=CDS_5y_Actual,linetype="Actual"))+geom_line()+geom_line(aes(y=CDS_5y_Prediction,linetype="Fitted"))+theme_bw()+xlab("")+ylab("Daily Change (Log CDS)")+ggtitle("Emerging Markets Average CDS Spreads, March 2020")+theme(axis.title.y = element_text(size = 10),axis.text = element_text(size = 10),legend.title = element_blank(),plot.title = element_text(size=12),legend.position = c(0.8, 0.8))+ylim(-0.15,0.2)
 p_EM_Mar
 
+pdf("Plots/threefigures.pdf", width = 18)
 p_EM <- grid.arrange(p_EM_preMar, p_EM_Mar, p_EM_postMar, ncol=3,nrow=1)
-# XYZ figure
-# pdf("Plots/Weighted/figure10weighted.pdf", width = 11.69, height = 8.27 )
-# plot(p_EM)
-# dev.off()
-
+dev.off()
 # =========================================================================.
 
 
@@ -3982,7 +4038,7 @@ panel <- merge(cds_5yr_merged, oxford, by = c("Country", "Date"), all.x = TRUE)
 paneladdition <- read_excel("Data/paneladdition.xlsx") # adding variables such as the oil, IMF suppot dummy, remittances, RFI, etc.
 
 panel <- merge(panel, paneladdition, by = c("Country", "Date"), all.x = TRUE )
-View(panel)
+# View(panel)
 
 panel$Dummy_Fiscal_Country <- as.numeric(panel$Fiscal_Response_Dummy > 0)
 # panel$Dummy_Fiscal_EU <- as.numeric(panel$EU_Fiscal_Response_Dummy > 0)
