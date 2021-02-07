@@ -3686,7 +3686,7 @@ yiwjej$Droppedvariable[yiwjej$Correlation_Coefficient < 0.25] <- "X"
 yiwjej <- yiwjej[, -2]
 yiwjej <- yiwjej %>% arrange(Correlation_Coefficient, Country)
 # view(yiwjej)
-
+# At this stage, I export this data and write it as a nice table in latex and then put it in the word document. 
 
 
 
